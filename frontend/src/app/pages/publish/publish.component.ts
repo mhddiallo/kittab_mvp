@@ -135,31 +135,46 @@ export class PublishComponent implements OnInit {
     const token = localStorage.getItem('kittab_token');
     if (!token) { this.router.navigate(['/login']); return; }
 
-    const form = new FormData();
-    form.append('title', this.title);
-    form.append('author', this.author);
-    form.append('condition', this.condition);
-    form.append('price', String(this.price));
-    form.append('book_type', this.bookType);
-    if (this.categoryId) form.append('category_id', String(this.categoryId));
-    if (this.description) form.append('description', this.description);
-    if (this.googleBooksId) form.append('google_books_id', this.googleBooksId);
-    this.images.forEach(img => form.append('images', img));
-
     try {
+      // Étape 1 : créer le livre en JSON
+      const payload: any = {
+        title: this.title,
+        author: this.author,
+        condition: this.condition,
+        price: this.price,
+        book_type: this.bookType,
+      };
+      if (this.categoryId) payload.category_id = this.categoryId;
+      if (this.description) payload.description = this.description;
+
       const res = await fetch('http://localhost:8000/api/books', {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: form,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
       });
-      if (res.ok) {
-        const book = await res.json();
-        this.router.navigate(['/books', book.id]);
-      } else {
+
+      if (!res.ok) {
         const err = await res.json();
         this.error = err.detail ?? 'Une erreur est survenue.';
         if (res.status === 401) this.router.navigate(['/login']);
+        this.submitting = false;
+        return;
       }
+
+      const book = await res.json();
+
+      // Étape 2 : uploader les images une par une
+      for (const img of this.images) {
+        const form = new FormData();
+        form.append('file', img);
+        await fetch(`http://localhost:8000/api/books/${book.id}/images`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: form,
+        });
+      }
+
+      this.router.navigate(['/books', book.id]);
     } catch {
       this.error = 'Impossible de contacter le serveur.';
     }
