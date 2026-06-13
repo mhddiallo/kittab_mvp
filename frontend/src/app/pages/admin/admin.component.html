@@ -1,0 +1,84 @@
+<app-navbar />
+
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-extrabold text-gray-900 mb-8">Dashboard Admin</h1>
+
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="error" class="card p-8 text-center text-red-600">{{ error }}</div>
+
+  <div *ngIf="stats">
+    <!-- Stats cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="card p-5">
+        <p class="text-xs text-gray-500 mb-1">Livres publiés</p>
+        <p class="text-3xl font-extrabold text-gray-900">{{ stats.total_books }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs text-gray-500 mb-1">Vues totales</p>
+        <p class="text-3xl font-extrabold text-primary">{{ stats.total_views }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs text-gray-500 mb-1">Utilisateurs</p>
+        <p class="text-3xl font-extrabold text-gray-900">{{ stats.total_users }}</p>
+      </div>
+      <div class="card p-5">
+        <p class="text-xs text-gray-500 mb-1">Annonces boostées</p>
+        <p class="text-3xl font-extrabold text-amber-500">{{ stats.boosted_books }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Villes -->
+      <div class="card p-6">
+        <h2 class="font-bold text-gray-800 mb-4">Publications par ville</h2>
+        <div *ngIf="stats.cities.length === 0" class="text-sm text-gray-400">Aucune donnée</div>
+        <div class="space-y-3">
+          <div *ngFor="let c of stats.cities" class="flex items-center gap-3">
+            <span class="text-sm text-gray-700 w-36 truncate">{{ c.city || 'Non précisée' }}</span>
+            <div class="flex-1 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full"
+                   [style.width.%]="(c.count / stats.cities[0].count) * 100"></div>
+            </div>
+            <span class="text-sm font-bold text-gray-700 w-6 text-right">{{ c.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Catégories -->
+      <div class="card p-6">
+        <h2 class="font-bold text-gray-800 mb-4">Publications par catégorie</h2>
+        <div *ngIf="stats.categories.length === 0" class="text-sm text-gray-400">Aucune donnée</div>
+        <div class="space-y-3">
+          <div *ngFor="let c of stats.categories" class="flex items-center gap-3">
+            <span class="text-sm text-gray-700 w-36 truncate">{{ c.name }}</span>
+            <div class="flex-1 bg-gray-100 rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full"
+                   [style.width.%]="(c.count / stats.categories[0].count) * 100"></div>
+            </div>
+            <span class="text-sm font-bold text-gray-700 w-6 text-right">{{ c.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Publications récentes -->
+      <div class="card p-6 md:col-span-2">
+        <h2 class="font-bold text-gray-800 mb-4">Publications (7 derniers jours)</h2>
+        <div *ngIf="stats.daily_publications.length === 0" class="text-sm text-gray-400">Aucune publication récente</div>
+        <div class="flex items-end gap-2 h-24">
+          <div *ngFor="let d of stats.daily_publications"
+               class="flex-1 flex flex-col items-center gap-1">
+            <span class="text-xs text-gray-500">{{ d.count }}</span>
+            <div class="w-full bg-primary rounded-t"
+                 [style.height.px]="d.count * 10 + 4"></div>
+            <span class="text-xs text-gray-400">{{ d.date | date:'dd/MM' }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

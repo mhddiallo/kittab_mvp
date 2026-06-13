@@ -15,6 +15,7 @@ class User(Base):
     address: Mapped[str | None] = mapped_column(String(500))
     is_profile_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     books = relationship("Book", back_populates="seller", cascade="all, delete-orphan")

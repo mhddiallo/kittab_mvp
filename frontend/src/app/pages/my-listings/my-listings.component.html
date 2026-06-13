@@ -1,0 +1,85 @@
+<app-navbar />
+
+<div class="max-w-4xl mx-auto px-4 py-10">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">Mes annonces</h1>
+      <p class="text-gray-500 text-sm mt-1">{{ books.length }} annonce{{ books.length > 1 ? 's' : '' }}</p>
+    </div>
+    <a routerLink="/publish" class="btn-primary flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Nouvelle annonce
+    </a>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Vide -->
+  <div *ngIf="!loading && books.length === 0" class="text-center py-20">
+    <div class="text-6xl mb-4">📭</div>
+    <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucune annonce publiée</h3>
+    <p class="text-gray-400 text-sm mb-6">Publie ton premier livre et commence à vendre !</p>
+    <a routerLink="/publish" class="btn-primary">Publier une annonce</a>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!loading && books.length > 0" class="space-y-4">
+    <div *ngFor="let book of books" class="card p-4 flex gap-4 items-start">
+      <!-- Image -->
+      <img [src]="getImageUrl(book)" [alt]="book.title"
+           class="w-20 h-24 object-cover rounded-lg shrink-0" />
+
+      <!-- Info -->
+      <div class="flex-1 min-w-0">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <h3 class="font-bold text-gray-900 truncate">{{ book.title }}</h3>
+            <p class="text-sm text-gray-500">par {{ book.author }}</p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span *ngIf="book.is_boosted"
+                  class="badge bg-amber-100 text-amber-700">⭐ Boosté</span>
+            <span [class]="'badge ' + (book.is_available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500')">
+              {{ book.is_available ? 'Disponible' : 'Vendu' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mt-2 text-sm">
+          <span class="font-bold text-primary">{{ book.price | number:'1.0-0' }} FCFA</span>
+          <span class="text-gray-400">{{ conditionLabel[book.condition] }}</span>
+          <span class="text-gray-400 flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            {{ book.views }} vue{{ book.views > 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-2 mt-3 flex-wrap">
+          <a [routerLink]="['/books', book.id]"
+             class="text-xs px-3 py-1.5 border border-gray-200 rounded-full text-gray-600 hover:border-primary hover:text-primary transition-colors">
+            Voir
+          </a>
+          <a [routerLink]="['/publish/edit', book.id]"
+             class="text-xs px-3 py-1.5 border border-gray-200 rounded-full text-gray-600 hover:border-primary hover:text-primary transition-colors">
+            Modifier
+          </a>
+          <button (click)="toggleAvailable(book)"
+                  class="text-xs px-3 py-1.5 border rounded-full transition-colors"
+                  [ngClass]="book.is_available ? 'border-gray-200 text-gray-600 hover:border-orange-400 hover:text-orange-500' : 'border-green-300 text-green-600 hover:bg-green-50'">
+            {{ book.is_available ? 'Marquer vendu' : 'Remettre en vente' }}
+          </button>
+          <button (click)="deleteBook(book.id)" [disabled]="deletingId === book.id"
+                  class="text-xs px-3 py-1.5 border border-red-200 rounded-full text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
+            {{ deletingId === book.id ? '...' : 'Supprimer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-footer />
