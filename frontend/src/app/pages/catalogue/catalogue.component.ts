@@ -43,8 +43,8 @@ export class CatalogueComponent implements OnInit {
   async loadBooks() {
     this.loading = true;
     try {
-      let url = `http://localhost:8000/api/books?limit=20&skip=0`;
-      if (this.searchQuery) url += `&search=${encodeURIComponent(this.searchQuery)}`;
+      let url = `http://localhost:8000/api/books?page_size=20`;
+      if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
       if (this.selectedCategoryId) url += `&category_id=${this.selectedCategoryId}`;
       const res = await fetch(url);
       if (res.ok) {

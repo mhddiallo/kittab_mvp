@@ -29,7 +29,7 @@ export class HomeComponent implements OnInit {
 
   async loadBooks() {
     try {
-      const res = await fetch('http://localhost:8000/api/books?page_size=10');
+      const res = await fetch('http://localhost:8000/api/books?page_size=10&page=1');
       if (res.ok) {
         const data = await res.json();
         const books: BookCard[] = data.items ?? data;
