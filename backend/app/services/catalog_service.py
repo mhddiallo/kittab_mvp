@@ -32,7 +32,7 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
     url = "https://www.googleapis.com/books/v1/volumes"
     params = {"q": q, "maxResults": limit, "printType": "books"}
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
             resp = await client.get(url, params=params)
             resp.raise_for_status()
             data = resp.json()
