@@ -91,3 +91,35 @@ class BookListOut(BaseModel):
     images: List[BookImageOut] = []
 
     model_config = {"from_attributes": True}
+
+
+class PaginatedBooks(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    items: List[BookListOut]
+
+
+class CatalogSuggestion(BaseModel):
+    source: str
+    title: str
+    author: str
+    isbn: Optional[str] = None
+    cover_url: Optional[str] = None
+    published_year: Optional[str] = None
+    google_books_id: Optional[str] = None
+
+
+class AlertCreate(BaseModel):
+    query: str
+    notification_phone: str
+
+
+class AlertOut(BaseModel):
+    id: int
+    query: str
+    notification_phone: str
+    is_notified: bool
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
