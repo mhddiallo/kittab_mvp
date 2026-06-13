@@ -25,7 +25,11 @@ export class BookCardComponent {
   get conditionClass(): string {
     return ({ new: 'bg-green-100 text-green-700', like_new: 'bg-blue-100 text-blue-700', good: 'bg-amber-100 text-amber-700', fair: 'bg-gray-100 text-gray-600' } as any)[this.book.condition] || 'bg-gray-100 text-gray-600';
   }
+  private readonly API = 'http://localhost:8000';
+
   get primaryImage(): string {
-    return this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url || 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
+    const url = this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url;
+    if (!url) return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
+    return url.startsWith('http') ? url : `${this.API}${url}`;
   }
 }
