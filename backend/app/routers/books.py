@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
@@ -48,11 +49,15 @@ def list_books(
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     education_level: Optional[str] = Query(None),
+    boosted: Optional[bool] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     query = db.query(Book).filter(Book.is_available == True)
+
+    if boosted:
+        query = query.filter(Book.is_boosted == True, Book.boost_expires_at > datetime.utcnow())
 
     if q:
         query = query.filter(

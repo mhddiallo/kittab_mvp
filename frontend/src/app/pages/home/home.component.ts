@@ -29,16 +29,23 @@ export class HomeComponent implements OnInit {
 
   async loadBooks() {
     try {
-      const res = await fetch('http://localhost:8000/api/books?page_size=10&page=1');
-      if (res.ok) {
-        const data = await res.json();
+      // À la une : livres boostés uniquement
+      const [boostedRes, latestRes] = await Promise.all([
+        fetch('http://localhost:8000/api/books?boosted=true&page_size=6&page=1'),
+        fetch('http://localhost:8000/api/books?page_size=6&page=1'),
+      ]);
+      if (latestRes.ok) {
+        const data = await latestRes.json();
         const books: BookCard[] = data.items ?? data;
         this.totalBooks = data.total ?? books.length;
-        this.trendingBooks = books.slice(0, 4);
-        this.popularBooks = books.slice(0, 6);
+        this.popularBooks = books;
+      }
+      if (boostedRes.ok) {
+        const data = await boostedRes.json();
+        this.trendingBooks = data.items ?? data;
       }
     } catch {}
-    if (!this.trendingBooks.length) {
+    if (!this.popularBooks.length) {
       this.trendingBooks = this.mock(4);
       this.popularBooks = this.mock(6, 4);
     }

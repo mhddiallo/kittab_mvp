@@ -47,24 +47,30 @@
 </section>
 
 <!-- À LA UNE -->
-<section class="bg-gradient-to-b from-red-600 to-red-800 py-12">
+<section *ngIf="trendingBooks.length > 0" class="bg-gradient-to-b from-red-600 to-red-800 py-12">
   <div class="max-w-7xl mx-auto px-6">
     <div class="flex items-center justify-between mb-6">
       <div>
-        <h2 class="text-white font-bold text-2xl flex items-center gap-2">🔥 À la une <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">Trending</span></h2>
-        <p class="text-red-200 text-sm mt-1">Les livres les plus populaires cette semaine</p>
+        <h2 class="text-white font-bold text-2xl flex items-center gap-2">⭐ À la une <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">Boostés</span></h2>
+        <p class="text-red-200 text-sm mt-1">Les annonces mises en avant cette semaine</p>
       </div>
       <a routerLink="/catalogue" class="text-white text-sm font-medium hover:underline">Voir tout →</a>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       @for (book of trendingBooks; track book.id) {
         <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer" [routerLink]="['/books', book.id]">
-          <div class="relative"><img [src]="book.images[0].url" [alt]="book.title" class="w-full h-44 object-cover" /><span class="absolute top-2 right-2 bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span></div>
-          <div class="p-3"><h3 class="font-semibold text-sm truncate">{{ book.title }}</h3><p class="text-xs text-gray-500">par {{ book.author }}</p><div class="flex items-center justify-between mt-2"><span class="text-xs text-yellow-500">★ 4.8</span><span class="badge bg-amber-100 text-amber-700">Bon état</span></div></div>
+          <div class="relative">
+            <img [src]="book.images[0]?.url || 'https://placehold.co/300x400/f3f4f6/9ca3af?text=📚'" [alt]="book.title" class="w-full h-44 object-cover" />
+            <span class="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-lg">⭐ Boosté</span>
+            <span class="absolute top-2 right-2 bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span>
+          </div>
+          <div class="p-3">
+            <h3 class="font-semibold text-sm truncate">{{ book.title }}</h3>
+            <p class="text-xs text-gray-500">par {{ book.author }}</p>
+          </div>
         </div>
       }
     </div>
-    <p class="text-center text-red-200 text-sm mt-6">Plus de <strong class="text-white">1000+ livres</strong> disponibles</p>
   </div>
 </section>
 
