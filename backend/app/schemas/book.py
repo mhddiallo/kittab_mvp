@@ -69,6 +69,7 @@ class BookOut(BaseModel):
     education_level: Optional[str] = None
     subject: Optional[str] = None
     is_available: bool
+    views: int = 0
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
@@ -85,6 +86,7 @@ class BookListOut(BaseModel):
     condition: BookCondition
     book_type: BookType
     is_available: bool
+    views: int = 0
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None

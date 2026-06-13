@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -25,7 +25,11 @@ export class CatalogueComponent implements OnInit {
   alertSent = false;
   searchTimeout: any;
 
+  constructor(private route: ActivatedRoute) {}
+
   async ngOnInit() {
+    const q = this.route.snapshot.queryParamMap.get('q');
+    if (q) this.searchQuery = q;
     await Promise.all([this.loadCategories(), this.loadBooks()]);
   }
 

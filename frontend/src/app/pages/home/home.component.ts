@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
@@ -8,7 +9,7 @@ import { BookCardComponent, BookCard } from '../../components/book-card/book-car
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, NavbarComponent, FooterComponent, BookCardComponent],
+  imports: [RouterLink, CommonModule, FormsModule, NavbarComponent, FooterComponent, BookCardComponent],
   templateUrl: './home.component.html',
 })
 export class HomeComponent implements OnInit {
@@ -16,6 +17,11 @@ export class HomeComponent implements OnInit {
   popularBooks: BookCard[] = [];
   totalBooks = 0;
   loading = true;
+  searchQuery = '';
+  suggestions: any[] = [];
+  private searchTimeout: any;
+
+  constructor(private router: Router) {}
 
   async ngOnInit() {
     await this.loadBooks();
@@ -23,7 +29,7 @@ export class HomeComponent implements OnInit {
 
   async loadBooks() {
     try {
-      const res = await fetch('http://localhost:8000/api/books?limit=10&skip=0');
+      const res = await fetch('http://localhost:8000/api/books?page_size=10');
       if (res.ok) {
         const data = await res.json();
         const books: BookCard[] = data.items ?? data;
@@ -32,12 +38,33 @@ export class HomeComponent implements OnInit {
         this.popularBooks = books.slice(0, 6);
       }
     } catch {}
-    // Fallback to mock data if backend unavailable
     if (!this.trendingBooks.length) {
       this.trendingBooks = this.mock(4);
       this.popularBooks = this.mock(6, 4);
     }
     this.loading = false;
+  }
+
+  onSearch() {
+    clearTimeout(this.searchTimeout);
+    if (this.searchQuery.length < 2) { this.suggestions = []; return; }
+    this.searchTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/api/books/autocomplete?q=${encodeURIComponent(this.searchQuery)}`);
+        if (res.ok) this.suggestions = await res.json();
+      } catch {}
+    }, 300);
+  }
+
+  selectSuggestion(s: any) {
+    this.searchQuery = s.title;
+    this.suggestions = [];
+    this.router.navigate(['/catalogue'], { queryParams: { q: s.title } });
+  }
+
+  goToCatalogue() {
+    this.suggestions = [];
+    this.router.navigate(['/catalogue'], { queryParams: { q: this.searchQuery } });
   }
 
   mock(count: number, offset = 0): BookCard[] {

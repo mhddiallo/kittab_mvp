@@ -15,6 +15,7 @@ interface BookDetail {
   images: string[];
   seller: { first_name: string; last_name: string; phone: string; address: string };
   is_available: boolean;
+  views: number;
   category: { id: number; name: string };
   created_at: string;
 }

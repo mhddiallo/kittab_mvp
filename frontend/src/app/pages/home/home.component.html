@@ -7,9 +7,28 @@
       Découvrez votre<br>prochaine<br><span class="text-primary">aventure littéraire</span>
     </h1>
     <p class="text-gray-500 mb-8 max-w-md text-sm">Trouvez des classiques et des nouveautés que vous avez toujours voulus dans votre liste de lecture</p>
-    <div class="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-3 max-w-md">
-      <input type="text" placeholder="Quel livre recherchez-vous ?" class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
-      <button class="bg-primary text-white rounded-full p-2 ml-2"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></button>
+    <div class="relative max-w-md">
+      <div class="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-3">
+        <input [(ngModel)]="searchQuery" (input)="onSearch()" (keyup.enter)="goToCatalogue()"
+               type="text" placeholder="Quel livre recherchez-vous ?"
+               class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
+        <button (click)="goToCatalogue()" class="bg-primary text-white rounded-full p-2 ml-2">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </button>
+      </div>
+      <!-- Autocomplete dropdown -->
+      <div *ngIf="suggestions.length > 0"
+           class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-2xl shadow-xl mt-2 z-20 overflow-hidden">
+        <button *ngFor="let s of suggestions" (mousedown)="selectSuggestion(s)"
+                class="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 text-left border-b border-gray-50 last:border-0">
+          <img *ngIf="s.cover_url" [src]="s.cover_url" class="w-8 h-10 object-cover rounded" />
+          <div *ngIf="!s.cover_url" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-lg shrink-0">📚</div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">{{ s.title }}</p>
+            <p class="text-xs text-gray-500">{{ s.author }}</p>
+          </div>
+        </button>
+      </div>
     </div>
     <div class="flex gap-8 mt-8 text-sm">
       <div><span class="font-bold text-gray-900 text-xl">1000+</span><br><span class="text-gray-400 text-xs">Livres disponibles</span></div>

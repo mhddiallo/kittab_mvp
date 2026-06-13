@@ -8,6 +8,7 @@ export interface BookCard {
   images: { url: string; is_primary: boolean }[];
   seller: { first_name: string; last_name: string; phone: string; address?: string };
   is_available: boolean;
+  views?: number;
 }
 
 @Component({

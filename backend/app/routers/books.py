@@ -89,6 +89,9 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
     book = db.get(Book, book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Annonce introuvable")
+    book.views = (book.views or 0) + 1
+    db.commit()
+    db.refresh(book)
     return book
 
 
