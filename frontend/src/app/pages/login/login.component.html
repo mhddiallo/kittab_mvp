@@ -1,10 +1,11 @@
 <!-- Fond gris clair plein écran -->
 <div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-12">
 
-  <!-- Navbar logo only -->
-  <div class="w-full max-w-3xl mb-6">
-    <a routerLink="/">
-      <img src="assets/logo.png" alt="KITTAB" class="h-9 w-auto" />
+  <!-- Bouton retour haut gauche -->
+  <div class="fixed top-4 left-4">
+    <a routerLink="/" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+      Retour à l'accueil
     </a>
   </div>
 
@@ -56,6 +57,7 @@
 
       @if (step === 'phone') {
         <div>
+          <img src="assets/logo.png" alt="KITTAB" class="h-8 w-auto mb-6" />
           <h1 class="text-xl font-extrabold text-gray-900 mb-1">Prêt à vendre tes livres ?</h1>
           <p class="text-gray-400 text-sm mb-6">Connecte-toi pour accéder à ton espace.</p>
 
@@ -78,9 +80,6 @@
             {{ loading ? 'Envoi en cours...' : 'Connexion par téléphone' }}
           </button>
 
-          <p class="text-center text-xs text-gray-400 mt-5">
-            <a routerLink="/catalogue" class="text-primary hover:underline">← Retour à l'accueil</a>
-          </p>
         </div>
       }
 
