@@ -1,0 +1,93 @@
+from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel
+
+from app.models.book import BookCondition, BookType
+
+
+class CategoryOut(BaseModel):
+    id: int
+    name: str
+    slug: str
+
+    model_config = {"from_attributes": True}
+
+
+class BookImageOut(BaseModel):
+    id: int
+    url: str
+    is_primary: bool
+
+    model_config = {"from_attributes": True}
+
+
+class SellerBrief(BaseModel):
+    id: int
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: str
+    address: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class BookCreate(BaseModel):
+    title: str
+    author: str
+    description: Optional[str] = None
+    isbn: Optional[str] = None
+    price: float
+    condition: BookCondition
+    book_type: BookType = BookType.OTHER
+    education_level: Optional[str] = None
+    subject: Optional[str] = None
+    category_id: Optional[int] = None
+
+
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    author: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[float] = None
+    condition: Optional[BookCondition] = None
+    book_type: Optional[BookType] = None
+    education_level: Optional[str] = None
+    subject: Optional[str] = None
+    category_id: Optional[int] = None
+    is_available: Optional[bool] = None
+
+
+class BookOut(BaseModel):
+    id: int
+    title: str
+    author: str
+    description: Optional[str] = None
+    isbn: Optional[str] = None
+    price: float
+    condition: BookCondition
+    book_type: BookType
+    education_level: Optional[str] = None
+    subject: Optional[str] = None
+    is_available: bool
+    created_at: datetime
+    seller: SellerBrief
+    category: Optional[CategoryOut] = None
+    images: List[BookImageOut] = []
+
+    model_config = {"from_attributes": True}
+
+
+class BookListOut(BaseModel):
+    id: int
+    title: str
+    author: str
+    price: float
+    condition: BookCondition
+    book_type: BookType
+    is_available: bool
+    created_at: datetime
+    seller: SellerBrief
+    category: Optional[CategoryOut] = None
+    images: List[BookImageOut] = []
+
+    model_config = {"from_attributes": True}
