@@ -1,52 +1,152 @@
-<app-navbar />
-<div class="min-h-screen bg-gray-50 flex items-center justify-center py-16 px-4">
-  <div class="w-full max-w-md">
-    <h1 class="text-3xl font-bold text-center text-gray-900 mb-2">Se connecter</h1>
-    <p class="text-center text-gray-500 text-sm mb-8">Accédez à votre compte KITTAB</p>
+<!-- Layout plein écran sans navbar/footer -->
+<div class="min-h-screen flex">
 
-    @if (step === 'phone') {
-      <div class="card p-8">
-        <h2 class="font-semibold text-gray-800 mb-5">Entrez votre numéro de téléphone</h2>
-        @if (error) { <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div> }
-        <label class="text-sm font-medium text-gray-700 block mb-1">Numéro de téléphone</label>
-        <input [(ngModel)]="phone" type="tel" placeholder="+224 XXX XXX XXX" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary mb-1" />
-        <p class="text-xs text-gray-400 mb-5">Vous recevrez un code par WhatsApp ou SMS</p>
-        <button (click)="requestOtp()" [disabled]="loading" class="btn-primary w-full text-center py-3 disabled:opacity-60">{{ loading ? 'Envoi...' : 'Recevoir le code' }}</button>
-        <p class="text-center text-xs text-gray-400 mt-4"><a routerLink="/catalogue" class="text-primary hover:underline">Continuer sans compte</a></p>
+  <!-- Panneau gauche -->
+  <div class="hidden md:flex md:w-1/2 bg-primary flex-col justify-between p-10 relative overflow-hidden">
+    <!-- Logo -->
+    <a routerLink="/">
+      <img src="assets/logo.png" alt="KITTAB" class="h-12 w-auto brightness-0 invert" />
+    </a>
+
+    <!-- Texte central -->
+    <div class="z-10">
+      <h2 class="text-white text-4xl font-extrabold leading-tight mb-8">
+        La bibliothèque<br>de ta communauté
+      </h2>
+      <ul class="space-y-4 text-white/90 text-sm">
+        <li class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Achète et vends tes livres scolaires facilement
+        </li>
+        <li class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Des milliers de livres disponibles près de chez toi
+        </li>
+        <li class="flex items-start gap-3">
+          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          Contact direct entre acheteur et vendeur
+        </li>
+      </ul>
+    </div>
+
+    <!-- Image décorative bas -->
+    <div class="text-white/20 text-9xl font-extrabold select-none leading-none">📚</div>
+
+    <!-- Cercles décoratifs -->
+    <div class="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full"></div>
+    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-white/5 rounded-full"></div>
+  </div>
+
+  <!-- Panneau droit — Formulaire -->
+  <div class="w-full md:w-1/2 flex items-center justify-center px-8 py-12 bg-white">
+    <div class="w-full max-w-sm">
+
+      <!-- Logo mobile uniquement -->
+      <div class="flex justify-center mb-8 md:hidden">
+        <img src="assets/logo.png" alt="KITTAB" class="h-12 w-auto" />
       </div>
-    }
 
-    @if (step === 'otp') {
-      <div class="card p-8">
-        <button (click)="step='phone'" class="text-gray-400 hover:text-gray-600 text-sm mb-4 flex items-center gap-1">← Retour</button>
-        <h2 class="font-semibold text-gray-800 mb-1">Vérifiez votre téléphone</h2>
-        <p class="text-gray-500 text-sm mb-5">Code envoyé au <strong>{{ phone }}</strong></p>
-        @if (devCode) {
-          <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
-            <p class="text-blue-600 text-xs font-medium mb-1">Mode test — utilisez ce code :</p>
-            <span class="text-blue-800 text-2xl font-bold tracking-widest">{{ devCode }}</span>
+      @if (step === 'phone') {
+        <div>
+          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Connectez-vous</h1>
+          <p class="text-gray-500 text-sm mb-8">Pas encore de compte ? Il sera créé automatiquement.</p>
+
+          @if (error) {
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+          }
+
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Numéro de téléphone</label>
+          <div class="relative mb-1.5">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+            </span>
+            <input [(ngModel)]="phone" (keyup.enter)="requestOtp()" type="tel" placeholder="+224 XXX XXX XXX"
+                   class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
-        }
-        @if (error) { <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div> }
-        <input [(ngModel)]="otp" type="text" maxlength="6" placeholder="000000" class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-2xl tracking-widest font-bold focus:outline-none focus:border-primary mb-4" />
-        <button (click)="verifyOtp()" [disabled]="loading" class="btn-primary w-full text-center py-3 disabled:opacity-60">{{ loading ? 'Vérification...' : 'Valider le code' }}</button>
-        <p class="text-center text-xs text-gray-400 mt-3">Code valable 10 min. <button (click)="requestOtp()" class="text-primary hover:underline">Renvoyer</button></p>
-      </div>
-    }
+          <p class="text-xs text-gray-400 mb-6">Vous recevrez un code par WhatsApp ou SMS</p>
 
-    @if (step === 'profile') {
-      <div class="card p-8">
-        <h2 class="font-semibold text-gray-800 mb-1">Complétez votre profil</h2>
-        <p class="text-gray-500 text-sm mb-5">Ces informations permettront aux acheteurs de vous contacter</p>
-        @if (error) { <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">{{ error }}</div> }
-        <div class="space-y-4">
-          <div><label class="text-sm font-medium text-gray-700 block mb-1">Prénom</label><input [(ngModel)]="firstName" type="text" placeholder="Votre prénom" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary" /></div>
-          <div><label class="text-sm font-medium text-gray-700 block mb-1">Nom</label><input [(ngModel)]="lastName" type="text" placeholder="Votre nom" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary" /></div>
-          <div><label class="text-sm font-medium text-gray-700 block mb-1">Adresse / Ville</label><input [(ngModel)]="address" type="text" placeholder="Ex: Conakry, Ratoma" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary" /></div>
+          <button (click)="requestOtp()" [disabled]="loading"
+                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
+            {{ loading ? 'Envoi en cours...' : 'Recevoir le code' }}
+          </button>
+
+          <p class="text-center text-xs text-gray-400 mt-6">
+            <a routerLink="/catalogue" class="text-primary hover:underline">Continuer sans compte →</a>
+          </p>
         </div>
-        <button (click)="completeProfile()" [disabled]="loading" class="btn-primary w-full text-center py-3 mt-6 disabled:opacity-60">{{ loading ? 'Enregistrement...' : 'Terminer' }}</button>
-      </div>
-    }
+      }
+
+      @if (step === 'otp') {
+        <div>
+          <button (click)="step='phone'" class="flex items-center gap-1 text-gray-400 hover:text-gray-600 text-sm mb-6">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            Retour
+          </button>
+
+          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Vérifiez votre téléphone</h1>
+          <p class="text-gray-500 text-sm mb-8">Code envoyé au <strong class="text-gray-800">{{ phone }}</strong></p>
+
+          @if (devCode) {
+            <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-5">
+              <p class="text-blue-600 text-xs font-medium mb-1">Mode test — utilisez ce code :</p>
+              <span class="text-blue-800 text-2xl font-bold tracking-widest">{{ devCode }}</span>
+            </div>
+          }
+
+          @if (error) {
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+          }
+
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Code à 6 chiffres</label>
+          <input [(ngModel)]="otp" (keyup.enter)="verifyOtp()" type="text" maxlength="6" placeholder="000000"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-3xl tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-6" />
+
+          <button (click)="verifyOtp()" [disabled]="loading"
+                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
+            {{ loading ? 'Vérification...' : 'Valider le code' }}
+          </button>
+
+          <p class="text-center text-xs text-gray-400 mt-4">
+            Code valable 10 min.
+            <button (click)="requestOtp()" class="text-primary hover:underline ml-1">Renvoyer</button>
+          </p>
+        </div>
+      }
+
+      @if (step === 'profile') {
+        <div>
+          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Complétez votre profil</h1>
+          <p class="text-gray-500 text-sm mb-8">Ces informations permettront aux acheteurs de vous contacter</p>
+
+          @if (error) {
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+          }
+
+          <div class="space-y-4 mb-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
+              <input [(ngModel)]="firstName" type="text" placeholder="Votre prénom"
+                     class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
+              <input [(ngModel)]="lastName" type="text" placeholder="Votre nom"
+                     class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Adresse / Ville</label>
+              <input [(ngModel)]="address" type="text" placeholder="Ex: Conakry, Ratoma"
+                     class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+            </div>
+          </div>
+
+          <button (click)="completeProfile()" [disabled]="loading"
+                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
+            {{ loading ? 'Enregistrement...' : 'Créer mon compte' }}
+          </button>
+        </div>
+      }
+
+    </div>
   </div>
 </div>
-<app-footer />
