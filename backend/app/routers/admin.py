@@ -75,6 +75,32 @@ def get_stats(db: Session = Depends(get_db), _: User = Depends(require_admin)):
     }
 
 
+@router.get("/books")
+def list_all_books(
+    q: Optional[str] = None,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    query = db.query(Book)
+    if q:
+        query = query.filter(Book.title.ilike(f"%{q}%") | Book.author.ilike(f"%{q}%"))
+    books = query.order_by(Book.is_boosted.desc(), Book.created_at.desc()).limit(50).all()
+    return [
+        {
+            "id": b.id,
+            "title": b.title,
+            "author": b.author,
+            "price": b.price,
+            "views": b.views,
+            "is_boosted": b.is_boosted,
+            "boost_expires_at": b.boost_expires_at.isoformat() if b.boost_expires_at else None,
+            "is_available": b.is_available,
+            "seller_phone": b.seller.phone if b.seller else None,
+        }
+        for b in books
+    ]
+
+
 @router.post("/books/{book_id}/boost")
 def boost_book(book_id: int, payload: BoostRequest, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     book = db.get(Book, book_id)

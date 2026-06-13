@@ -30,7 +30,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
 
       <!-- Villes -->
       <div class="card p-6">
@@ -79,6 +79,73 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Gestion des boosts -->
+    <div class="card p-6">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="font-bold text-gray-800 text-lg">Gérer les boosts</h2>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600">Durée :</label>
+          <select [(ngModel)]="boostDays"
+                  class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
+            <option [ngValue]="3">3 jours</option>
+            <option [ngValue]="7">7 jours</option>
+            <option [ngValue]="14">14 jours</option>
+            <option [ngValue]="30">30 jours</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Recherche -->
+      <div class="mb-4">
+        <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" type="text"
+               placeholder="Rechercher un livre..."
+               class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      </div>
+
+      <div *ngIf="booksLoading" class="flex justify-center py-8">
+        <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <div *ngIf="!booksLoading && books.length === 0" class="text-sm text-gray-400 text-center py-6">
+        Aucun livre trouvé
+      </div>
+
+      <div class="space-y-2">
+        <div *ngFor="let book of books"
+             class="flex items-center justify-between gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors"
+             [class.bg-amber-50]="book.is_boosted">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2">
+              <span *ngIf="book.is_boosted" class="text-amber-500 text-xs font-bold">⭐ BOOSTÉ</span>
+              <span class="font-medium text-gray-900 truncate text-sm">{{ book.title }}</span>
+            </div>
+            <div class="flex items-center gap-3 text-xs text-gray-400 mt-0.5">
+              <span>{{ book.author }}</span>
+              <span>{{ book.price | number:'1.0-0' }} FCFA</span>
+              <span>{{ book.views }} vues</span>
+              <span *ngIf="book.boost_expires_at" class="text-amber-600">
+                expire {{ book.boost_expires_at | date:'dd/MM/yyyy' }}
+              </span>
+            </div>
+          </div>
+          <div class="shrink-0">
+            <button *ngIf="!book.is_boosted"
+                    (click)="boost(book)"
+                    [disabled]="boostingId === book.id"
+                    class="text-xs px-4 py-1.5 bg-amber-500 text-white rounded-full hover:bg-amber-600 transition-colors disabled:opacity-50 font-semibold">
+              {{ boostingId === book.id ? '...' : '⭐ Booster' }}
+            </button>
+            <button *ngIf="book.is_boosted"
+                    (click)="unboost(book)"
+                    [disabled]="boostingId === book.id"
+                    class="text-xs px-4 py-1.5 border border-amber-300 text-amber-600 rounded-full hover:bg-amber-50 transition-colors disabled:opacity-50">
+              {{ boostingId === book.id ? '...' : 'Retirer boost' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
