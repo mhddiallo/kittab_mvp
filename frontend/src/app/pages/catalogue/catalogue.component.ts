@@ -18,6 +18,7 @@ export class CatalogueComponent implements OnInit {
   searchQuery = '';
   selectedCategoryId: number | null = null;
   books: BookCard[] = [];
+  boostedBooks: BookCard[] = [];
   categories: Category[] = [];
   total = 0;
   loading = true;
@@ -30,13 +31,23 @@ export class CatalogueComponent implements OnInit {
   async ngOnInit() {
     const q = this.route.snapshot.queryParamMap.get('q');
     if (q) this.searchQuery = q;
-    await Promise.all([this.loadCategories(), this.loadBooks()]);
+    await Promise.all([this.loadCategories(), this.loadBooks(), this.loadBoostedBooks()]);
   }
 
   async loadCategories() {
     try {
       const res = await fetch('http://localhost:8000/api/categories');
       if (res.ok) this.categories = await res.json();
+    } catch {}
+  }
+
+  async loadBoostedBooks() {
+    try {
+      const res = await fetch('http://localhost:8000/api/books?boosted=true&page_size=6');
+      if (res.ok) {
+        const data = await res.json();
+        this.boostedBooks = data.items ?? data;
+      }
     } catch {}
   }
 
