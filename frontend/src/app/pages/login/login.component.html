@@ -1,77 +1,64 @@
-<!-- Layout plein écran sans navbar/footer -->
-<div class="min-h-screen flex">
+<!-- Fond gris clair plein écran -->
+<div class="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-12">
 
-  <!-- Panneau gauche -->
-  <div class="hidden md:flex md:w-1/2 bg-primary flex-col justify-center p-12 relative overflow-hidden">
-    <!-- Logo -->
-    <a routerLink="/" class="absolute top-8 left-10">
-      <img src="assets/logo.png" alt="KITTAB" class="h-10 w-auto brightness-0 invert" />
-    </a>
+  <!-- Logo centré en haut -->
+  <a routerLink="/" class="mb-8">
+    <img src="assets/logo.png" alt="KITTAB" class="h-10 w-auto" />
+  </a>
 
-    <!-- Cercles décoratifs -->
-    <div class="absolute -top-20 -right-20 w-80 h-80 bg-white/5 rounded-full"></div>
-    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-white/5 rounded-full"></div>
+  <!-- Carte centrale -->
+  <div class="w-full max-w-3xl bg-white rounded-2xl shadow-sm border border-gray-200 flex overflow-hidden">
 
-    <!-- Contenu -->
-    <div class="z-10">
-      <h2 class="text-white text-4xl font-extrabold leading-tight mb-3">
+    <!-- Partie gauche — features -->
+    <div class="hidden md:flex flex-col justify-center w-1/2 p-8 border-r border-gray-100">
+      <h2 class="text-2xl font-extrabold text-gray-900 leading-snug mb-2">
         Vends, achète et échange tes livres facilement
       </h2>
-      <p class="text-white/70 text-sm mb-10">
-        Vends, achète ou échange avec des gens de ta ville.
-      </p>
+      <p class="text-gray-400 text-sm mb-8">Rejoins la communauté Kittab et donne une seconde vie à tes livres.</p>
 
-      <!-- Feature cards avec icônes -->
-      <div class="space-y-4">
-        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
-          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      <div class="space-y-5">
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
           </div>
           <div>
-            <p class="text-white font-semibold text-sm">Publication rapide</p>
-            <p class="text-white/60 text-xs">Publie ton annonce en quelques minutes</p>
+            <p class="text-sm font-semibold text-gray-800">Publication rapide</p>
+            <p class="text-xs text-gray-400">Publie ton annonce en quelques minutes</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
-          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
           </div>
           <div>
-            <p class="text-white font-semibold text-sm">Large communauté</p>
-            <p class="text-white/60 text-xs">Des milliers de livres disponibles près de chez toi</p>
+            <p class="text-sm font-semibold text-gray-800">Large communauté</p>
+            <p class="text-xs text-gray-400">Des milliers de livres disponibles près de chez toi</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
-          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
           </div>
           <div>
-            <p class="text-white font-semibold text-sm">Contact direct et sécurisé</p>
-            <p class="text-white/60 text-xs">Échange directement avec le vendeur via WhatsApp</p>
+            <p class="text-sm font-semibold text-gray-800">Contact direct et sécurisé</p>
+            <p class="text-xs text-gray-400">Échange directement avec le vendeur via WhatsApp</p>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Panneau droit — Formulaire -->
-  <div class="w-full md:w-1/2 flex items-center justify-center px-8 py-12 bg-white">
-    <div class="w-full max-w-sm">
-
-      <!-- Logo mobile uniquement -->
-      <div class="flex justify-center mb-8 md:hidden">
-        <img src="assets/logo.png" alt="KITTAB" class="h-12 w-auto" />
-      </div>
+    <!-- Partie droite — formulaire -->
+    <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
 
       @if (step === 'phone') {
         <div>
-          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Connectez-vous</h1>
-          <p class="text-gray-500 text-sm mb-8">Pas encore de compte ? Il sera créé automatiquement.</p>
+          <h1 class="text-xl font-extrabold text-gray-900 mb-1">Prêt à vendre tes livres ?</h1>
+          <p class="text-gray-400 text-sm mb-6">Connecte-toi pour accéder à ton espace.</p>
 
           @if (error) {
-            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100">{{ error }}</div>
           }
 
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Numéro de téléphone</label>
@@ -82,15 +69,15 @@
             <input [(ngModel)]="phone" (keyup.enter)="requestOtp()" type="tel" placeholder="+224 XXX XXX XXX"
                    class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
           </div>
-          <p class="text-xs text-gray-400 mb-6">Vous recevrez un code par WhatsApp ou SMS</p>
+          <p class="text-xs text-gray-400 mb-5">Vous recevrez un code par WhatsApp ou SMS</p>
 
           <button (click)="requestOtp()" [disabled]="loading"
-                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
-            {{ loading ? 'Envoi en cours...' : 'Recevoir le code' }}
+                  class="w-full btn-primary py-3 font-semibold text-sm disabled:opacity-60">
+            {{ loading ? 'Envoi en cours...' : 'Connexion par téléphone' }}
           </button>
 
-          <p class="text-center text-xs text-gray-400 mt-6">
-            <a routerLink="/catalogue" class="text-primary hover:underline">Continuer sans compte →</a>
+          <p class="text-center text-xs text-gray-400 mt-5">
+            <a routerLink="/catalogue" class="text-primary hover:underline">← Retour à l'accueil</a>
           </p>
         </div>
       }
@@ -102,26 +89,26 @@
             Retour
           </button>
 
-          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Vérifiez votre téléphone</h1>
-          <p class="text-gray-500 text-sm mb-8">Code envoyé au <strong class="text-gray-800">{{ phone }}</strong></p>
+          <h1 class="text-xl font-extrabold text-gray-900 mb-1">Vérifiez votre téléphone</h1>
+          <p class="text-gray-400 text-sm mb-6">Code envoyé au <strong class="text-gray-800">{{ phone }}</strong></p>
 
           @if (devCode) {
-            <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-5">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
               <p class="text-blue-600 text-xs font-medium mb-1">Mode test — utilisez ce code :</p>
               <span class="text-blue-800 text-2xl font-bold tracking-widest">{{ devCode }}</span>
             </div>
           }
 
           @if (error) {
-            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100">{{ error }}</div>
           }
 
           <label class="block text-sm font-medium text-gray-700 mb-1.5">Code à 6 chiffres</label>
           <input [(ngModel)]="otp" (keyup.enter)="verifyOtp()" type="text" maxlength="6" placeholder="000000"
-                 class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-3xl tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-6" />
+                 class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-3xl tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-5" />
 
           <button (click)="verifyOtp()" [disabled]="loading"
-                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
+                  class="w-full btn-primary py-3 font-semibold text-sm disabled:opacity-60">
             {{ loading ? 'Vérification...' : 'Valider le code' }}
           </button>
 
@@ -134,14 +121,14 @@
 
       @if (step === 'profile') {
         <div>
-          <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Complétez votre profil</h1>
-          <p class="text-gray-500 text-sm mb-8">Ces informations permettront aux acheteurs de vous contacter</p>
+          <h1 class="text-xl font-extrabold text-gray-900 mb-1">Complétez votre profil</h1>
+          <p class="text-gray-400 text-sm mb-6">Ces informations permettront aux acheteurs de vous contacter</p>
 
           @if (error) {
-            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-5 border border-red-100">{{ error }}</div>
+            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100">{{ error }}</div>
           }
 
-          <div class="space-y-4 mb-6">
+          <div class="space-y-4 mb-5">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
               <input [(ngModel)]="firstName" type="text" placeholder="Votre prénom"
@@ -160,7 +147,7 @@
           </div>
 
           <button (click)="completeProfile()" [disabled]="loading"
-                  class="w-full btn-primary py-3 font-semibold text-base disabled:opacity-60">
+                  class="w-full btn-primary py-3 font-semibold text-sm disabled:opacity-60">
             {{ loading ? 'Enregistrement...' : 'Créer mon compte' }}
           </button>
         </div>
