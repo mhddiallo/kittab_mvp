@@ -172,10 +172,9 @@
               ×
             </button>
           </div>
-          <div *ngFor="let _ of [].constructor(4 - imagePreviews.length)"
-               class="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-xl">
-            +
-          </div>
+          <ng-container *ngFor="let _ of emptySlots">
+            <div class="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-xl">+</div>
+          </ng-container>
         </div>
       </div>
 
@@ -189,7 +188,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500">État</span>
-            <span class="font-semibold text-gray-800">{{ conditions.find(c => c.value === condition)?.label || '—' }}</span>
+            <span class="font-semibold text-gray-800">{{ conditionLabel }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-500">Photos</span>

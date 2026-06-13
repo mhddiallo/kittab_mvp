@@ -115,6 +115,14 @@ export class PublishComponent implements OnInit {
     this.imagePreviews.splice(i, 1);
   }
 
+  get emptySlots(): null[] {
+    return Array(4 - this.imagePreviews.length).fill(null);
+  }
+
+  get conditionLabel(): string {
+    return this.conditions.find(c => c.value === this.condition)?.label || '—';
+  }
+
   get isValid() {
     return this.title && this.author && this.condition && this.price && this.price > 0;
   }
