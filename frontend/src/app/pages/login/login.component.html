@@ -2,41 +2,58 @@
 <div class="min-h-screen flex">
 
   <!-- Panneau gauche -->
-  <div class="hidden md:flex md:w-1/2 bg-primary flex-col justify-between p-10 relative overflow-hidden">
+  <div class="hidden md:flex md:w-1/2 bg-primary flex-col justify-center p-12 relative overflow-hidden">
     <!-- Logo -->
-    <a routerLink="/">
-      <img src="assets/logo.png" alt="KITTAB" class="h-12 w-auto brightness-0 invert" />
+    <a routerLink="/" class="absolute top-8 left-10">
+      <img src="assets/logo.png" alt="KITTAB" class="h-10 w-auto brightness-0 invert" />
     </a>
 
-    <!-- Texte central -->
+    <!-- Cercles décoratifs -->
+    <div class="absolute -top-20 -right-20 w-80 h-80 bg-white/5 rounded-full"></div>
+    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-white/5 rounded-full"></div>
+
+    <!-- Contenu -->
     <div class="z-10">
-      <h2 class="text-white text-4xl font-extrabold leading-tight mb-8">
+      <h2 class="text-white text-4xl font-extrabold leading-tight mb-3">
         La bibliothèque<br>de ta communauté
       </h2>
-      <ul class="space-y-4 text-white/90 text-sm">
-        <li class="flex items-start gap-3">
-          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          Achète et vends tes livres scolaires facilement
-        </li>
-        <li class="flex items-start gap-3">
-          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          Des milliers de livres disponibles près de chez toi
-        </li>
-        <li class="flex items-start gap-3">
-          <svg class="w-5 h-5 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          Contact direct entre acheteur et vendeur
-        </li>
-      </ul>
-    </div>
+      <p class="text-white/70 text-sm mb-10">
+        Rejoins la plateforme qui connecte les lecteurs. Achète, vends et échange des livres près de chez toi.
+      </p>
 
-    <!-- Image décorative bas -->
-    <div class="flex-1 flex items-end justify-center">
-      <img src="assets/login-illustration.png" alt="" class="w-full max-w-xs object-contain drop-shadow-lg" />
-    </div>
+      <!-- Feature cards avec icônes -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
+          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Publication rapide</p>
+            <p class="text-white/60 text-xs">Publie ton annonce en quelques minutes</p>
+          </div>
+        </div>
 
-    <!-- Cercles décoratifs -->
-    <div class="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full"></div>
-    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-white/5 rounded-full"></div>
+        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
+          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Large communauté</p>
+            <p class="text-white/60 text-xs">Des milliers de livres disponibles près de chez toi</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 bg-white/10 rounded-2xl px-5 py-4">
+          <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          </div>
+          <div>
+            <p class="text-white font-semibold text-sm">Contact direct et sécurisé</p>
+            <p class="text-white/60 text-xs">Échange directement avec le vendeur via WhatsApp</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Panneau droit — Formulaire -->
