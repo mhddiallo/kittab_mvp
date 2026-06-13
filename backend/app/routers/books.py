@@ -54,10 +54,17 @@ def list_books(
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
+    # Expirer les boosts dépassés
+    db.query(Book).filter(
+        Book.is_boosted == True,
+        Book.boost_expires_at < datetime.utcnow()
+    ).update({"is_boosted": False, "boost_expires_at": None}, synchronize_session=False)
+    db.commit()
+
     query = db.query(Book).filter(Book.is_available == True)
 
     if boosted:
-        query = query.filter(Book.is_boosted == True, Book.boost_expires_at > datetime.utcnow())
+        query = query.filter(Book.is_boosted == True)
 
     if q:
         query = query.filter(
