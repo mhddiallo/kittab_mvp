@@ -17,6 +17,11 @@
     <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
   </div>
 
+  <!-- Message boost -->
+  <div *ngIf="boostMessage" class="mb-4 p-4 rounded-xl bg-green-50 border border-green-100 text-sm text-green-700 font-medium">
+    {{ boostMessage }}
+  </div>
+
   <!-- Vide -->
   <div *ngIf="!loading && books.length === 0" class="text-center py-20">
     <div class="text-6xl mb-4">📭</div>
@@ -25,19 +30,12 @@
     <a routerLink="/publish" class="btn-primary">Publier une annonce</a>
   </div>
 
-  <!-- Message boost -->
-  <div *ngIf="boostMessage" class="mb-4 p-4 rounded-xl bg-blue-50 border border-blue-100 text-sm text-blue-700">
-    {{ boostMessage }}
-  </div>
-
   <!-- Liste -->
   <div *ngIf="!loading && books.length > 0" class="space-y-4">
     <div *ngFor="let book of books" class="card p-4 flex gap-4 items-start">
-      <!-- Image -->
       <img [src]="getImageUrl(book)" [alt]="book.title"
            class="w-20 h-24 object-cover rounded-lg shrink-0" />
 
-      <!-- Info -->
       <div class="flex-1 min-w-0">
         <div class="flex items-start justify-between gap-2">
           <div>
@@ -45,8 +43,7 @@
             <p class="text-sm text-gray-500">par {{ book.author }}</p>
           </div>
           <div class="flex items-center gap-2 shrink-0">
-            <span *ngIf="book.is_boosted"
-                  class="badge bg-amber-100 text-amber-700">⭐ Boosté</span>
+            <span *ngIf="book.is_boosted" class="badge bg-amber-100 text-amber-700">⭐ Boosté</span>
             <span [class]="'badge ' + (book.is_available ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500')">
               {{ book.is_available ? 'Disponible' : 'Vendu' }}
             </span>
@@ -62,7 +59,6 @@
           </span>
         </div>
 
-        <!-- Actions -->
         <div class="flex gap-2 mt-3 flex-wrap">
           <a [routerLink]="['/books', book.id]"
              class="text-xs px-3 py-1.5 border border-gray-200 rounded-full text-gray-600 hover:border-primary hover:text-primary transition-colors">
@@ -78,8 +74,8 @@
             {{ book.is_available ? 'Marquer vendu' : 'Remettre en vente' }}
           </button>
           <button *ngIf="!book.is_boosted"
-                  (click)="requestBoost(book)" [disabled]="boostingId === book.id"
-                  class="text-xs px-3 py-1.5 border border-amber-300 rounded-full text-amber-600 hover:bg-amber-50 transition-colors disabled:opacity-50">
+                  (click)="openBoostModal(book)" [disabled]="boostingId === book.id"
+                  class="text-xs px-3 py-1.5 border border-amber-300 rounded-full text-amber-600 hover:bg-amber-50 transition-colors disabled:opacity-50 font-semibold">
             {{ boostingId === book.id ? '...' : '⭐ Booster' }}
           </button>
           <span *ngIf="book.is_boosted" class="text-xs px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
@@ -92,6 +88,72 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Modale boost -->
+<div *ngIf="showBoostModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+  <!-- Overlay -->
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeBoostModal()"></div>
+
+  <!-- Contenu -->
+  <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6 z-10">
+    <button (click)="closeBoostModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+
+    <div class="mb-5">
+      <h2 class="text-xl font-extrabold text-gray-900">⭐ Booster mon annonce</h2>
+      <p class="text-sm text-gray-500 mt-1">
+        <span class="font-medium text-gray-700">{{ selectedBook?.title }}</span>
+      </p>
+    </div>
+
+    <p class="text-sm text-gray-600 mb-5">
+      Ton annonce apparaîtra en <strong>première position</strong> dans le catalogue et sera mise en avant avec un badge ⭐.
+    </p>
+
+    <!-- Options durée -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <label *ngFor="let opt of boostOptions"
+             class="relative flex flex-col items-center p-4 rounded-xl border-2 cursor-pointer transition-all"
+             [class.border-primary]="selectedDays === opt.days"
+             [class.bg-red-50]="selectedDays === opt.days"
+             [class.border-gray-100]="selectedDays !== opt.days">
+        <input type="radio" [(ngModel)]="selectedDays" [value]="opt.days" class="sr-only" />
+        <span *ngIf="opt.tag"
+              class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full"
+              [class.bg-primary]="opt.tag === 'Populaire'"
+              [class.text-white]="opt.tag === 'Populaire'"
+              [class.bg-amber-400]="opt.tag !== 'Populaire'"
+              [class.text-white]="opt.tag !== 'Populaire'">
+          {{ opt.tag }}
+        </span>
+        <span class="text-lg font-extrabold" [class.text-primary]="selectedDays === opt.days">{{ opt.label }}</span>
+        <span class="text-sm font-bold text-gray-700 mt-1">{{ opt.price | number:'1.0-0' }} FCFA</span>
+      </label>
+    </div>
+
+    <!-- Récapitulatif -->
+    <div class="bg-gray-50 rounded-xl p-4 mb-5 text-sm">
+      <div class="flex justify-between">
+        <span class="text-gray-600">Durée sélectionnée</span>
+        <span class="font-semibold">{{ selectedOption.label }}</span>
+      </div>
+      <div class="flex justify-between mt-1">
+        <span class="text-gray-600">Prix</span>
+        <span class="font-bold text-primary">{{ selectedOption.price | number:'1.0-0' }} FCFA</span>
+      </div>
+    </div>
+
+    <p class="text-xs text-gray-400 mb-5">
+      Après confirmation, l'admin validera votre demande. Le boost sera activé une fois le paiement confirmé.
+    </p>
+
+    <button (click)="confirmBoost()"
+            class="w-full btn-primary py-3 font-semibold text-base">
+      Envoyer la demande
+    </button>
   </div>
 </div>
 

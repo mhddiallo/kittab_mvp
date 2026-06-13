@@ -3,6 +3,7 @@ import uuid
 from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -217,9 +218,14 @@ def delete_image(
 
 # ── Boost requests ───────────────────────────────────────────────────────────────
 
+class BoostRequestPayload(BaseModel):
+    duration_days: int = 7
+
+
 @router.post("/{book_id}/boost-request", status_code=status.HTTP_201_CREATED)
 def request_boost(
     book_id: int,
+    payload: BoostRequestPayload,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -235,7 +241,7 @@ def request_boost(
     if existing:
         raise HTTPException(status_code=400, detail="Une demande de boost est déjà en attente")
 
-    req = BoostRequest(book_id=book_id, seller_id=current_user.id)
+    req = BoostRequest(book_id=book_id, seller_id=current_user.id, duration_days=payload.duration_days)
     db.add(req)
     db.commit()
     return {"message": "Demande de boost envoyée, l'admin va examiner votre demande"}
