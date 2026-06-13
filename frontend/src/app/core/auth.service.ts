@@ -4,6 +4,9 @@ export interface CurrentUser {
   first_name: string;
   last_name: string;
   phone: string;
+  address?: string;
+  city?: string;
+  is_admin?: boolean;
   is_profile_complete: boolean;
 }
 
