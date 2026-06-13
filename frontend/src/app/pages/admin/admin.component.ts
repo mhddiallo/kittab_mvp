@@ -39,13 +39,15 @@ export class AdminComponent implements OnInit {
   boostRequests: BoostRequest[] = [];
   requestsLoading = false;
   processingId: number | null = null;
-  boostDays = 7;
+  selectedRequest: BoostRequest | null = null;
 
   // Books management
   books: AdminBook[] = [];
   booksLoading = false;
   searchQuery = '';
   boostingId: number | null = null;
+  boostModalBook: AdminBook | null = null;
+  bookBoostDays = 7;
   searchTimeout: any;
 
   constructor(private auth: AuthService) {}
@@ -73,17 +75,21 @@ export class AdminComponent implements OnInit {
     this.requestsLoading = false;
   }
 
+  openRequestModal(req: BoostRequest) { this.selectedRequest = req; }
+  closeRequestModal() { this.selectedRequest = null; }
+
   async approveRequest(req: BoostRequest) {
     this.processingId = req.id;
     try {
       const res = await fetch(`http://localhost:8000/api/admin/boost-requests/${req.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
-        body: JSON.stringify({ days: this.boostDays }),
+        body: JSON.stringify({ days: req.duration_days }),
       });
       if (res.ok) {
         this.boostRequests = this.boostRequests.filter(r => r.id !== req.id);
         if (this.stats) this.stats.boosted_books++;
+        this.selectedRequest = null;
         await this.loadBooks();
       }
     } catch {}
@@ -97,10 +103,16 @@ export class AdminComponent implements OnInit {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
-      if (res.ok) this.boostRequests = this.boostRequests.filter(r => r.id !== req.id);
+      if (res.ok) {
+        this.boostRequests = this.boostRequests.filter(r => r.id !== req.id);
+        this.selectedRequest = null;
+      }
     } catch {}
     this.processingId = null;
   }
+
+  openBoostModal(book: AdminBook) { this.boostModalBook = book; this.bookBoostDays = 7; }
+  closeBoostModal() { this.boostModalBook = null; }
 
   onSearch() {
     clearTimeout(this.searchTimeout);
@@ -123,13 +135,14 @@ export class AdminComponent implements OnInit {
       const res = await fetch(`http://localhost:8000/api/admin/books/${book.id}/boost`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
-        body: JSON.stringify({ days: this.boostDays }),
+        body: JSON.stringify({ days: this.bookBoostDays }),
       });
       if (res.ok) {
         const data = await res.json();
         book.is_boosted = true;
         book.boost_expires_at = data.expires_at;
         if (this.stats) this.stats.boosted_books++;
+        this.boostModalBook = null;
       }
     } catch {}
     this.boostingId = null;
