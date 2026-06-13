@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publier une annonce — Kittab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#D32F2F' } } } }</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>* { font-family: 'Inter', sans-serif; box-sizing: border-box; }</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- Navbar -->
+  <nav class="bg-white border-b border-gray-100 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <span class="text-2xl font-extrabold" style="color:#D32F2F">Kittab</span>
+      <div class="flex gap-6 text-sm font-medium text-gray-600">
+        <a href="#" class="hover:text-red-700">Accueil</a>
+        <a href="#" class="hover:text-red-700">Catalogue</a>
+        <a href="#" class="font-semibold" style="color:#D32F2F">Publier</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Header page -->
+  <div style="background: linear-gradient(135deg, #D32F2F 0%, #b71c1c 100%)" class="py-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <p class="text-red-200 text-sm font-medium mb-1">Vendeur · Nouvelle annonce</p>
+      <h1 class="text-3xl font-extrabold text-white">Publier une annonce</h1>
+      <p class="text-red-100 mt-1 text-sm">Remplis les informations ci-dessous pour mettre ton livre en vente</p>
+    </div>
+  </div>
+
+  <!-- Formulaire -->
+  <div class="max-w-6xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- Colonne gauche : formulaire -->
+      <div class="lg:col-span-2 space-y-6">
+
+        <!-- Bloc livre -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#D32F2F">1</span>
+            Informations du livre
+          </h2>
+
+          <!-- Autocomplete titre -->
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Titre du livre <span style="color:#D32F2F">*</span></label>
+            <div class="relative">
+              <input type="text" value="Mathématiques Terminale" placeholder="Recherche un livre..."
+                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:border-transparent pr-10"
+                style="focus-ring-color:#D32F2F" />
+              <svg class="w-4 h-4 text-gray-400 absolute right-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+              </svg>
+              <!-- Suggestions dropdown -->
+              <div class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-10">
+                <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-red-50 cursor-pointer border-b border-gray-50">
+                  <img src="https://via.placeholder.com/32x44/e5e7eb/9ca3af?text=📚" class="w-8 h-10 object-cover rounded" />
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">Mathématiques Terminale S</p>
+                    <p class="text-xs text-gray-500">Aimé Jacquet · Manuel scolaire</p>
+                  </div>
+                </div>
+                <div class="px-4 py-2.5 flex items-center gap-3 hover:bg-red-50 cursor-pointer">
+                  <img src="https://via.placeholder.com/32x44/e5e7eb/9ca3af?text=📚" class="w-8 h-10 object-cover rounded" />
+                  <div>
+                    <p class="text-sm font-semibold text-gray-800">Mathématiques 3e</p>
+                    <p class="text-xs text-gray-500">Bernard Verlant · Manuel scolaire</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Auteur -->
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Auteur</label>
+            <input type="text" value="Aimé Jacquet" placeholder="Rempli automatiquement"
+              class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-500" readonly />
+          </div>
+
+          <!-- Catégorie + Type -->
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Catégorie <span style="color:#D32F2F">*</span></label>
+              <select class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
+                <option>Mathématiques</option>
+                <option>Sciences</option>
+                <option>Littérature</option>
+                <option>Histoire</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-1.5">Type <span style="color:#D32F2F">*</span></label>
+              <select class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none">
+                <option>Manuel scolaire</option>
+                <option>Roman</option>
+                <option>Autobiographie</option>
+                <option>Science</option>
+                <option>Histoire</option>
+                <option>Autre</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Description <span class="text-gray-400 font-normal">(optionnel)</span></label>
+            <textarea rows="3" placeholder="Ex: Livre en bon état, quelques annotations au crayon..."
+              class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Bloc état & prix -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#D32F2F">2</span>
+            État & Prix
+          </h2>
+
+          <!-- État -->
+          <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-3">État du livre <span style="color:#D32F2F">*</span></label>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="border-2 rounded-xl p-3 text-center cursor-pointer" style="border-color:#D32F2F; background:#fff5f5">
+                <div class="text-lg mb-1">✨</div>
+                <p class="text-xs font-bold" style="color:#D32F2F">Neuf</p>
+                <p class="text-xs text-gray-400 mt-0.5">Jamais utilisé</p>
+              </div>
+              <div class="border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer hover:border-blue-300">
+                <div class="text-lg mb-1">👍</div>
+                <p class="text-xs font-bold text-blue-600">Très bon</p>
+                <p class="text-xs text-gray-400 mt-0.5">Peu de traces</p>
+              </div>
+              <div class="border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer hover:border-yellow-300">
+                <div class="text-lg mb-1">📖</div>
+                <p class="text-xs font-bold text-yellow-600">Bon état</p>
+                <p class="text-xs text-gray-400 mt-0.5">Quelques marques</p>
+              </div>
+              <div class="border-2 border-gray-200 rounded-xl p-3 text-center cursor-pointer hover:border-orange-300">
+                <div class="text-lg mb-1">📝</div>
+                <p class="text-xs font-bold text-orange-600">Correct</p>
+                <p class="text-xs text-gray-400 mt-0.5">Très annoté</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prix -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Prix <span style="color:#D32F2F">*</span></label>
+            <div class="relative">
+              <input type="number" value="5000" placeholder="0"
+                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none pr-16" />
+              <span class="absolute right-4 top-2.5 text-sm font-semibold text-gray-500">FCFA</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1">Prix moyen pour ce type de livre : 3 000 – 8 000 FCFA</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Colonne droite : photos + résumé -->
+      <div class="space-y-6">
+
+        <!-- Upload photos -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 class="font-bold text-gray-800 text-base mb-4 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background:#D32F2F">3</span>
+            Photos <span class="text-gray-400 font-normal text-sm">(max 4)</span>
+          </h2>
+
+          <!-- Zone principale -->
+          <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-red-300 cursor-pointer mb-3" style="background:#fafafa">
+            <div class="text-3xl mb-2">📷</div>
+            <p class="text-sm font-semibold text-gray-700">Ajouter des photos</p>
+            <p class="text-xs text-gray-400 mt-1">JPG, PNG ou WEBP · Max 5 Mo</p>
+          </div>
+
+          <!-- Miniatures -->
+          <div class="grid grid-cols-4 gap-2">
+            <div class="aspect-square rounded-lg overflow-hidden border-2" style="border-color:#D32F2F">
+              <img src="https://via.placeholder.com/80x80/fecaca/D32F2F?text=1" class="w-full h-full object-cover" />
+            </div>
+            <div class="aspect-square rounded-lg overflow-hidden border border-gray-200">
+              <img src="https://via.placeholder.com/80x80/e5e7eb/9ca3af?text=2" class="w-full h-full object-cover" />
+            </div>
+            <div class="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-xl cursor-pointer hover:border-red-300">+</div>
+            <div class="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-xl cursor-pointer hover:border-red-300">+</div>
+          </div>
+        </div>
+
+        <!-- Résumé annonce -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+          <h2 class="font-bold text-gray-800 text-base mb-4">Récapitulatif</h2>
+          <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Livre</span>
+              <span class="font-semibold text-gray-800 text-right max-w-36 truncate">Mathématiques Terminale S</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">État</span>
+              <span class="font-semibold text-green-600">Neuf</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Photos</span>
+              <span class="font-semibold text-gray-800">2 / 4</span>
+            </div>
+            <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between">
+              <span class="text-gray-500">Prix</span>
+              <span class="font-extrabold text-lg" style="color:#D32F2F">5 000 FCFA</span>
+            </div>
+          </div>
+
+          <button class="w-full mt-5 text-white py-3 rounded-full font-bold text-sm transition-colors hover:opacity-90" style="background:#D32F2F">
+            Publier mon annonce →
+          </button>
+          <p class="text-xs text-gray-400 text-center mt-3">Ton annonce sera visible immédiatement</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
