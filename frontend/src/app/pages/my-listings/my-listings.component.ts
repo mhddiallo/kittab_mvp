@@ -22,6 +22,8 @@ export class MyListingsComponent implements OnInit {
   books: MyBook[] = [];
   loading = true;
   deletingId: number | null = null;
+  boostingId: number | null = null;
+  boostMessage = '';
 
   conditionLabel: Record<string, string> = {
     new: 'Neuf', like_new: 'Très bon', good: 'Bon état', fair: 'Correct'
@@ -66,6 +68,27 @@ export class MyListingsComponent implements OnInit {
       this.books = this.books.filter(b => b.id !== id);
     } catch {}
     this.deletingId = null;
+  }
+
+  async requestBoost(book: MyBook) {
+    this.boostingId = book.id;
+    this.boostMessage = '';
+    try {
+      const res = await fetch(`http://localhost:8000/api/books/${book.id}/boost-request`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        this.boostMessage = '✅ Demande envoyée ! L\'admin va examiner votre demande.';
+      } else {
+        this.boostMessage = '⚠️ ' + (data.detail ?? 'Une erreur est survenue.');
+      }
+    } catch {
+      this.boostMessage = '⚠️ Impossible de contacter le serveur.';
+    }
+    this.boostingId = null;
+    setTimeout(() => this.boostMessage = '', 5000);
   }
 
   getImageUrl(book: MyBook): string {

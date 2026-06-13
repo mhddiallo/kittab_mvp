@@ -81,6 +81,63 @@
 
     </div>
 
+    <!-- Demandes de boost -->
+    <div class="card p-6 mb-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-bold text-gray-800 text-lg">
+          Demandes de boost
+          <span *ngIf="boostRequests.length > 0"
+                class="ml-2 inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-primary rounded-full">
+            {{ boostRequests.length }}
+          </span>
+        </h2>
+        <div class="flex items-center gap-2">
+          <label class="text-sm text-gray-600">Durée à approuver :</label>
+          <select [(ngModel)]="boostDays"
+                  class="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
+            <option [ngValue]="3">3 jours</option>
+            <option [ngValue]="7">7 jours</option>
+            <option [ngValue]="14">14 jours</option>
+            <option [ngValue]="30">30 jours</option>
+          </select>
+        </div>
+      </div>
+
+      <div *ngIf="requestsLoading" class="flex justify-center py-6">
+        <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <div *ngIf="!requestsLoading && boostRequests.length === 0"
+           class="text-center py-8 text-gray-400 text-sm">
+        Aucune demande en attente
+      </div>
+
+      <div class="space-y-3">
+        <div *ngFor="let req of boostRequests"
+             class="flex items-center justify-between gap-4 p-4 bg-amber-50 border border-amber-100 rounded-xl">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-900 text-sm truncate">{{ req.book_title }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">{{ req.book_author }}</p>
+            <div class="flex items-center gap-3 mt-1 text-xs text-gray-400">
+              <span *ngIf="req.seller_name">{{ req.seller_name }}</span>
+              <span *ngIf="req.seller_phone" class="font-medium text-gray-600">{{ req.seller_phone }}</span>
+              <span>{{ req.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            <button (click)="approveRequest(req)" [disabled]="processingId === req.id"
+                    class="text-xs px-3 py-1.5 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors disabled:opacity-50 font-semibold">
+              {{ processingId === req.id ? '...' : '✓ Approuver' }}
+            </button>
+            <button (click)="rejectRequest(req)" [disabled]="processingId === req.id"
+                    class="text-xs px-3 py-1.5 border border-red-200 text-red-500 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50">
+              {{ processingId === req.id ? '...' : '✗ Rejeter' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Gestion des boosts -->
     <div class="card p-6">
       <div class="flex items-center justify-between mb-5 flex-wrap gap-3">

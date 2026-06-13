@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.models.book import Book
+from app.models.book import Book, BoostRequest, BoostRequestStatus
 from app.models.user import User
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -19,7 +19,7 @@ def require_admin(current_user: User = Depends(get_current_user)):
     return current_user
 
 
-class BoostRequest(BaseModel):
+class BoostPayload(BaseModel):
     days: int = 7
 
 
@@ -101,8 +101,71 @@ def list_all_books(
     ]
 
 
+@router.get("/boost-requests")
+def list_boost_requests(
+    status: Optional[str] = None,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    query = db.query(BoostRequest)
+    if status:
+        query = query.filter(BoostRequest.status == status)
+    else:
+        query = query.filter(BoostRequest.status == BoostRequestStatus.PENDING)
+    requests = query.order_by(BoostRequest.created_at.desc()).all()
+    return [
+        {
+            "id": r.id,
+            "book_id": r.book_id,
+            "book_title": r.book.title,
+            "book_author": r.book.author,
+            "seller_phone": r.seller.phone if r.seller else None,
+            "seller_name": f"{r.seller.first_name or ''} {r.seller.last_name or ''}".strip() if r.seller else None,
+            "status": r.status,
+            "duration_days": r.duration_days,
+            "created_at": r.created_at.isoformat() if r.created_at else None,
+        }
+        for r in requests
+    ]
+
+
+@router.post("/boost-requests/{request_id}/approve")
+def approve_boost(
+    request_id: int,
+    payload: BoostPayload,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    req = db.get(BoostRequest, request_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Demande introuvable")
+    req.status = BoostRequestStatus.APPROVED
+    req.reviewed_at = datetime.utcnow()
+    book = db.get(Book, req.book_id)
+    if book:
+        book.is_boosted = True
+        book.boost_expires_at = datetime.utcnow() + timedelta(days=payload.days)
+    db.commit()
+    return {"message": f"Boost approuvé pour {payload.days} jours"}
+
+
+@router.post("/boost-requests/{request_id}/reject")
+def reject_boost(
+    request_id: int,
+    db: Session = Depends(get_db),
+    _: User = Depends(require_admin),
+):
+    req = db.get(BoostRequest, request_id)
+    if not req:
+        raise HTTPException(status_code=404, detail="Demande introuvable")
+    req.status = BoostRequestStatus.REJECTED
+    req.reviewed_at = datetime.utcnow()
+    db.commit()
+    return {"message": "Demande rejetée"}
+
+
 @router.post("/books/{book_id}/boost")
-def boost_book(book_id: int, payload: BoostRequest, db: Session = Depends(get_db), _: User = Depends(require_admin)):
+def boost_book(book_id: int, payload: BoostPayload, db: Session = Depends(get_db), _: User = Depends(require_admin)):
     book = db.get(Book, book_id)
     if not book:
         raise HTTPException(status_code=404, detail="Livre introuvable")

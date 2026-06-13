@@ -18,6 +18,12 @@ interface AdminBook {
   is_available: boolean; seller_phone: string | null;
 }
 
+interface BoostRequest {
+  id: number; book_id: number; book_title: string; book_author: string;
+  seller_phone: string | null; seller_name: string | null;
+  status: string; duration_days: number; created_at: string;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -29,11 +35,16 @@ export class AdminComponent implements OnInit {
   loading = true;
   error = '';
 
+  // Boost requests
+  boostRequests: BoostRequest[] = [];
+  requestsLoading = false;
+  processingId: number | null = null;
+  boostDays = 7;
+
   // Books management
   books: AdminBook[] = [];
   booksLoading = false;
   searchQuery = '';
-  boostDays = 7;
   boostingId: number | null = null;
   searchTimeout: any;
 
@@ -48,7 +59,47 @@ export class AdminComponent implements OnInit {
       else this.error = 'Accès refusé ou non autorisé';
     } catch { this.error = 'Impossible de contacter le serveur'; }
     this.loading = false;
-    await this.loadBooks();
+    await Promise.all([this.loadBoostRequests(), this.loadBooks()]);
+  }
+
+  async loadBoostRequests() {
+    this.requestsLoading = true;
+    try {
+      const res = await fetch('http://localhost:8000/api/admin/boost-requests', {
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) this.boostRequests = await res.json();
+    } catch {}
+    this.requestsLoading = false;
+  }
+
+  async approveRequest(req: BoostRequest) {
+    this.processingId = req.id;
+    try {
+      const res = await fetch(`http://localhost:8000/api/admin/boost-requests/${req.id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
+        body: JSON.stringify({ days: this.boostDays }),
+      });
+      if (res.ok) {
+        this.boostRequests = this.boostRequests.filter(r => r.id !== req.id);
+        if (this.stats) this.stats.boosted_books++;
+        await this.loadBooks();
+      }
+    } catch {}
+    this.processingId = null;
+  }
+
+  async rejectRequest(req: BoostRequest) {
+    this.processingId = req.id;
+    try {
+      const res = await fetch(`http://localhost:8000/api/admin/boost-requests/${req.id}/reject`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) this.boostRequests = this.boostRequests.filter(r => r.id !== req.id);
+    } catch {}
+    this.processingId = null;
   }
 
   onSearch() {

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.models.book import Book, BookCondition, BookImage, BookType
+from app.models.book import Book, BookCondition, BookImage, BookType, BoostRequest, BoostRequestStatus
 from app.models.user import User
 from app.schemas.book import (
     AlertCreate,
@@ -213,6 +213,32 @@ def delete_image(
         book.images[0].is_primary = True
 
     db.commit()
+
+
+# ── Boost requests ───────────────────────────────────────────────────────────────
+
+@router.post("/{book_id}/boost-request", status_code=status.HTTP_201_CREATED)
+def request_boost(
+    book_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    book = db.get(Book, book_id)
+    if not book or book.seller_id != current_user.id:
+        raise HTTPException(status_code=404, detail="Livre introuvable")
+
+    existing = (
+        db.query(BoostRequest)
+        .filter(BoostRequest.book_id == book_id, BoostRequest.status == BoostRequestStatus.PENDING)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=400, detail="Une demande de boost est déjà en attente")
+
+    req = BoostRequest(book_id=book_id, seller_id=current_user.id)
+    db.add(req)
+    db.commit()
+    return {"message": "Demande de boost envoyée, l'admin va examiner votre demande"}
 
 
 # ── Alerts ───────────────────────────────────────────────────────────────────────

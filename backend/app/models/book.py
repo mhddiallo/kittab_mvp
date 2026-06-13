@@ -58,6 +58,30 @@ class Book(Base):
     seller = relationship("User", back_populates="books")
     category = relationship("Category", back_populates="books")
     images = relationship("BookImage", back_populates="book", cascade="all, delete-orphan")
+    boost_requests = relationship("BoostRequest", back_populates="book")
+
+
+class BoostRequestStatus(str, PyEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
+class BoostRequest(Base):
+    __tablename__ = "boost_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"), nullable=False)
+    seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    status: Mapped[BoostRequestStatus] = mapped_column(
+        Enum(BoostRequestStatus), default=BoostRequestStatus.PENDING
+    )
+    duration_days: Mapped[int] = mapped_column(Integer, default=7)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    reviewed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    book = relationship("Book", back_populates="boost_requests")
+    seller = relationship("User")
 
 
 class BookImage(Base):
