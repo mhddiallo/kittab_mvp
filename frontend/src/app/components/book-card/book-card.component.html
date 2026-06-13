@@ -1,0 +1,19 @@
+<a [routerLink]="['/books', book.id]" class="card block overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
+  <div class="relative">
+    <img [src]="primaryImage" [alt]="book.title" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+    <span class="absolute top-2 left-2 badge" [ngClass]="conditionClass">{{ conditionLabel }}</span>
+    <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span>
+  </div>
+  <div class="p-3">
+    <h3 class="font-semibold text-sm text-gray-900 truncate">{{ book.title }}</h3>
+    <p class="text-xs text-gray-500 mb-2">par {{ book.author }}</p>
+    <p class="text-xs text-gray-400 flex items-center gap-1">
+      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+      {{ book.seller.address || 'Non précisé' }}
+    </p>
+    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+      <span class="text-primary font-bold text-sm">{{ book.price | number }} FCFA</span>
+      <button class="bg-primary/10 hover:bg-primary text-primary hover:text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors">Contacter</button>
+    </div>
+  </div>
+</a>

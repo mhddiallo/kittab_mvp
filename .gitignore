@@ -1,0 +1,14 @@
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Backend
+backend/__pycache__/
+backend/.venv/
+backend/*.pyc
+backend/uploads/
+
+# Environment
+.env
+*.env

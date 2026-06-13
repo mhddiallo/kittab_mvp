@@ -1,0 +1,94 @@
+<app-navbar />
+
+<!-- HERO -->
+<section class="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-10">
+  <div class="flex-1">
+    <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-4">
+      Découvrez votre<br>prochaine<br><span class="text-primary">aventure littéraire</span>
+    </h1>
+    <p class="text-gray-500 mb-8 max-w-md text-sm">Trouvez des classiques et des nouveautés que vous avez toujours voulus dans votre liste de lecture</p>
+    <div class="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-3 max-w-md">
+      <input type="text" placeholder="Quel livre recherchez-vous ?" class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
+      <button class="bg-primary text-white rounded-full p-2 ml-2"><svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg></button>
+    </div>
+    <div class="flex gap-8 mt-8 text-sm">
+      <div><span class="font-bold text-gray-900 text-xl">1000+</span><br><span class="text-gray-400 text-xs">Livres disponibles</span></div>
+      <div><span class="font-bold text-gray-900 text-xl">500+</span><br><span class="text-gray-400 text-xs">Lecteurs actifs</span></div>
+      <div><span class="font-bold text-gray-900 text-xl">15</span><br><span class="text-gray-400 text-xs">Villes couvertes</span></div>
+    </div>
+  </div>
+  <div class="flex-1 hidden md:flex justify-center">
+    <div class="bg-gradient-to-br from-red-50 to-amber-50 rounded-3xl p-10 text-center relative">
+      <div class="text-9xl mb-4">📚</div>
+      <div class="absolute top-4 right-2 bg-white shadow-md rounded-xl px-3 py-2 text-xs font-medium">🌿 Savoir Partagé</div>
+      <div class="absolute bottom-6 left-2 bg-white shadow-md rounded-xl px-3 py-2 text-xs font-medium">⭐ Qualité africaine</div>
+      <p class="text-sm text-gray-500 font-medium">Lire, c'est grandir. Partager, c'est multiplier</p>
+    </div>
+  </div>
+</section>
+
+<!-- À LA UNE -->
+<section class="bg-gradient-to-b from-red-600 to-red-800 py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-white font-bold text-2xl flex items-center gap-2">🔥 À la une <span class="bg-white/20 text-white text-xs px-2 py-0.5 rounded-full">Trending</span></h2>
+        <p class="text-red-200 text-sm mt-1">Les livres les plus populaires cette semaine</p>
+      </div>
+      <a routerLink="/catalogue" class="text-white text-sm font-medium hover:underline">Voir tout →</a>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      @for (book of trendingBooks; track book.id) {
+        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer" [routerLink]="['/books', book.id]">
+          <div class="relative"><img [src]="book.images[0].url" [alt]="book.title" class="w-full h-44 object-cover" /><span class="absolute top-2 right-2 bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span></div>
+          <div class="p-3"><h3 class="font-semibold text-sm truncate">{{ book.title }}</h3><p class="text-xs text-gray-500">par {{ book.author }}</p><div class="flex items-center justify-between mt-2"><span class="text-xs text-yellow-500">★ 4.8</span><span class="badge bg-amber-100 text-amber-700">Bon état</span></div></div>
+        </div>
+      }
+    </div>
+    <p class="text-center text-red-200 text-sm mt-6">Plus de <strong class="text-white">1000+ livres</strong> disponibles</p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="max-w-7xl mx-auto px-6 py-14 grid md:grid-cols-2 gap-6">
+  <div class="card p-8">
+    <h3 class="font-bold text-2xl text-gray-900 mb-3">Découvrez les<br>livres les plus lus</h3>
+    <p class="text-gray-500 text-sm mb-6">Explorez notre sélection des ouvrages les plus appréciés par notre communauté de lecteurs</p>
+    <a routerLink="/catalogue" class="text-primary font-medium text-sm hover:underline">Explorer maintenant →</a>
+  </div>
+  <div class="card p-8">
+    <h3 class="font-bold text-2xl text-gray-900 mb-3">Achetez, vendez<br>vos livres facilement</h3>
+    <p class="text-gray-500 text-sm mb-6">Une plateforme complète pour toutes vos transactions de livres en quelques clics seulement</p>
+    <a routerLink="/catalogue" class="text-primary font-medium text-sm hover:underline">Découvrir comment →</a>
+  </div>
+</section>
+
+<!-- AMBER SECTION -->
+<section class="bg-amber-400 py-14">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
+    <div class="text-8xl flex-shrink-0">🧑‍🎓</div>
+    <div class="flex-1">
+      <h2 class="font-bold text-3xl text-white mb-3">Achetez, vendez ou échangez<br>vos livres facilement</h2>
+      <p class="text-amber-100 mb-6 text-sm">Rejoignez notre communauté de passionnés et partagez la richesse de la connaissance africaine.</p>
+      <div class="grid grid-cols-2 gap-3 mb-6">
+        <div class="bg-white/20 rounded-xl p-3 text-white text-sm font-medium">📖 Acheter des livres<br><span class="font-normal text-xs text-amber-100">Livres neufs et d'occasion</span></div>
+        <div class="bg-white/20 rounded-xl p-3 text-white text-sm font-medium">🏷️ Vendre des livres<br><span class="font-normal text-xs text-amber-100">Monétisez votre collection</span></div>
+        <div class="bg-white/20 rounded-xl p-3 text-white text-sm font-medium">🔄 Échanger<br><span class="font-normal text-xs text-amber-100">Échangez avec la communauté</span></div>
+        <div class="bg-white/20 rounded-xl p-3 text-white text-sm font-medium">📚 Découvrir<br><span class="font-normal text-xs text-amber-100">Explorez notre catalogue</span></div>
+      </div>
+      <a routerLink="/catalogue" class="inline-flex items-center bg-white text-amber-700 font-semibold px-6 py-3 rounded-full text-sm hover:bg-amber-50 transition-colors">Découvrir notre plateforme →</a>
+    </div>
+  </div>
+</section>
+
+<!-- POPULAR -->
+<section class="max-w-7xl mx-auto px-6 py-14">
+  <h2 class="font-bold text-2xl text-center text-gray-900 mb-2">Livres populaires</h2>
+  <p class="text-center text-gray-500 text-sm mb-8">Découvrez les ouvrages les plus appréciés par notre communauté</p>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    @for (book of popularBooks; track book.id) { <app-book-card [book]="book" /> }
+  </div>
+  <div class="text-center mt-10"><a routerLink="/catalogue" class="btn-outline inline-flex items-center gap-2">Voir tous les livres →</a></div>
+</section>
+
+<app-footer />
