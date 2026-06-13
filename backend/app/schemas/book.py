@@ -42,6 +42,7 @@ class BookCreate(BaseModel):
     education_level: Optional[str] = None
     subject: Optional[str] = None
     category_id: Optional[int] = None
+    accepts_exchange: bool = False
 
 
 class BookUpdate(BaseModel):
@@ -55,6 +56,7 @@ class BookUpdate(BaseModel):
     subject: Optional[str] = None
     category_id: Optional[int] = None
     is_available: Optional[bool] = None
+    accepts_exchange: Optional[bool] = None
 
 
 class BookOut(BaseModel):
@@ -69,6 +71,7 @@ class BookOut(BaseModel):
     education_level: Optional[str] = None
     subject: Optional[str] = None
     is_available: bool
+    accepts_exchange: bool = False
     views: int = 0
     created_at: datetime
     seller: SellerBrief
@@ -86,6 +89,7 @@ class BookListOut(BaseModel):
     condition: BookCondition
     book_type: BookType
     is_available: bool
+    accepts_exchange: bool = False
     views: int = 0
     created_at: datetime
     seller: SellerBrief

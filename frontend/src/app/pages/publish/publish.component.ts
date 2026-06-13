@@ -34,6 +34,7 @@ export class PublishComponent implements OnInit {
   price: number | null = null;
   description = '';
   googleBooksId = '';
+  acceptsExchange = false;
 
   // State
   categories: Category[] = [];
@@ -146,6 +147,7 @@ export class PublishComponent implements OnInit {
       };
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
+      payload.accepts_exchange = this.acceptsExchange;
 
       const res = await fetch('http://localhost:8000/api/books', {
         method: 'POST',

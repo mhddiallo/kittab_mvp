@@ -46,6 +46,7 @@ class Book(Base):
     education_level: Mapped[str | None] = mapped_column(String(100))
     subject: Mapped[str | None] = mapped_column(String(100))
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
+    accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)
     is_boosted: Mapped[bool] = mapped_column(Boolean, default=False)
     boost_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

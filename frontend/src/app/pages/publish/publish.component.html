@@ -126,7 +126,7 @@
         </div>
 
         <!-- Prix -->
-        <div>
+        <div class="mb-5">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Prix <span class="text-primary">*</span></label>
           <div class="relative">
             <input
@@ -139,6 +139,21 @@
             <span class="absolute right-4 top-2.5 text-sm font-semibold text-gray-400">FCFA</span>
           </div>
           <p class="text-xs text-gray-400 mt-1.5">Prix moyen pour ce type de livre : 3 000 – 25 000 FCFA</p>
+        </div>
+
+        <!-- Échange -->
+        <div class="border-t border-gray-100 pt-5">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <div class="relative">
+              <input type="checkbox" [(ngModel)]="acceptsExchange" name="acceptsExchange" class="sr-only peer" />
+              <div class="w-11 h-6 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-700">🔄 J'accepte les échanges</p>
+              <p class="text-xs text-gray-400">Les acheteurs pourront proposer un de leurs livres en échange</p>
+            </div>
+          </label>
         </div>
       </div>
 

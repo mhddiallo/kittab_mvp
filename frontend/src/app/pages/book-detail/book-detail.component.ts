@@ -15,6 +15,7 @@ interface BookDetail {
   images: string[];
   seller: { first_name: string; last_name: string; phone: string; address: string };
   is_available: boolean;
+  accepts_exchange: boolean;
   views: number;
   category: { id: number; name: string };
   created_at: string;
@@ -55,6 +56,13 @@ export class BookDetailComponent implements OnInit {
 
   get condition() {
     return this.book ? (this.conditionMap[this.book.condition] ?? { label: this.book.condition, cls: 'bg-gray-100 text-gray-600' }) : null;
+  }
+
+  get exchangeWhatsAppUrl(): string {
+    if (!this.book) return '#';
+    const phone = this.book.seller.phone.replace('+', '');
+    const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`);
+    return `https://wa.me/${phone}?text=${msg}`;
   }
 
   get displayImages(): string[] {
