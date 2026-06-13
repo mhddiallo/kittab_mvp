@@ -62,6 +62,11 @@ export class CatalogueComponent implements OnInit {
     this.loadBooks();
   }
 
+  getImageUrl(url: string | undefined): string {
+    if (!url) return 'https://placehold.co/176x128/f3f4f6/9ca3af?text=Livre';
+    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+  }
+
   async sendAlert() {
     if (!this.alertPhone || !this.searchQuery) return;
     try {
@@ -74,3 +79,4 @@ export class CatalogueComponent implements OnInit {
     } catch {}
   }
 }
+

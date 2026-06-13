@@ -59,6 +59,6 @@ export class BookDetailComponent implements OnInit {
   get displayImages(): string[] {
     if (!this.book) return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
     if (!this.book.images.length) return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
-    return this.book.images.map(i => i.url.startsWith('http') ? i.url : `http://localhost:8000${i.url}`);
+    return this.book.images.map(i => (i as any).url ? `http://localhost:8000${(i as any).url}` : i as unknown as string);
   }
 }
