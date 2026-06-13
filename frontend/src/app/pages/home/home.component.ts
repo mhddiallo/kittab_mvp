@@ -23,6 +23,12 @@ export class HomeComponent implements OnInit {
 
   constructor(private router: Router) {}
 
+  getImageUrl(book: BookCard): string {
+    const url = book.images?.find(i => i.is_primary)?.url || book.images?.[0]?.url;
+    if (!url) return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=📚';
+    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+  }
+
   async ngOnInit() {
     await this.loadBooks();
   }

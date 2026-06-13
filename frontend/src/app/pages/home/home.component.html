@@ -60,7 +60,7 @@
       @for (book of trendingBooks; track book.id) {
         <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer" [routerLink]="['/books', book.id]">
           <div class="relative">
-            <img [src]="book.images[0]?.url || 'https://placehold.co/300x400/f3f4f6/9ca3af?text=📚'" [alt]="book.title" class="w-full h-44 object-cover" />
+            <img [src]="getImageUrl(book)" [alt]="book.title" class="w-full h-44 object-cover" />
             <span class="absolute top-2 left-2 bg-amber-400 text-white text-xs font-bold px-2 py-1 rounded-lg">⭐ Boosté</span>
             <span class="absolute top-2 right-2 bg-white text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span>
           </div>
