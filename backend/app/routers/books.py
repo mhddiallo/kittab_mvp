@@ -50,6 +50,7 @@ def list_books(
     max_price: Optional[float] = Query(None),
     education_level: Optional[str] = Query(None),
     boosted: Optional[bool] = Query(None),
+    accepts_exchange: Optional[bool] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -65,6 +66,8 @@ def list_books(
 
     if boosted:
         query = query.filter(Book.is_boosted == True)
+    if accepts_exchange:
+        query = query.filter(Book.accepts_exchange == True)
 
     if q:
         query = query.filter(

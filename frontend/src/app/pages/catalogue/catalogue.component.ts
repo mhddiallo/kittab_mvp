@@ -17,6 +17,12 @@ interface Category { id: number; name: string; }
 export class CatalogueComponent implements OnInit {
   searchQuery = '';
   selectedCategoryId: number | null = null;
+  selectedCondition = '';
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+  onlyExchange = false;
+  showFilters = false;
+
   books: BookCard[] = [];
   boostedBooks: BookCard[] = [];
   categories: Category[] = [];
@@ -25,6 +31,24 @@ export class CatalogueComponent implements OnInit {
   alertPhone = '';
   alertSent = false;
   searchTimeout: any;
+
+  conditions = [
+    { value: '', label: 'Tous les états' },
+    { value: 'new', label: 'Neuf' },
+    { value: 'like_new', label: 'Très bon' },
+    { value: 'good', label: 'Bon état' },
+    { value: 'fair', label: 'Correct' },
+  ];
+
+  priceRanges = [
+    { label: 'Tous les prix', min: null, max: null },
+    { label: 'Moins de 2 000 FCFA', min: null, max: 2000 },
+    { label: '2 000 – 5 000 FCFA', min: 2000, max: 5000 },
+    { label: '5 000 – 10 000 FCFA', min: 5000, max: 10000 },
+    { label: 'Plus de 10 000 FCFA', min: 10000, max: null },
+  ];
+
+  selectedPriceRange = 0;
 
   constructor(private route: ActivatedRoute) {}
 
@@ -57,6 +81,11 @@ export class CatalogueComponent implements OnInit {
       let url = `http://localhost:8000/api/books?page_size=20`;
       if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
       if (this.selectedCategoryId) url += `&category_id=${this.selectedCategoryId}`;
+      if (this.selectedCondition) url += `&condition=${this.selectedCondition}`;
+      const range = this.priceRanges[this.selectedPriceRange];
+      if (range.min !== null) url += `&min_price=${range.min}`;
+      if (range.max !== null) url += `&max_price=${range.max}`;
+      if (this.onlyExchange) url += `&accepts_exchange=true`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -77,6 +106,25 @@ export class CatalogueComponent implements OnInit {
     this.loadBooks();
   }
 
+  applyFilters() {
+    this.loadBooks();
+  }
+
+  resetFilters() {
+    this.selectedCondition = '';
+    this.selectedPriceRange = 0;
+    this.onlyExchange = false;
+    this.loadBooks();
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.selectedCondition) count++;
+    if (this.selectedPriceRange > 0) count++;
+    if (this.onlyExchange) count++;
+    return count;
+  }
+
   getImageUrl(url: string | undefined): string {
     if (!url) return 'https://placehold.co/176x128/f3f4f6/9ca3af?text=Livre';
     return url.startsWith('http') ? url : `http://localhost:8000${url}`;
@@ -94,4 +142,3 @@ export class CatalogueComponent implements OnInit {
     } catch {}
   }
 }
-
