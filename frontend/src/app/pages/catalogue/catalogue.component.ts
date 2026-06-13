@@ -27,10 +27,21 @@ export class CatalogueComponent implements OnInit {
   boostedBooks: BookCard[] = [];
   categories: Category[] = [];
   total = 0;
+  currentPage = 1;
+  pageSize = 20;
   loading = true;
   alertPhone = '';
   alertSent = false;
   searchTimeout: any;
+
+  get totalPages(): number { return Math.ceil(this.total / this.pageSize); }
+  get pages(): number[] {
+    const p = this.totalPages;
+    if (p <= 7) return Array.from({ length: p }, (_, i) => i + 1);
+    if (this.currentPage <= 4) return [1,2,3,4,5,0,p];
+    if (this.currentPage >= p - 3) return [1,0,p-4,p-3,p-2,p-1,p];
+    return [1,0,this.currentPage-1,this.currentPage,this.currentPage+1,0,p];
+  }
 
   conditions = [
     { value: '', label: 'Tous les états' },
@@ -75,10 +86,10 @@ export class CatalogueComponent implements OnInit {
     } catch {}
   }
 
-  async loadBooks() {
+  async loadBooks(page = this.currentPage) {
     this.loading = true;
     try {
-      let url = `http://localhost:8000/api/books?page_size=20`;
+      let url = `http://localhost:8000/api/books?page=${page}&page_size=${this.pageSize}`;
       if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
       if (this.selectedCategoryId) url += `&category_id=${this.selectedCategoryId}`;
       if (this.selectedCondition) url += `&condition=${this.selectedCondition}`;
@@ -91,9 +102,16 @@ export class CatalogueComponent implements OnInit {
         const data = await res.json();
         this.books = data.items ?? data;
         this.total = data.total ?? this.books.length;
+        this.currentPage = page;
       }
     } catch {}
     this.loading = false;
+  }
+
+  goToPage(page: number) {
+    if (page < 1 || page > this.totalPages || page === this.currentPage) return;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.loadBooks(page);
   }
 
   onSearch() {
@@ -103,18 +121,18 @@ export class CatalogueComponent implements OnInit {
 
   selectCategory(id: number | null) {
     this.selectedCategoryId = id;
-    this.loadBooks();
+    this.loadBooks(1);
   }
 
   applyFilters() {
-    this.loadBooks();
+    this.loadBooks(1);
   }
 
   resetFilters() {
     this.selectedCondition = '';
     this.selectedPriceRange = 0;
     this.onlyExchange = false;
-    this.loadBooks();
+    this.loadBooks(1);
   }
 
   get activeFilterCount(): number {

@@ -147,6 +147,28 @@
   <div *ngIf="!loading && books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
     <app-book-card *ngFor="let book of books" [book]="book" />
   </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-center gap-1 mt-10">
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+            class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+
+    <ng-container *ngFor="let p of pages">
+      <span *ngIf="p === 0" class="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">…</span>
+      <button *ngIf="p !== 0" (click)="goToPage(p)"
+              [ngClass]="p === currentPage ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary'"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border text-sm font-medium transition-colors">
+        {{ p }}
+      </button>
+    </ng-container>
+
+    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+            class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
 </section>
 
 <app-footer />
