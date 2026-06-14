@@ -37,7 +37,7 @@ export class PublishComponent implements OnInit {
   googleBooksId = '';
   acceptsExchange = false;
   educationLevel = '';
-  packItems: string[] = ['', ''];
+  packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
   educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
 
@@ -130,7 +130,7 @@ export class PublishComponent implements OnInit {
   }
 
   addPackItem() {
-    if (this.packItems.length < 10) this.packItems.push('');
+    if (this.packItems.length < 10) this.packItems.push({ value: '' });
   }
 
   removePackItem(i: number) {
@@ -138,7 +138,7 @@ export class PublishComponent implements OnInit {
   }
 
   get validPackItems(): string[] {
-    return this.packItems.filter(s => s.trim().length > 0);
+    return this.packItems.map(p => p.value.trim()).filter(s => s.length > 0);
   }
 
   get isValid() {
