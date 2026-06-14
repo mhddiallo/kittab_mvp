@@ -18,6 +18,9 @@ interface BookDetail {
   is_available: boolean;
   accepts_exchange: boolean;
   views: number;
+  is_pack: boolean;
+  pack_items: string[] | null;
+  education_level: string | null;
   category: { id: number; name: string };
   created_at: string;
 }

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+import json
 
 from app.models.book import BookCondition, BookType
 
@@ -43,6 +44,15 @@ class BookCreate(BaseModel):
     subject: Optional[str] = None
     category_id: Optional[int] = None
     accepts_exchange: bool = False
+    is_pack: bool = False
+    pack_items: Optional[List[str]] = None
+
+    @field_validator('pack_items', mode='before')
+    @classmethod
+    def parse_pack_items(cls, v):
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
 
 
 class BookUpdate(BaseModel):
@@ -57,6 +67,8 @@ class BookUpdate(BaseModel):
     category_id: Optional[int] = None
     is_available: Optional[bool] = None
     accepts_exchange: Optional[bool] = None
+    is_pack: Optional[bool] = None
+    pack_items: Optional[List[str]] = None
 
 
 class BookOut(BaseModel):
@@ -73,10 +85,22 @@ class BookOut(BaseModel):
     is_available: bool
     accepts_exchange: bool = False
     views: int = 0
+    is_pack: bool = False
+    pack_items: Optional[List[str]] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
     images: List[BookImageOut] = []
+
+    @field_validator('pack_items', mode='before')
+    @classmethod
+    def parse_pack_items(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return []
+        return v
 
     model_config = {"from_attributes": True}
 
@@ -91,10 +115,22 @@ class BookListOut(BaseModel):
     is_available: bool
     accepts_exchange: bool = False
     views: int = 0
+    is_pack: bool = False
+    pack_items: Optional[List[str]] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
     images: List[BookImageOut] = []
+
+    @field_validator('pack_items', mode='before')
+    @classmethod
+    def parse_pack_items(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except Exception:
+                return []
+        return v
 
     model_config = {"from_attributes": True}
 

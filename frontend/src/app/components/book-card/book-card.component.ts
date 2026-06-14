@@ -9,6 +9,8 @@ export interface BookCard {
   seller: { first_name: string; last_name: string; phone: string; address?: string };
   is_available: boolean;
   views?: number;
+  is_pack?: boolean;
+  pack_items?: string[];
 }
 
 @Component({

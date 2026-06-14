@@ -22,10 +22,24 @@
           Informations du livre
         </h2>
 
+        <!-- Toggle livre / pack -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <button type="button" (click)="isPack = false"
+                  [ngClass]="!isPack ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                  class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
+            📖 Livre seul
+          </button>
+          <button type="button" (click)="isPack = true"
+                  [ngClass]="isPack ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                  class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
+            📦 Pack de livres
+          </button>
+        </div>
+
         <!-- Titre avec autocomplete -->
         <div class="mb-4 relative">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Titre du livre <span class="text-primary">*</span>
+            {{ isPack ? 'Nom du pack' : 'Titre du livre' }} <span class="text-primary">*</span>
           </label>
           <div class="relative">
             <input
@@ -58,15 +72,47 @@
           </div>
         </div>
 
-        <!-- Auteur -->
-        <div class="mb-4">
+        <!-- Auteur (livre seul uniquement) -->
+        <div *ngIf="!isPack" class="mb-4">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Auteur <span class="text-primary">*</span></label>
-          <input
-            type="text"
-            [(ngModel)]="author"
-            placeholder="Nom de l'auteur"
-            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-          />
+          <input type="text" [(ngModel)]="author" placeholder="Nom de l'auteur"
+                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+        </div>
+
+        <!-- Champs pack -->
+        <div *ngIf="isPack" class="mb-4 space-y-4">
+          <!-- Niveau scolaire optionnel -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+              Niveau scolaire <span class="text-gray-400 font-normal">(optionnel)</span>
+            </label>
+            <select [(ngModel)]="educationLevel"
+                    class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
+              <option value="">— Pas un manuel scolaire —</option>
+              <option *ngFor="let l of educationLevels" [value]="l">{{ l }}</option>
+            </select>
+            <p class="text-xs text-gray-400 mt-1">Laissez vide pour un pack de romans, séries, etc.</p>
+          </div>
+
+          <!-- Liste des livres -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              Livres inclus dans le pack <span class="text-primary">*</span>
+              <span class="text-gray-400 font-normal ml-1">(min. 2, max. 10)</span>
+            </label>
+            <div class="space-y-2">
+              <div *ngFor="let item of packItems; let i = index" class="flex items-center gap-2">
+                <input type="text" [(ngModel)]="packItems[i]" [placeholder]="'Livre ' + (i+1)"
+                       class="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+                <button type="button" *ngIf="packItems.length > 1" (click)="removePackItem(i)"
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-lg shrink-0">✕</button>
+              </div>
+            </div>
+            <button type="button" *ngIf="packItems.length < 10" (click)="addPackItem()"
+                    class="mt-2 flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+              + Ajouter un livre
+            </button>
+          </div>
         </div>
 
         <!-- Catégorie + Type -->

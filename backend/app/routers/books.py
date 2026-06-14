@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 from datetime import datetime
@@ -122,7 +123,10 @@ def create_book(
             status_code=400,
             detail="Veuillez compléter votre profil avant de publier une annonce",
         )
-    book = Book(**payload.model_dump(), seller_id=current_user.id)
+    data = payload.model_dump()
+    if data.get('pack_items') is not None:
+        data['pack_items'] = json.dumps(data['pack_items'])
+    book = Book(**data, seller_id=current_user.id)
     db.add(book)
     db.commit()
     db.refresh(book)

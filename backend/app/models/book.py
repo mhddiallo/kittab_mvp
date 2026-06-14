@@ -45,6 +45,8 @@ class Book(Base):
     book_type: Mapped[BookType] = mapped_column(Enum(BookType), default=BookType.OTHER)
     education_level: Mapped[str | None] = mapped_column(String(100))
     subject: Mapped[str | None] = mapped_column(String(100))
+    is_pack: Mapped[bool] = mapped_column(Boolean, default=False)
+    pack_items: Mapped[str | None] = mapped_column(Text)  # JSON string list
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)

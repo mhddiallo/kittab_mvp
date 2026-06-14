@@ -26,6 +26,7 @@ interface Category {
 })
 export class PublishComponent implements OnInit {
   // Form fields
+  isPack = false;
   title = '';
   author = '';
   categoryId: number | null = null;
@@ -35,6 +36,10 @@ export class PublishComponent implements OnInit {
   description = '';
   googleBooksId = '';
   acceptsExchange = false;
+  educationLevel = '';
+  packItems: string[] = ['', ''];
+
+  educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
 
   // State
   categories: Category[] = [];
@@ -124,8 +129,22 @@ export class PublishComponent implements OnInit {
     return this.conditions.find(c => c.value === this.condition)?.label || '—';
   }
 
+  addPackItem() {
+    if (this.packItems.length < 10) this.packItems.push('');
+  }
+
+  removePackItem(i: number) {
+    if (this.packItems.length > 1) this.packItems.splice(i, 1);
+  }
+
+  get validPackItems(): string[] {
+    return this.packItems.filter(s => s.trim().length > 0);
+  }
+
   get isValid() {
-    return this.title && this.author && this.condition && this.price && this.price > 0;
+    if (!this.condition || !this.price || this.price <= 0) return false;
+    if (this.isPack) return this.title.trim().length > 0 && this.validPackItems.length >= 2;
+    return this.title.trim().length > 0 && this.author.trim().length > 0;
   }
 
   async submit() {
@@ -140,14 +159,19 @@ export class PublishComponent implements OnInit {
       // Étape 1 : créer le livre en JSON
       const payload: any = {
         title: this.title,
-        author: this.author,
+        author: this.isPack ? 'Pack' : this.author,
         condition: this.condition,
         price: this.price,
         book_type: this.bookType,
+        accepts_exchange: this.acceptsExchange,
+        is_pack: this.isPack,
       };
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
-      payload.accepts_exchange = this.acceptsExchange;
+      if (this.isPack) {
+        payload.pack_items = this.validPackItems;
+        if (this.educationLevel) payload.education_level = this.educationLevel;
+      }
 
       const res = await fetch('http://localhost:8000/api/books', {
         method: 'POST',
