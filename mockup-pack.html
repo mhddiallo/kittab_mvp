@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup — Pack de livres Kittab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { primary: '#c0392b' } } } }</script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <!-- NAV -->
+  <nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between mb-8">
+    <span class="text-xl font-black text-primary">KITTAB</span>
+    <span class="text-sm text-gray-400">Mockup — Pack de livres</span>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 space-y-16 pb-20">
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- 1. FORMULAIRE DE PUBLICATION          -->
+    <!-- ══════════════════════════════════════ -->
+    <section>
+      <h2 class="text-lg font-bold text-gray-500 uppercase tracking-wider mb-4">1 — Formulaire de publication</h2>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 max-w-2xl">
+        <h1 class="text-2xl font-extrabold text-gray-900 mb-6">Publier une annonce</h1>
+
+        <!-- Toggle type -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Type d'annonce</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button class="flex items-center gap-2 border-2 border-gray-200 rounded-xl px-4 py-3 text-sm font-medium text-gray-600 hover:border-primary transition-colors">
+              <span class="text-lg">📖</span> Livre seul
+            </button>
+            <button class="flex items-center gap-2 border-2 border-primary bg-red-50 rounded-xl px-4 py-3 text-sm font-semibold text-primary">
+              <span class="text-lg">📦</span> Pack de livres
+            </button>
+          </div>
+        </div>
+
+        <!-- Nom du pack -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nom du pack <span class="text-primary">*</span></label>
+          <input type="text" value="Pack 6ème - Collège Mariama Bâ"
+                 class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+        </div>
+
+        <!-- Niveau scolaire (optionnel) -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+            Niveau scolaire
+            <span class="text-gray-400 font-normal ml-1">(optionnel)</span>
+          </label>
+          <select class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white">
+            <option value="">— Pas un manuel scolaire —</option>
+            <option>6ème</option>
+            <option selected>5ème</option>
+            <option>4ème</option>
+            <option>3ème</option>
+            <option>Seconde</option>
+            <option>Première</option>
+            <option>Terminale</option>
+            <option>Licence 1</option>
+            <option>Licence 2</option>
+            <option>Licence 3</option>
+          </select>
+          <p class="text-xs text-gray-400 mt-1">Laissez vide pour un pack de romans, séries, etc.</p>
+        </div>
+
+        <!-- Livres inclus -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">Livres inclus dans le pack <span class="text-primary">*</span></label>
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <input type="text" value="Mathématiques 6ème"
+                     class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-lg">✕</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" value="Français — La Boîte à Merveilles"
+                     class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-lg">✕</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" value="Histoire-Géographie 5ème"
+                     class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+              <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-lg">✕</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" placeholder="Ajouter un livre..."
+                     class="flex-1 border border-dashed border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary text-gray-400" />
+              <button class="w-8 h-8 flex items-center justify-center text-primary border border-primary rounded-lg text-lg font-bold hover:bg-red-50">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prix + état -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Prix du pack <span class="text-primary">*</span></label>
+            <div class="relative">
+              <input type="number" value="25000"
+                     class="w-full border border-gray-200 rounded-xl pl-4 pr-14 py-2.5 text-sm focus:outline-none focus:border-primary" />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium">FCFA</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1.5">État général</label>
+            <select class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary bg-white">
+              <option>Neuf</option>
+              <option selected>Bon état</option>
+              <option>Correct</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
+          <textarea rows="3" placeholder="Décrivez l'état des livres, ce qui est inclus..."
+                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary resize-none">Tous les manuels de 5ème en bon état. Achetés en septembre, très peu utilisés.</textarea>
+        </div>
+
+        <button class="w-full bg-primary text-white rounded-xl py-3 font-semibold text-sm hover:bg-red-800 transition-colors">
+          Publier le pack
+        </button>
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- 2. CATALOGUE — CARDS                  -->
+    <!-- ══════════════════════════════════════ -->
+    <section>
+      <h2 class="text-lg font-bold text-gray-500 uppercase tracking-wider mb-4">2 — Affichage catalogue</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-5">
+
+        <!-- Card livre normal -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="relative">
+            <img src="https://placehold.co/300x200/f3f4f6/9ca3af?text=Livre" class="w-full h-40 object-cover" />
+            <span class="absolute top-2 left-2 bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full">Bon état</span>
+            <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">4 000 FCFA</span>
+          </div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">Elon Musk</p>
+            <p class="text-xs text-gray-500 mb-2">par Boris Manenti</p>
+            <p class="text-xs text-gray-400 flex items-center gap-1">📍 Ouakam, Dakar</p>
+            <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+              <span class="text-primary font-bold text-sm">4 000 FCFA</span>
+              <span class="text-xs text-gray-400">👁 8</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card PACK -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ring-2 ring-primary/20">
+          <div class="relative">
+            <img src="https://placehold.co/300x200/fef3c7/d97706?text=📦+Pack" class="w-full h-40 object-cover" />
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">📦 PACK</span>
+            <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">25 000 FCFA</span>
+          </div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">Pack 6ème</p>
+            <p class="text-xs text-gray-500 mb-2">3 livres inclus</p>
+            <p class="text-xs text-gray-400 flex items-center gap-1">📍 Ouakam, Dakar</p>
+            <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+              <span class="text-primary font-bold text-sm">25 000 FCFA</span>
+              <span class="text-xs text-gray-400">👁 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Pack romans -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ring-2 ring-primary/20">
+          <div class="relative">
+            <img src="https://placehold.co/300x200/fef3c7/d97706?text=📦+Pack" class="w-full h-40 object-cover" />
+            <span class="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">📦 PACK</span>
+            <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">8 000 FCFA</span>
+          </div>
+          <div class="p-3">
+            <p class="font-semibold text-sm text-gray-900 truncate">Trilogie Mariama Bâ</p>
+            <p class="text-xs text-gray-500 mb-2">3 livres inclus</p>
+            <p class="text-xs text-gray-400 flex items-center gap-1">📍 Conakry</p>
+            <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+              <span class="text-primary font-bold text-sm">8 000 FCFA</span>
+              <span class="text-xs text-gray-400">👁 2</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- 3. FICHE DÉTAIL PACK                  -->
+    <!-- ══════════════════════════════════════ -->
+    <section>
+      <h2 class="text-lg font-bold text-gray-500 uppercase tracking-wider mb-4">3 — Fiche détail du pack</h2>
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-6">
+        <!-- Breadcrumb -->
+        <p class="text-xs text-gray-400 mb-6">Accueil / Catalogue / <span class="text-gray-700 font-medium">Pack 6ème</span></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <!-- Image -->
+          <div>
+            <img src="https://placehold.co/600x400/fef3c7/d97706?text=Photo+du+pack" class="w-full rounded-xl object-cover" />
+          </div>
+
+          <!-- Infos -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <span class="bg-primary text-white text-xs font-bold px-2.5 py-1 rounded-full">📦 PACK SCOLAIRE</span>
+              <span class="bg-yellow-100 text-yellow-700 text-xs font-semibold px-2.5 py-1 rounded-full">Bon état</span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-gray-900 mb-1">Pack 6ème — Collège Mariama Bâ</h1>
+            <p class="text-gray-400 text-sm mb-1">Niveau : <span class="text-gray-700 font-medium">6ème</span></p>
+            <p class="text-3xl font-black text-primary mt-4 mb-2">25 000 FCFA</p>
+            <p class="text-xs text-gray-400 mb-6">👁 5 vues</p>
+
+            <!-- Livres inclus -->
+            <div class="mb-6">
+              <p class="font-semibold text-gray-800 mb-3">Livres inclus (3)</p>
+              <div class="space-y-2">
+                <div class="flex items-center gap-2 text-sm text-gray-700">
+                  <span class="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs font-bold">✓</span>
+                  Mathématiques 6ème
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-700">
+                  <span class="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs font-bold">✓</span>
+                  Français — La Boîte à Merveilles
+                </div>
+                <div class="flex items-center gap-2 text-sm text-gray-700">
+                  <span class="w-5 h-5 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-xs font-bold">✓</span>
+                  Histoire-Géographie 5ème
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p class="text-sm text-gray-600 mb-6">Tous les manuels de 6ème en bon état. Achetés en septembre, très peu utilisés.</p>
+
+            <!-- Vendeur -->
+            <div class="bg-red-50 rounded-2xl p-4">
+              <p class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <span class="text-primary">👤</span> Contacter le vendeur
+              </p>
+              <p class="text-sm text-gray-600 mb-0.5">Nom : <span class="font-medium text-gray-900">Absa Niang</span></p>
+              <p class="text-sm text-gray-600 mb-0.5">Téléphone : <span class="font-medium text-primary">776298669</span></p>
+              <p class="text-sm text-gray-600 mb-4">Localisation : <span class="font-medium text-gray-900">Ouakam, Dakar</span></p>
+              <div class="grid grid-cols-2 gap-3">
+                <button class="bg-primary text-white rounded-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2">
+                  📞 Appeler
+                </button>
+                <button class="bg-green-500 text-white rounded-full py-2.5 text-sm font-semibold flex items-center justify-center gap-2">
+                  💬 WhatsApp
+                </button>
+              </div>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-4">Publié le 14/06/2026</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>
