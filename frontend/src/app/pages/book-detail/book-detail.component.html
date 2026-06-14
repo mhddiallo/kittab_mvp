@@ -28,9 +28,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
       <!-- Images -->
       <div>
-        <div class="card overflow-hidden mb-3 bg-gray-50 flex items-center justify-center" style="min-height:28rem">
+        <div class="card overflow-hidden mb-3 bg-gray-50 flex items-center justify-center" style="aspect-ratio: 3/4">
           <img [src]="displayImages[selectedImage]" [alt]="book.title"
-               class="max-h-[28rem] w-auto max-w-full object-contain" />
+               class="w-full h-full object-contain" />
         </div>
         <div *ngIf="displayImages.length > 1" class="flex gap-2">
           <button *ngFor="let img of displayImages; let i = index"
