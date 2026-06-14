@@ -60,14 +60,14 @@ async def autocomplete(db: Session, q: str) -> list[dict]:
         return []
 
     internal = search_internal(db, q, limit=5)
-    google = await search_open_library(q, limit=10)
+    google = await search_open_library(q, limit=5)
 
     internal_titles = {r["title"].lower() for r in internal}
     merged = internal[:]
     for g in google:
         if g["title"].lower() not in internal_titles:
             merged.append(g)
-        if len(merged) >= 10:
+        if len(merged) >= 5:
             break
 
     return merged
