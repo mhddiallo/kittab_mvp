@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
 
 interface BookDetail {
   id: number;
@@ -24,13 +25,14 @@ interface BookDetail {
 @Component({
   selector: 'app-book-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, RouterLink, NavbarComponent, FooterComponent, BookCardComponent],
   templateUrl: './book-detail.component.html',
 })
 export class BookDetailComponent implements OnInit {
   book: BookDetail | null = null;
   selectedImage = 0;
   loading = true;
+  similarBooks: BookCard[] = [];
 
   conditionMap: Record<string, { label: string; cls: string }> = {
     new: { label: 'Neuf', cls: 'bg-green-100 text-green-700' },
@@ -42,16 +44,37 @@ export class BookDetailComponent implements OnInit {
   constructor(private route: ActivatedRoute) {}
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.loadBook(Number(id));
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      this.selectedImage = 0;
+      this.similarBooks = [];
+      this.book = null;
+      this.loading = true;
+      this.loadBook(id);
+    });
   }
 
   async loadBook(id: number) {
     try {
       const res = await fetch(`http://localhost:8000/api/books/${id}`);
-      if (res.ok) this.book = await res.json();
+      if (res.ok) {
+        this.book = await res.json();
+        if (this.book?.category?.id) {
+          this.loadSimilarBooks(this.book.category.id, id);
+        }
+      }
     } catch {}
     this.loading = false;
+  }
+
+  async loadSimilarBooks(categoryId: number, excludeId: number) {
+    try {
+      const res = await fetch(`http://localhost:8000/api/books?category_id=${categoryId}&page_size=5`);
+      if (res.ok) {
+        const data = await res.json();
+        this.similarBooks = (data.items ?? data).filter((b: BookCard) => b.id !== excludeId);
+      }
+    } catch {}
   }
 
   get condition() {
