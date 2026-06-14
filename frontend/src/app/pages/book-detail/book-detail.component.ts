@@ -15,6 +15,7 @@ interface BookDetail {
   description: string;
   images: string[];
   seller: { first_name: string; last_name: string; phone: string; address: string };
+  cover_url: string | null;
   is_available: boolean;
   accepts_exchange: boolean;
   views: number;
@@ -93,7 +94,9 @@ export class BookDetailComponent implements OnInit {
 
   get displayImages(): string[] {
     if (!this.book) return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
-    if (!this.book.images.length) return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
-    return this.book.images.map(i => (i as any).url ? `http://localhost:8000${(i as any).url}` : i as unknown as string);
+    const uploaded = this.book.images.map(i => (i as any).url ? `http://localhost:8000${(i as any).url}` : i as unknown as string);
+    if (uploaded.length) return uploaded;
+    if (this.book.cover_url) return [this.book.cover_url];
+    return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
   }
 }

@@ -11,6 +11,7 @@ export interface BookCard {
   views?: number;
   is_pack?: boolean;
   pack_items?: string[];
+  cover_url?: string | null;
 }
 
 @Component({
@@ -32,7 +33,8 @@ export class BookCardComponent {
 
   get primaryImage(): string {
     const url = this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url;
-    if (!url) return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
-    return url.startsWith('http') ? url : `${this.API}${url}`;
+    if (url) return url.startsWith('http') ? url : `${this.API}${url}`;
+    if (this.book.cover_url) return this.book.cover_url;
+    return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
   }
 }

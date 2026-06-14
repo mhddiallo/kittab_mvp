@@ -69,13 +69,26 @@
               *ngFor="let s of suggestions"
               (mousedown)="selectSuggestion(s)"
               class="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 text-left border-b border-gray-50 last:border-0">
-              <div class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-lg shrink-0">📚</div>
+              <img *ngIf="s.thumbnail" [src]="s.thumbnail" class="w-8 h-10 object-cover rounded shrink-0" />
+              <div *ngIf="!s.thumbnail" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-lg shrink-0">📚</div>
               <div>
                 <p class="text-sm font-semibold text-gray-800">{{ s.title }}</p>
                 <p class="text-xs text-gray-500">{{ s.author }} · <span [class]="s.source === 'internal' ? 'text-primary' : 'text-gray-400'">{{ s.source === 'internal' ? 'Catalogue Kittab' : 'Open Library' }}</span></p>
               </div>
             </button>
           </div>
+        </div>
+
+        <!-- Couverture sélectionnée -->
+        <div *ngIf="!isPack && selectedCover" class="mb-4 flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+          <img [src]="selectedCover" class="w-12 h-16 object-cover rounded shadow" />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ title }}</p>
+            <p class="text-xs text-gray-500">Couverture récupérée automatiquement</p>
+          </div>
+          <button type="button" (click)="selectedCover = ''" class="text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
         </div>
 
         <!-- Auteur (livre seul uniquement) -->

@@ -47,6 +47,7 @@ class Book(Base):
     subject: Mapped[str | None] = mapped_column(String(100))
     is_pack: Mapped[bool] = mapped_column(Boolean, default=False)
     pack_items: Mapped[str | None] = mapped_column(Text)  # JSON string list
+    cover_url: Mapped[str | None] = mapped_column(String(500))
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)

@@ -46,6 +46,7 @@ class BookCreate(BaseModel):
     accepts_exchange: bool = False
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
+    cover_url: Optional[str] = None
 
     @field_validator('pack_items', mode='before')
     @classmethod
@@ -87,6 +88,7 @@ class BookOut(BaseModel):
     views: int = 0
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
+    cover_url: Optional[str] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
@@ -117,6 +119,7 @@ class BookListOut(BaseModel):
     views: int = 0
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
+    cover_url: Optional[str] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
@@ -148,8 +151,13 @@ class CatalogSuggestion(BaseModel):
     author: str
     isbn: Optional[str] = None
     cover_url: Optional[str] = None
+    thumbnail: Optional[str] = None
     published_year: Optional[str] = None
     google_books_id: Optional[str] = None
+
+    def model_post_init(self, __context: any) -> None:
+        if self.thumbnail is None and self.cover_url:
+            self.thumbnail = self.cover_url
 
 
 class AlertCreate(BaseModel):

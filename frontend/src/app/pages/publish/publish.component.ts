@@ -35,6 +35,7 @@ export class PublishComponent implements OnInit {
   price: number | null = null;
   description = '';
   googleBooksId = '';
+  selectedCover = '';
   acceptsExchange = false;
   educationLevel = '';
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
@@ -179,6 +180,7 @@ export class PublishComponent implements OnInit {
     this.title = s.title;
     this.author = s.author;
     this.googleBooksId = s.google_books_id ?? '';
+    this.selectedCover = s.thumbnail ?? '';
     this.showSuggestions = false;
     this.suggestions = [];
   }
@@ -249,6 +251,7 @@ export class PublishComponent implements OnInit {
       };
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
+      if (this.selectedCover) payload.cover_url = this.selectedCover;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;
         if (this.educationLevel) payload.education_level = this.educationLevel;
