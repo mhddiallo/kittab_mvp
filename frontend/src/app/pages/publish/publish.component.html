@@ -155,7 +155,7 @@
         <!-- État -->
         <div class="mb-6">
           <label class="block text-sm font-semibold text-gray-700 mb-3">État du livre <span class="text-primary">*</span></label>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
             <button
               *ngFor="let c of conditions"
               (click)="condition = c.value"
@@ -164,6 +164,13 @@
               <div class="text-2xl mb-1">{{ c.emoji }}</div>
               <p [class]="'text-xs font-bold ' + (condition === c.value ? c.textCls : 'text-gray-600')">{{ c.label }}</p>
               <p class="text-xs text-gray-400 mt-0.5">{{ c.desc }}</p>
+            </button>
+            <!-- Bouton questionnaire -->
+            <button type="button" (click)="openConditionQuiz()"
+                    class="border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-primary hover:bg-red-50 transition-all">
+              <div class="text-2xl mb-1">🤔</div>
+              <p class="text-xs font-bold text-gray-600">Je ne sais pas</p>
+              <p class="text-xs text-gray-400 mt-0.5">On t'aide</p>
             </button>
           </div>
         </div>
@@ -279,6 +286,60 @@
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- Modal questionnaire état -->
+<div *ngIf="showConditionQuiz" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeConditionQuiz()">
+  <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
+
+    <!-- Question -->
+    <div *ngIf="!quizSuggestion">
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex gap-1">
+          <div *ngFor="let q of quizQuestions; let i = index"
+               [class]="'w-8 h-1 rounded-full ' + (i <= quizStep ? 'bg-primary' : 'bg-gray-200')"></div>
+        </div>
+        <button (click)="closeConditionQuiz()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      </div>
+
+      <div class="text-3xl mb-4 text-center">{{ quizQuestions[quizStep].question.includes('pages') ? '📄' : quizQuestions[quizStep].question.includes('couverture') ? '📕' : quizQuestions[quizStep].question.includes('annotations') ? '✏️' : '📚' }}</div>
+      <h3 class="font-bold text-gray-900 text-lg text-center mb-6">{{ quizQuestions[quizStep].question }}</h3>
+
+      <div class="space-y-3">
+        <button *ngFor="let opt of quizQuestions[quizStep].options"
+                (click)="answerQuiz(opt.score)"
+                class="w-full text-left px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-primary hover:bg-red-50 transition-colors">
+          {{ opt.label }}
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-400 text-center mt-4">Question {{ quizStep + 1 }} / {{ quizQuestions.length }}</p>
+    </div>
+
+    <!-- Résultat -->
+    <div *ngIf="quizSuggestion" class="text-center">
+      <button (click)="closeConditionQuiz()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      <div class="text-5xl mb-4">🎯</div>
+      <h3 class="font-bold text-gray-900 text-xl mb-2">Notre suggestion</h3>
+      <p class="text-gray-500 text-sm mb-5">D'après tes réponses, ton livre est en :</p>
+
+      <div class="bg-primary/10 border-2 border-primary rounded-2xl p-4 mb-4">
+        <p class="text-2xl font-extrabold text-primary mb-1">{{ quizSuggestion.label }}</p>
+        <p class="text-sm text-gray-600">Prix suggéré : <span class="font-bold text-gray-900">{{ quizSuggestion.priceMin | number }} – {{ quizSuggestion.priceMax | number }} FCFA</span></p>
+      </div>
+
+      <p class="text-xs text-gray-400 mb-5">Tu pourras toujours modifier l'état et le prix manuellement.</p>
+
+      <button (click)="applyQuizSuggestion()"
+              class="w-full bg-primary text-white rounded-xl py-3 font-semibold text-sm hover:bg-red-800 transition-colors">
+        Appliquer cette suggestion
+      </button>
+      <button (click)="closeConditionQuiz()" class="w-full mt-2 text-sm text-gray-400 hover:text-gray-600 py-2">
+        Choisir moi-même
+      </button>
+    </div>
+
   </div>
 </div>
 

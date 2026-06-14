@@ -59,6 +59,87 @@ export class PublishComponent implements OnInit {
     { value: 'fair', label: 'Correct', emoji: '📝', desc: 'Très annoté', cls: 'border-orange-400 bg-orange-50', textCls: 'text-orange-600' },
   ];
 
+  // Questionnaire état
+  showConditionQuiz = false;
+  quizStep = 0;
+  quizAnswers: number[] = [];
+  quizSuggestion: { condition: string; label: string; priceMin: number; priceMax: number } | null = null;
+
+  quizQuestions = [
+    {
+      question: 'Les pages sont-elles toutes présentes et intactes ?',
+      options: [
+        { label: 'Oui, toutes les pages sont là', score: 0 },
+        { label: 'Il manque ou des pages sont déchirées', score: 3 },
+      ]
+    },
+    {
+      question: 'La couverture est-elle en bon état ?',
+      options: [
+        { label: 'Propre, sans déchirure', score: 0 },
+        { label: 'Légèrement abîmée ou cornée', score: 1 },
+        { label: 'Très abîmée ou déchirée', score: 2 },
+      ]
+    },
+    {
+      question: 'Y a-t-il des annotations ou surlignages ?',
+      options: [
+        { label: 'Non, aucun', score: 0 },
+        { label: 'Quelques-uns au crayon (effaçables)', score: 1 },
+        { label: 'Beaucoup à l\'encre ou stabilo', score: 2 },
+      ]
+    },
+    {
+      question: 'Le livre a-t-il été utilisé ?',
+      options: [
+        { label: 'Jamais, il est neuf', score: 0 },
+        { label: 'Peu utilisé', score: 1 },
+        { label: 'Beaucoup utilisé', score: 2 },
+      ]
+    },
+  ];
+
+  openConditionQuiz() {
+    this.showConditionQuiz = true;
+    this.quizStep = 0;
+    this.quizAnswers = [];
+    this.quizSuggestion = null;
+  }
+
+  closeConditionQuiz() {
+    this.showConditionQuiz = false;
+  }
+
+  answerQuiz(score: number) {
+    this.quizAnswers.push(score);
+    if (this.quizStep < this.quizQuestions.length - 1) {
+      this.quizStep++;
+    } else {
+      this.computeQuizResult();
+    }
+  }
+
+  computeQuizResult() {
+    const total = this.quizAnswers.reduce((a, b) => a + b, 0);
+    if (total === 0) {
+      this.quizSuggestion = { condition: 'new', label: 'Neuf', priceMin: 8000, priceMax: 25000 };
+    } else if (total <= 2) {
+      this.quizSuggestion = { condition: 'like_new', label: 'Très bon état', priceMin: 5000, priceMax: 15000 };
+    } else if (total <= 4) {
+      this.quizSuggestion = { condition: 'good', label: 'Bon état', priceMin: 3000, priceMax: 8000 };
+    } else {
+      this.quizSuggestion = { condition: 'fair', label: 'Correct', priceMin: 1000, priceMax: 4000 };
+    }
+  }
+
+  applyQuizSuggestion() {
+    if (this.quizSuggestion) {
+      this.condition = this.quizSuggestion.condition;
+      if (!this.price) this.price = this.quizSuggestion.priceMin;
+    }
+    this.closeConditionQuiz();
+  }
+
   bookTypes = [
     { value: 'textbook', label: 'Manuel scolaire' },
     { value: 'novel', label: 'Roman' },
