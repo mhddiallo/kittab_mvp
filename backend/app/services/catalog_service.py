@@ -55,9 +55,9 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
         info = item.get("volumeInfo", {})
         authors = info.get("authors", [])
         image_links = info.get("imageLinks", {})
-        thumbnail = image_links.get("thumbnail") or image_links.get("smallThumbnail")
+        thumbnail = image_links.get("extraLarge") or image_links.get("large") or image_links.get("medium") or image_links.get("thumbnail") or image_links.get("smallThumbnail")
         if thumbnail:
-            thumbnail = thumbnail.replace("http://", "https://")
+            thumbnail = thumbnail.replace("http://", "https://").replace("&zoom=1", "&zoom=3")
 
         isbn = None
         for identifier in info.get("industryIdentifiers", []):
