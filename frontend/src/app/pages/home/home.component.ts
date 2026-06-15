@@ -22,11 +22,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private searchTimeout: any;
 
   // Hero rotating text
-  heroTexts = [
-    'tes livres facilement',
-    'une seconde vie à tes livres',
-    'de tes livres dont tu n\'as plus besoin',
-    'tes connaissances avec d\'autres',
+  heroPhrases = [
+    { before: 'Vends, achète et échange tes ', after: ' facilement' },
+    { before: 'Donne une seconde vie à tes ', after: '' },
+    { before: 'Débarrasse-toi de tes ', after: ' dont tu n\'as plus besoin' },
   ];
   currentHeroIndex = 0;
   heroVisible = true;
@@ -45,8 +44,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     }, 3500);
   }
 
-  get currentHeroText() {
-    return this.heroTexts[this.currentHeroIndex];
+  get currentPhrase() {
+    return this.heroPhrases[this.currentHeroIndex];
   }
 
   ngOnDestroy() {
