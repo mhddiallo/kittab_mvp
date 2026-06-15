@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,7 +12,7 @@ import { BookCardComponent, BookCard } from '../../components/book-card/book-car
   imports: [RouterLink, CommonModule, FormsModule, NavbarComponent, FooterComponent, BookCardComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   trendingBooks: BookCard[] = [];
   popularBooks: BookCard[] = [];
   totalBooks = 0;
@@ -21,7 +21,38 @@ export class HomeComponent implements OnInit {
   suggestions: any[] = [];
   private searchTimeout: any;
 
+  // Hero rotating text
+  heroTexts = [
+    'tes livres facilement',
+    'une seconde vie à tes livres',
+    'de tes livres dont tu n\'as plus besoin',
+    'tes connaissances avec d\'autres',
+  ];
+  currentHeroIndex = 0;
+  heroVisible = true;
+  private heroInterval: any;
+  private heroFadeTimeout: any;
+
   constructor(private router: Router) {}
+
+  startHeroRotation() {
+    this.heroInterval = setInterval(() => {
+      this.heroVisible = false;
+      this.heroFadeTimeout = setTimeout(() => {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroTexts.length;
+        this.heroVisible = true;
+      }, 500);
+    }, 3500);
+  }
+
+  get currentHeroText() {
+    return this.heroTexts[this.currentHeroIndex];
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.heroInterval);
+    clearTimeout(this.heroFadeTimeout);
+  }
 
   getImageUrl(book: BookCard): string {
     const url = book.images?.find(i => i.is_primary)?.url || book.images?.[0]?.url;
@@ -31,6 +62,7 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadBooks();
+    this.startHeroRotation();
   }
 
   async loadBooks() {
