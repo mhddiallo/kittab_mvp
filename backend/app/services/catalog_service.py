@@ -46,7 +46,7 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
     print(f"[DEBUG] Querying: {url} with q={params['q']}")
 
     try:
-        async with httpx.AsyncClient(timeout=3.0) as client:
+        async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
             resp = await client.get(url, params=params)
             print(f"[DEBUG] Response status: {resp.status_code}")
             resp.raise_for_status()
