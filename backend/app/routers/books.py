@@ -23,7 +23,7 @@ from app.schemas.book import (
     PaginatedBooks,
 )
 from app.services.alert_service import check_and_notify_alerts
-from app.services.catalog_service import autocomplete
+from app.services.catalog_service import autocomplete, save_to_catalog
 from app.models.alert import BookAlert
 
 router = APIRouter(prefix="/books", tags=["books"])
@@ -37,6 +37,20 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 @router.get("/autocomplete", response_model=list[CatalogSuggestion])
 async def book_autocomplete(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
     return await autocomplete(db, q)
+
+
+class CatalogSavePayload(BaseModel):
+    title: str
+    author: str
+    open_library_id: str
+    isbn: str | None = None
+    cover_url: str | None = None
+    published_year: str | None = None
+
+
+@router.post("/catalog/save", status_code=status.HTTP_204_NO_CONTENT)
+def save_catalog_entry(payload: CatalogSavePayload, db: Session = Depends(get_db)):
+    save_to_catalog(db, payload.model_dump())
 
 
 # ── Listing CRUD ────────────────────────────────────────────────────────────────

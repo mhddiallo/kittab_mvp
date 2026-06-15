@@ -189,6 +189,19 @@ export class PublishComponent implements OnInit {
     this.selectedCover = s.thumbnail ?? '';
     this.showSuggestions = false;
     this.suggestions = [];
+
+    if (s.source === 'google_books' && s.open_library_id) {
+      fetch('http://localhost:8000/api/books/catalog/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: s.title,
+          author: s.author,
+          open_library_id: s.open_library_id,
+          cover_url: s.thumbnail ?? null,
+        }),
+      }).catch(() => {});
+    }
   }
 
   onImageChange(event: Event) {

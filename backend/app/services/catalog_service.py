@@ -2,6 +2,7 @@ import asyncio
 import httpx
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.book_catalog import BookCatalog
 
 
@@ -30,12 +31,20 @@ def search_internal(db: Session, q: str, limit: int = 10) -> list[dict]:
     ]
 
 
-async def search_open_library(q: str, limit: int = 10) -> list[dict]:
-    url = "https://openlibrary.org/search.json"
-    # title: force la recherche par titre uniquement pour plus de pertinence
-    params = {"title": q, "limit": limit, "fields": "key,title,author_name,isbn,cover_i,first_publish_year", "lang": "fre,eng"}
+async def search_google_books(q: str, limit: int = 10) -> list[dict]:
+    url = "https://www.googleapis.com/books/v1/volumes"
+    params: dict = {
+        "q": f"intitle:{q}",
+        "maxResults": limit,
+        "printType": "books",
+        "fields": "items(id,volumeInfo(title,authors,industryIdentifiers,imageLinks,publishedDate))",
+        "langRestrict": "fr",
+    }
+    if settings.GOOGLE_BOOKS_API_KEY:
+        params["key"] = settings.GOOGLE_BOOKS_API_KEY
+
     try:
-        async with httpx.AsyncClient(timeout=2.0, verify=False) as client:
+        async with httpx.AsyncClient(timeout=3.0) as client:
             resp = await client.get(url, params=params)
             resp.raise_for_status()
             data = resp.json()
@@ -43,39 +52,76 @@ async def search_open_library(q: str, limit: int = 10) -> list[dict]:
         return []
 
     results = []
-    for item in data.get("docs", []):
-        authors = item.get("author_name", [])
-        cover_i = item.get("cover_i")
-        thumbnail = f"https://covers.openlibrary.org/b/id/{cover_i}-M.jpg" if cover_i else None
+    for item in data.get("items", []):
+        info = item.get("volumeInfo", {})
+        authors = info.get("authors", [])
+        image_links = info.get("imageLinks", {})
+        thumbnail = image_links.get("thumbnail") or image_links.get("smallThumbnail")
+        if thumbnail:
+            thumbnail = thumbnail.replace("http://", "https://")
+
+        isbn = None
+        for identifier in info.get("industryIdentifiers", []):
+            if identifier.get("type") in ("ISBN_13", "ISBN_10"):
+                isbn = identifier["identifier"]
+                if identifier["type"] == "ISBN_13":
+                    break
+
+        published_year = (info.get("publishedDate") or "")[:4] or None
+
         results.append({
-            "source": "open_library",
-            "open_library_id": item.get("key", "").replace("/works/", ""),
-            "title": item.get("title", ""),
+            "source": "google_books",
+            "open_library_id": item.get("id", ""),
+            "title": info.get("title", ""),
             "author": ", ".join(authors[:2]) if authors else "",
-            "isbn": item.get("isbn", [None])[0] if item.get("isbn") else None,
+            "isbn": isbn,
             "cover_url": thumbnail,
             "thumbnail": thumbnail,
-            "published_year": str(item.get("first_publish_year", "")) or None,
+            "published_year": published_year,
         })
     return results
+
+
+def save_to_catalog(db: Session, book_data: dict) -> None:
+    """Cache-aside: save a Google Books result to our local catalog."""
+    google_id = book_data.get("open_library_id")
+    if not google_id:
+        return
+
+    existing = db.query(BookCatalog).filter(BookCatalog.open_library_id == google_id).first()
+    if existing:
+        return
+
+    entry = BookCatalog(
+        title=book_data.get("title", ""),
+        author=book_data.get("author", ""),
+        isbn=book_data.get("isbn"),
+        cover_url=book_data.get("cover_url"),
+        published_year=book_data.get("published_year"),
+        open_library_id=google_id,
+    )
+    db.add(entry)
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
 
 
 async def autocomplete(db: Session, q: str) -> list[dict]:
     if not q or len(q) < 2:
         return []
 
-    # Lancer les deux recherches en parallèle
-    internal, open_lib = await asyncio.gather(
+    internal, google = await asyncio.gather(
         asyncio.to_thread(search_internal, db, q, 5),
-        search_open_library(q, 5),
+        search_google_books(q, 8),
     )
 
     internal_titles = {r["title"].lower() for r in internal}
     merged = internal[:]
-    for g in open_lib:
+    for g in google:
         if g["title"].lower() not in internal_titles:
             merged.append(g)
-        if len(merged) >= 5:
+        if len(merged) >= 8:
             break
 
     return merged

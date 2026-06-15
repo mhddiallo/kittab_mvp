@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     UPLOAD_DIR: str = "uploads"
     SIMULATION_MODE: bool = True
+    GOOGLE_BOOKS_API_KEY: str = ""
 
     class Config:
         env_file = ".env"
