@@ -1,8 +1,12 @@
+import io
 import json
 import os
 import uuid
 from datetime import datetime
 from typing import Optional
+
+import cloudinary
+import cloudinary.uploader
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel
@@ -28,6 +32,14 @@ from app.services.category_mapping import map_to_kittab_category
 from app.models.alert import BookAlert
 
 router = APIRouter(prefix="/books", tags=["books"])
+
+if settings.CLOUDINARY_CLOUD_NAME:
+    cloudinary.config(
+        cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+        api_key=settings.CLOUDINARY_API_KEY,
+        api_secret=settings.CLOUDINARY_API_SECRET,
+        secure=True,
+    )
 
 MAX_IMAGES = 4
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
@@ -302,16 +314,27 @@ async def upload_image(
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Format non supporté (jpg, png, webp)")
 
-    filename = f"{uuid.uuid4()}{ext}"
-    dest = os.path.join(settings.UPLOAD_DIR, filename)
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-
     content = await file.read()
-    with open(dest, "wb") as f:
-        f.write(content)
+
+    if settings.CLOUDINARY_CLOUD_NAME:
+        result = cloudinary.uploader.upload(
+            io.BytesIO(content),
+            folder="kittab/books",
+            public_id=str(uuid.uuid4()),
+            overwrite=False,
+            resource_type="image",
+        )
+        image_url = result["secure_url"]
+    else:
+        filename = f"{uuid.uuid4()}{ext}"
+        dest = os.path.join(settings.UPLOAD_DIR, filename)
+        os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
+        with open(dest, "wb") as f:
+            f.write(content)
+        image_url = f"/uploads/{filename}"
 
     is_primary = len(book.images) == 0
-    image = BookImage(book_id=book_id, url=f"/uploads/{filename}", is_primary=is_primary)
+    image = BookImage(book_id=book_id, url=image_url, is_primary=is_primary)
     db.add(image)
     db.commit()
     db.refresh(book)
@@ -333,9 +356,17 @@ def delete_image(
     if not image or image.book_id != book_id:
         raise HTTPException(status_code=404, detail="Image introuvable")
 
-    path = os.path.join(settings.UPLOAD_DIR, os.path.basename(image.url))
-    if os.path.exists(path):
-        os.remove(path)
+    if settings.CLOUDINARY_CLOUD_NAME and image.url.startswith("https://res.cloudinary.com"):
+        try:
+            # Extraire le public_id depuis l'URL Cloudinary
+            public_id = "/".join(image.url.split("/")[-3:]).rsplit(".", 1)[0]
+            cloudinary.uploader.destroy(public_id)
+        except Exception:
+            pass
+    else:
+        path = os.path.join(settings.UPLOAD_DIR, os.path.basename(image.url))
+        if os.path.exists(path):
+            os.remove(path)
 
     was_primary = image.is_primary
     db.delete(image)

@@ -165,7 +165,11 @@ export class BookDetailComponent implements OnInit {
 
   get displayImages(): string[] {
     if (!this.book) return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];
-    const uploaded = this.book.images.map(i => (i as any).url ? `${environment.apiUrl}${(i as any).url}` : i as unknown as string);
+    const uploaded = this.book.images.map(i => {
+      const url = (i as any).url;
+      if (!url) return i as unknown as string;
+      return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
+    });
     if (uploaded.length) return uploaded;
     if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return [this.book.cover_url];
     return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];
