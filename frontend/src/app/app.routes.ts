@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: 'books/:id', loadComponent: () => import('./pages/book-detail/book-detail.component').then(m => m.BookDetailComponent) },
   { path: 'how-it-works', loadComponent: () => import('./pages/how-it-works/how-it-works.component').then(m => m.HowItWorksComponent) },
   { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
+  { path: 'community', loadComponent: () => import('./pages/community/community.component').then(m => m.CommunityComponent) },
   { path: 'publish', loadComponent: () => import('./pages/publish/publish.component').then(m => m.PublishComponent), canActivate: [authGuard] },
   { path: 'publish/edit/:id', loadComponent: () => import('./pages/publish/edit/edit-book.component').then(m => m.EditBookComponent), canActivate: [authGuard] },
   { path: 'profile', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },
