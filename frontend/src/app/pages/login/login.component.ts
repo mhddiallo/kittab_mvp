@@ -26,6 +26,10 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.initGoogleButton();
+  }
+
+  private initGoogleButton() {
     if (typeof google !== 'undefined') {
       google.accounts.id.initialize({
         client_id: '211698271206-1smssf8ul4pp3dn771sdma0np7boblmu.apps.googleusercontent.com',
@@ -35,6 +39,8 @@ export class LoginComponent implements OnInit {
         document.getElementById('google-btn'),
         { theme: 'outline', size: 'large', width: '100%', text: 'continue_with' }
       );
+    } else {
+      setTimeout(() => this.initGoogleButton(), 300);
     }
   }
 
