@@ -32,7 +32,8 @@ def search_internal(db: Session, q: str, limit: int = 10) -> list[dict]:
 
 async def search_open_library(q: str, limit: int = 10) -> list[dict]:
     url = "https://openlibrary.org/search.json"
-    params = {"q": q, "limit": limit, "fields": "key,title,author_name,isbn,cover_i,first_publish_year"}
+    # title: force la recherche par titre uniquement pour plus de pertinence
+    params = {"title": q, "limit": limit, "fields": "key,title,author_name,isbn,cover_i,first_publish_year", "lang": "fre,eng"}
     try:
         async with httpx.AsyncClient(timeout=2.0, verify=False) as client:
             resp = await client.get(url, params=params)

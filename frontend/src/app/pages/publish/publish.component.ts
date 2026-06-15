@@ -179,7 +179,7 @@ export class PublishComponent implements OnInit {
   }
 
   hideSuggestionsDelayed() {
-    setTimeout(() => { this.showSuggestions = false; }, 200);
+    setTimeout(() => { this.showSuggestions = false; }, 400);
   }
 
   selectSuggestion(s: AutocompleteResult) {
