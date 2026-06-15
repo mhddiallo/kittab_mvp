@@ -102,37 +102,18 @@ export class BookDetailComponent implements OnInit {
     if (this.showBookInfo && !this.bookInfo && this.book?.open_library_id) {
       this.bookInfoLoading = true;
       try {
-        const workId = this.book.open_library_id;
-        const [workRes, authorRes] = await Promise.all([
-          fetch(`https://openlibrary.org/works/${workId}.json`),
-          this.book.author ? fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(this.book.author)}&limit=1`) : Promise.resolve(null),
-        ]);
-
-        let summary = '';
-        let subjects: string[] = [];
-        let first_publish_year = '';
-        if (workRes.ok) {
-          const work = await workRes.json();
-          summary = typeof work.description === 'string' ? work.description
-            : work.description?.value ?? '';
-          subjects = (work.subjects ?? []).slice(0, 5);
-          first_publish_year = work.first_publish_date ?? '';
+        const googleId = this.book.open_library_id;
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${googleId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const info = data.volumeInfo ?? {};
+          this.bookInfo = {
+            summary: info.description ?? '',
+            subjects: (info.categories ?? []).slice(0, 5),
+            first_publish_year: (info.publishedDate ?? '').slice(0, 4),
+            author_bio: '',
+          };
         }
-
-        let author_bio = '';
-        if (authorRes?.ok) {
-          const authorData = await authorRes.json();
-          const authorKey = authorData.docs?.[0]?.key;
-          if (authorKey) {
-            const bioRes = await fetch(`https://openlibrary.org${authorKey}.json`);
-            if (bioRes.ok) {
-              const bio = await bioRes.json();
-              author_bio = typeof bio.bio === 'string' ? bio.bio : bio.bio?.value ?? '';
-            }
-          }
-        }
-
-        this.bookInfo = { summary, subjects, first_publish_year, author_bio };
       } catch {}
       this.bookInfoLoading = false;
     }

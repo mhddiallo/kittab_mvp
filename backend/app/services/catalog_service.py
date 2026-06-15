@@ -42,18 +42,12 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
     if settings.GOOGLE_BOOKS_API_KEY:
         params["key"] = settings.GOOGLE_BOOKS_API_KEY
 
-    print(f"[DEBUG] Google Books API key present: {bool(settings.GOOGLE_BOOKS_API_KEY)}")
-    print(f"[DEBUG] Querying: {url} with q={params['q']}")
-
     try:
         async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
             resp = await client.get(url, params=params)
-            print(f"[DEBUG] Response status: {resp.status_code}")
             resp.raise_for_status()
             data = resp.json()
-            print(f"[DEBUG] Items count: {len(data.get('items', []))}")
-    except Exception as e:
-        print(f"[DEBUG] Exception: {e}")
+    except Exception:
         return []
 
     results = []
