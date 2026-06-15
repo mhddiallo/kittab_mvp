@@ -1,6 +1,8 @@
 <a [routerLink]="['/books', book.id]" class="card block overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
   <div class="relative">
-    <img [src]="primaryImage" [alt]="book.title" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
+    <img [src]="primaryImage" [alt]="book.title"
+         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+         (error)="onImageError($event)" />
     <span *ngIf="book.is_pack" class="absolute top-2 left-2 bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">📦 PACK</span>
     <span *ngIf="!book.is_pack" class="absolute top-2 left-2 badge" [ngClass]="conditionClass">{{ conditionLabel }}</span>
     <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span>

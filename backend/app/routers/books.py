@@ -39,6 +39,53 @@ async def book_autocomplete(q: str = Query(..., min_length=2), db: Session = Dep
     return await autocomplete(db, q)
 
 
+@router.get("/info")
+async def book_info(
+    google_id: Optional[str] = Query(None),
+    title: Optional[str] = Query(None),
+    author: Optional[str] = Query(None),
+):
+    from app.services.catalog_service import search_google_books
+    import httpx
+
+    api_key = settings.GOOGLE_BOOKS_API_KEY
+    volume_info = None
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
+            if google_id:
+                params = {}
+                if api_key:
+                    params["key"] = api_key
+                r = await client.get(f"https://www.googleapis.com/books/v1/volumes/{google_id}", params=params)
+                if r.status_code == 200:
+                    volume_info = r.json().get("volumeInfo")
+
+            if not volume_info and title:
+                q = f"intitle:{title}"
+                if author:
+                    q += f"+inauthor:{author}"
+                params = {"q": q, "maxResults": 1}
+                if api_key:
+                    params["key"] = api_key
+                r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
+                if r.status_code == 200:
+                    items = r.json().get("items", [])
+                    if items:
+                        volume_info = items[0].get("volumeInfo")
+    except Exception:
+        pass
+
+    if not volume_info:
+        return {"summary": None, "subjects": [], "published_year": None}
+
+    return {
+        "summary": volume_info.get("description"),
+        "subjects": (volume_info.get("categories") or [])[:6],
+        "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
+    }
+
+
 class CatalogSavePayload(BaseModel):
     title: str
     author: str

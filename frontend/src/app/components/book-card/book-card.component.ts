@@ -37,4 +37,8 @@ export class BookCardComponent {
     if (this.book.cover_url) return this.book.cover_url;
     return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
   }
+
+  onImageError(event: Event) {
+    (event.target as HTMLImageElement).src = 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
+  }
 }

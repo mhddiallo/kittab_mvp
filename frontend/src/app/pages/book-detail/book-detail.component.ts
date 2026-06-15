@@ -112,30 +112,18 @@ export class BookDetailComponent implements OnInit {
     if (!this.book) return;
     this.bookInfoLoading = true;
     try {
-      let volumeInfo: any = null;
+      const params = new URLSearchParams();
+      if (this.book.open_library_id) params.set('google_id', this.book.open_library_id);
+      if (this.book.title) params.set('title', this.book.title);
+      if (this.book.author) params.set('author', this.book.author);
 
-      if (this.book.open_library_id) {
-        const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${this.book.open_library_id}`);
-        if (res.ok) {
-          const data = await res.json();
-          volumeInfo = data.volumeInfo;
-        }
-      }
-
-      if (!volumeInfo) {
-        const q = encodeURIComponent(`intitle:${this.book.title}${this.book.author ? '+inauthor:' + this.book.author : ''}`);
-        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`);
-        if (res.ok) {
-          const data = await res.json();
-          volumeInfo = data.items?.[0]?.volumeInfo ?? null;
-        }
-      }
-
-      if (volumeInfo) {
+      const res = await fetch(`http://localhost:8000/api/books/info?${params}`);
+      if (res.ok) {
+        const data = await res.json();
         this.bookInfo = {
-          summary: volumeInfo.description ?? '',
-          subjects: (volumeInfo.categories ?? []).slice(0, 6),
-          first_publish_year: (volumeInfo.publishedDate ?? '').slice(0, 4),
+          summary: data.summary ?? '',
+          subjects: data.subjects ?? [],
+          first_publish_year: data.published_year ?? '',
           author_bio: '',
         };
       } else {
