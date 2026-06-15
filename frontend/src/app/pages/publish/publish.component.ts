@@ -223,7 +223,6 @@ export class PublishComponent implements OnInit {
         const data = await res.json();
         if (data.title) this.title = data.title;
         if (data.author) this.author = data.author;
-        if (data.title) this.onTitleInput();
       } else {
         this.scanError = 'Impossible de lire la couverture, remplis manuellement.';
       }
