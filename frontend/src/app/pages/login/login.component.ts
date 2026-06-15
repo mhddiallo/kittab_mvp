@@ -37,10 +37,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
         client_id: '211698271206-1smssf8ul4pp3dn771sdma0np7boblmu.apps.googleusercontent.com',
         callback: (response: any) => this.zone.run(() => this.handleGoogleCallback(response)),
       });
-      google.accounts.id.renderButton(
-        document.getElementById('google-btn'),
-        { theme: 'outline', size: 'large', width: '100%', text: 'continue_with' }
-      );
+      const btn = document.getElementById('google-btn');
+      const width = btn?.offsetWidth || 360;
+      google.accounts.id.renderButton(btn, {
+        theme: 'outline', size: 'large', width: width, text: 'continue_with'
+      });
     } else {
       setTimeout(() => this.initGoogleButton(), 300);
     }
