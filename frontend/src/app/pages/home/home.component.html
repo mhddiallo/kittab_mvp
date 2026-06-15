@@ -4,9 +4,7 @@
 <section class="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-10">
   <div class="flex-1">
     <h1 class="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-8">
-      <span class="transition-opacity duration-500" [style.opacity]="heroVisible ? '1' : '0'">
-        {{ currentPhrase.before }}<span class="text-primary">livres</span>{{ currentPhrase.after }}
-      </span>
+      {{ beforeRed }}<span class="text-primary">{{ redPart }}</span>{{ afterRed }}<span class="inline-block w-0.5 h-10 bg-primary align-middle ml-0.5 animate-pulse"></span>
     </h1>
     <div class="relative max-w-md">
       <div class="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-3">

@@ -21,36 +21,79 @@ export class HomeComponent implements OnInit, OnDestroy {
   suggestions: any[] = [];
   private searchTimeout: any;
 
-  // Hero rotating text
+  // Hero typewriter
   heroPhrases = [
-    { before: 'Vends, achète et échange tes ', after: ' facilement' },
-    { before: 'Donne une seconde vie à tes ', after: '' },
-    { before: 'Débarrasse-toi de tes ', after: ' dont tu n\'as plus besoin' },
+    'Vends, achète et échange tes livres facilement',
+    'Donne une seconde vie à tes livres',
+    'Débarrasse-toi de tes livres dont tu n\'as plus besoin',
   ];
   currentHeroIndex = 0;
-  heroVisible = true;
-  private heroInterval: any;
-  private heroFadeTimeout: any;
+  displayedText = '';
+  showCursor = true;
+  private typewriterTimeout: any;
 
   constructor(private router: Router) {}
 
-  startHeroRotation() {
-    this.heroInterval = setInterval(() => {
-      this.heroVisible = false;
-      this.heroFadeTimeout = setTimeout(() => {
-        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroPhrases.length;
-        this.heroVisible = true;
-      }, 500);
-    }, 3500);
+  startTypewriter() {
+    this.typePhrase();
   }
 
-  get currentPhrase() {
-    return this.heroPhrases[this.currentHeroIndex];
+  private typePhrase() {
+    const full = this.heroPhrases[this.currentHeroIndex];
+    let i = 0;
+    this.displayedText = '';
+
+    const type = () => {
+      if (i < full.length) {
+        this.displayedText += full[i++];
+        this.typewriterTimeout = setTimeout(type, 45);
+      } else {
+        // Pause avant d'effacer
+        this.typewriterTimeout = setTimeout(() => this.erasePhrase(), 2000);
+      }
+    };
+    type();
+  }
+
+  private erasePhrase() {
+    const erase = () => {
+      if (this.displayedText.length > 0) {
+        this.displayedText = this.displayedText.slice(0, -1);
+        this.typewriterTimeout = setTimeout(erase, 25);
+      } else {
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroPhrases.length;
+        this.typewriterTimeout = setTimeout(() => this.typePhrase(), 400);
+      }
+    };
+    erase();
+  }
+
+  get beforeRed(): string {
+    const full = this.heroPhrases[this.currentHeroIndex];
+    const redStart = full.indexOf('livres');
+    const typed = this.displayedText;
+    if (redStart < 0 || typed.length <= redStart) return typed;
+    return typed.slice(0, redStart);
+  }
+
+  get redPart(): string {
+    const full = this.heroPhrases[this.currentHeroIndex];
+    const redStart = full.indexOf('livres');
+    const typed = this.displayedText;
+    if (redStart < 0 || typed.length <= redStart) return '';
+    return typed.slice(redStart, Math.min(typed.length, redStart + 6));
+  }
+
+  get afterRed(): string {
+    const full = this.heroPhrases[this.currentHeroIndex];
+    const redEnd = full.indexOf('livres') + 6;
+    const typed = this.displayedText;
+    if (typed.length <= redEnd) return '';
+    return typed.slice(redEnd);
   }
 
   ngOnDestroy() {
-    clearInterval(this.heroInterval);
-    clearTimeout(this.heroFadeTimeout);
+    clearTimeout(this.typewriterTimeout);
   }
 
   getImageUrl(book: BookCard): string {
@@ -61,7 +104,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async ngOnInit() {
     await this.loadBooks();
-    this.startHeroRotation();
+    this.startTypewriter();
   }
 
   async loadBooks() {
