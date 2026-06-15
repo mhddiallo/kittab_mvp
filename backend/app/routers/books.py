@@ -60,7 +60,7 @@ async def scan_cover(file: UploadFile = File(...)):
                 },
                 {
                     "type": "text",
-                    "text": "This is a book cover. Extract the book title, author name, and category. For category, use ONE of these values only: Autobiographies, Romans, Histoire, Sciences, Manuels scolaires, Développement personnel, Religion & Spiritualité, Philosophie, Économie & Business, Droit, Médecine & Santé, Informatique, Littérature africaine, Jeunesse, Poésie, BD & Comics, Langues & Dictionnaires, Autres. Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\", \"category\": \"...\"}. If you cannot determine a field, use an empty string.",
+                    "text": "This is a book cover or back cover. Extract: title, author name, category, and language of the book. For category, use ONE of: Autobiographies, Romans, Histoire, Sciences, Manuels scolaires, Développement personnel, Religion & Spiritualité, Philosophie, Économie & Business, Droit, Médecine & Santé, Informatique, Littérature africaine, Jeunesse, Poésie, BD & Comics, Langues & Dictionnaires, Autres. For language use the language name in French (Français, Anglais, Arabe, Portugais, Wolof, etc). Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\", \"category\": \"...\", \"language\": \"...\"}. If you cannot determine a field, use an empty string.",
                 },
             ],
         }],
@@ -73,7 +73,7 @@ async def scan_cover(file: UploadFile = File(...)):
         match = _re.search(r'\{.*?\}', text, _re.DOTALL)
         if match:
             data = _json.loads(match.group())
-            return {"title": data.get("title", ""), "author": data.get("author", ""), "category": data.get("category", "")}
+            return {"title": data.get("title", ""), "author": data.get("author", ""), "category": data.get("category", ""), "language": data.get("language", "")}
         raise ValueError("no json")
     except Exception:
         raise HTTPException(status_code=422, detail="Impossible d'extraire les informations du livre")

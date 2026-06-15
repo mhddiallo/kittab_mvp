@@ -240,6 +240,9 @@ export class PublishComponent implements OnInit {
           const match = this.categories.find(c => c.name === data.category);
           if (match) this.categoryId = match.id;
         }
+        if (data.language && this.languages.includes(data.language)) {
+          this.language = data.language;
+        }
         // Utiliser la photo scannée comme image de l'annonce
         if (this.images.length < 4) {
           this.images.push(file);

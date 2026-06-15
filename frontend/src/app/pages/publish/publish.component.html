@@ -180,16 +180,6 @@
                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
         </div>
 
-        <!-- Nombre de pages -->
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Nombre de pages <span class="text-gray-400 font-normal">(optionnel)</span>
-          </label>
-          <input type="number" [(ngModel)]="pageCount" min="1"
-                 placeholder="Ex: 320"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        </div>
-
         <!-- Description -->
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">
@@ -273,10 +263,13 @@
 
       <!-- Photos -->
       <div class="card p-6">
-        <h2 class="font-bold text-gray-800 text-base mb-4 flex items-center gap-2">
+        <h2 class="font-bold text-gray-800 text-base mb-2 flex items-center gap-2">
           <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">3</span>
           Photos <span class="text-gray-400 font-normal text-sm">(max 4)</span>
         </h2>
+        <p class="text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+          📸 Ajoutez des photos claires de votre livre pour que les acheteurs puissent voir son état réel (couverture, dos, pages intérieures).
+        </p>
 
         <!-- Drop zone -->
         <label *ngIf="images.length < 4"
