@@ -8,7 +8,7 @@
     </a>
 
     <!-- Nav links desktop -->
-    <div class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+    <div class="hidden lg:flex items-center gap-7 text-sm font-medium text-gray-600">
       <a routerLink="/" routerLinkActive="text-primary" [routerLinkActiveOptions]="{exact:true}" class="hover:text-primary transition-colors">Accueil</a>
       <a routerLink="/catalogue" routerLinkActive="text-primary" class="hover:text-primary transition-colors">Catalogue</a>
       <a routerLink="/how-it-works" routerLinkActive="text-primary" class="hover:text-primary transition-colors">Comment ça marche</a>
@@ -21,16 +21,16 @@
     <!-- Actions desktop + bouton burger mobile -->
     <div class="flex items-center gap-3">
       <!-- Bouton Publier (desktop) -->
-      <a routerLink="/publish" class="hidden md:flex btn-outline items-center gap-1.5">
+      <a routerLink="/publish" class="hidden lg:flex btn-outline items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Vendre un livre
       </a>
 
       <!-- Non connecté (desktop) -->
-      <a *ngIf="!auth.isLoggedIn" routerLink="/login" class="hidden md:block btn-primary">Se connecter</a>
+      <a *ngIf="!auth.isLoggedIn" routerLink="/login" class="hidden lg:block btn-primary">Se connecter</a>
 
       <!-- Connecté (desktop) -->
-      <div *ngIf="auth.isLoggedIn" class="hidden md:block relative group">
+      <div *ngIf="auth.isLoggedIn" class="hidden lg:block relative group">
         <button class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 transition-colors">
           <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
             {{ auth.user?.first_name?.[0]?.toUpperCase() || '?' }}
@@ -60,7 +60,7 @@
       </div>
 
       <!-- Burger mobile -->
-      <button (click)="menuOpen = !menuOpen" class="md:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+      <button (click)="menuOpen = !menuOpen" class="lg:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition-colors">
         <span class="block w-5 h-0.5 bg-gray-700 transition-transform" [class.rotate-45]="menuOpen" [class.translate-y-2]="menuOpen"></span>
         <span class="block w-5 h-0.5 bg-gray-700 transition-opacity" [class.opacity-0]="menuOpen"></span>
         <span class="block w-5 h-0.5 bg-gray-700 transition-transform" [class.-rotate-45]="menuOpen" [class.-translate-y-2]="menuOpen"></span>
@@ -69,7 +69,7 @@
   </div>
 
   <!-- Menu mobile -->
-  <div *ngIf="menuOpen" class="md:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1">
+  <div *ngIf="menuOpen" class="lg:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1">
     <a routerLink="/" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" [routerLinkActiveOptions]="{exact:true}" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Accueil</a>
     <a routerLink="/catalogue" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Catalogue</a>
     <a routerLink="/how-it-works" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Comment ça marche</a>
