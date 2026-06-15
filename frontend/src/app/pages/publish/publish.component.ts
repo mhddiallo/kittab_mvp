@@ -240,6 +240,13 @@ export class PublishComponent implements OnInit {
           const match = this.categories.find(c => c.name === data.category);
           if (match) this.categoryId = match.id;
         }
+        // Utiliser la photo scannée comme image de l'annonce
+        if (this.images.length < 4) {
+          this.images.push(file);
+          const reader = new FileReader();
+          reader.onload = e => this.imagePreviews.push(e.target?.result as string);
+          reader.readAsDataURL(file);
+        }
       } else {
         this.scanError = 'Impossible de lire la couverture, remplis manuellement.';
       }
@@ -318,6 +325,7 @@ export class PublishComponent implements OnInit {
       if (this.description) payload.description = this.description;
       if (this.selectedCover) payload.cover_url = this.selectedCover;
       if (this.language) payload.language = this.language;
+      if (this.pageCount) payload.page_count = this.pageCount;
       if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
       if (this.pageCount) payload.page_count = this.pageCount;
       if (this.isPack) {
