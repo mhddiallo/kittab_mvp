@@ -36,10 +36,12 @@ export class PublishComponent implements OnInit {
   description = '';
   googleBooksId = '';
   selectedCover = '';
+  language = '';
   acceptsExchange = false;
   educationLevel = '';
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
+  languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
   educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
 
   // State
@@ -252,6 +254,8 @@ export class PublishComponent implements OnInit {
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
       if (this.selectedCover) payload.cover_url = this.selectedCover;
+      if (this.language) payload.language = this.language;
+      if (this.googleBooksId) payload.google_books_id = this.googleBooksId;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;
         if (this.educationLevel) payload.education_level = this.educationLevel;

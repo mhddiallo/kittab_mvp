@@ -16,6 +16,8 @@ interface BookDetail {
   images: string[];
   seller: { first_name: string; last_name: string; phone: string; address: string };
   cover_url: string | null;
+  language: string | null;
+  google_books_id: string | null;
   is_available: boolean;
   accepts_exchange: boolean;
   views: number;
@@ -24,6 +26,13 @@ interface BookDetail {
   education_level: string | null;
   category: { id: number; name: string };
   created_at: string;
+}
+
+interface BookInfo {
+  summary: string;
+  subjects: string[];
+  first_publish_year: string;
+  author_bio: string;
 }
 
 @Component({
@@ -37,6 +46,11 @@ export class BookDetailComponent implements OnInit {
   selectedImage = 0;
   loading = true;
   similarBooks: BookCard[] = [];
+
+  // Panneau infos livre
+  showBookInfo = false;
+  bookInfo: BookInfo | null = null;
+  bookInfoLoading = false;
 
   conditionMap: Record<string, { label: string; cls: string }> = {
     new: { label: 'Neuf', cls: 'bg-green-100 text-green-700' },
@@ -54,6 +68,8 @@ export class BookDetailComponent implements OnInit {
       this.similarBooks = [];
       this.book = null;
       this.loading = true;
+      this.showBookInfo = false;
+      this.bookInfo = null;
       this.loadBook(id);
     });
   }
@@ -79,6 +95,47 @@ export class BookDetailComponent implements OnInit {
         this.similarBooks = (data.items ?? data).filter((b: BookCard) => b.id !== excludeId);
       }
     } catch {}
+  }
+
+  async toggleBookInfo() {
+    this.showBookInfo = !this.showBookInfo;
+    if (this.showBookInfo && !this.bookInfo && this.book?.google_books_id) {
+      this.bookInfoLoading = true;
+      try {
+        const workId = this.book.google_books_id;
+        const [workRes, authorRes] = await Promise.all([
+          fetch(`https://openlibrary.org/works/${workId}.json`),
+          this.book.author ? fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(this.book.author)}&limit=1`) : Promise.resolve(null),
+        ]);
+
+        let summary = '';
+        let subjects: string[] = [];
+        let first_publish_year = '';
+        if (workRes.ok) {
+          const work = await workRes.json();
+          summary = typeof work.description === 'string' ? work.description
+            : work.description?.value ?? '';
+          subjects = (work.subjects ?? []).slice(0, 5);
+          first_publish_year = work.first_publish_date ?? '';
+        }
+
+        let author_bio = '';
+        if (authorRes?.ok) {
+          const authorData = await authorRes.json();
+          const authorKey = authorData.docs?.[0]?.key;
+          if (authorKey) {
+            const bioRes = await fetch(`https://openlibrary.org${authorKey}.json`);
+            if (bioRes.ok) {
+              const bio = await bioRes.json();
+              author_bio = typeof bio.bio === 'string' ? bio.bio : bio.bio?.value ?? '';
+            }
+          }
+        }
+
+        this.bookInfo = { summary, subjects, first_publish_year, author_bio };
+      } catch {}
+      this.bookInfoLoading = false;
+    }
   }
 
   get condition() {
