@@ -37,19 +37,28 @@
         </div>
 
         <!-- Titre (livre seul avec autocomplete / pack sans autocomplete) -->
-        <!-- Scan couverture -->
-        <div *ngIf="!isPack" class="mb-4">
-          <button type="button" (click)="scanInput.click()"
-                  [disabled]="scanLoading"
-                  class="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
-            <span *ngIf="!scanLoading">📷 Scanner la couverture du livre</span>
-            <span *ngIf="scanLoading" class="flex items-center gap-2">
-              <span class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span>
-              Analyse en cours...
-            </span>
-          </button>
-          <input #scanInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event)" />
-          <p *ngIf="scanError" class="text-xs text-red-500 mt-1 text-center">{{ scanError }}</p>
+        <!-- Scan couverture / dos -->
+        <div *ngIf="!isPack" class="mb-4 space-y-2">
+          <p class="text-xs text-gray-500 font-medium">📷 Scanner pour remplir automatiquement</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" (click)="scanCoverInput.click()" [disabled]="scanLoading"
+                    class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-xs font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
+              <span *ngIf="scanLoading !== 'cover'">📖 Couverture</span>
+              <span *ngIf="scanLoading === 'cover'" class="flex items-center gap-1">
+                <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Analyse...
+              </span>
+            </button>
+            <button type="button" (click)="scanBackInput.click()" [disabled]="scanLoading"
+                    class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-xs font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
+              <span *ngIf="scanLoading !== 'back'">📄 Dos du livre</span>
+              <span *ngIf="scanLoading === 'back'" class="flex items-center gap-1">
+                <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Analyse...
+              </span>
+            </button>
+          </div>
+          <input #scanCoverInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event, 'cover')" />
+          <input #scanBackInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event, 'back')" />
+          <p *ngIf="scanError" class="text-xs text-red-500 text-center">{{ scanError }}</p>
         </div>
 
         <div class="mb-4 relative">

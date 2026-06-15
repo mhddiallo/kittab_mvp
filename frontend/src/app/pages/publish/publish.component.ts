@@ -55,7 +55,7 @@ export class PublishComponent implements OnInit {
   submitting = false;
   error = '';
   autocompleteTimeout: any;
-  scanLoading = false;
+  scanLoading: false | 'cover' | 'back' = false;
   scanError = '';
 
   conditions = [
@@ -219,11 +219,11 @@ export class PublishComponent implements OnInit {
     }
   }
 
-  async onScanImage(event: Event) {
+  async onScanImage(event: Event, mode: 'cover' | 'back' = 'cover') {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
-    this.scanLoading = true;
+    this.scanLoading = mode;
     this.scanError = '';
     try {
       const form = new FormData();
@@ -234,16 +234,17 @@ export class PublishComponent implements OnInit {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.title) this.title = data.title;
-        if (data.author) this.author = data.author;
-        if (data.category) {
+        // Ne pas écraser ce qui est déjà rempli
+        if (data.title && !this.title) this.title = data.title;
+        if (data.author && !this.author) this.author = data.author;
+        if (data.category && !this.categoryId) {
           const match = this.categories.find(c => c.name === data.category);
           if (match) this.categoryId = match.id;
         }
-        if (data.language && this.languages.includes(data.language)) {
+        if (data.language && !this.language && this.languages.includes(data.language)) {
           this.language = data.language;
         }
-        // Utiliser la photo scannée comme image de l'annonce
+        // Ajouter la photo scannée comme image de l'annonce
         if (this.images.length < 4) {
           this.images.push(file);
           const reader = new FileReader();
@@ -251,7 +252,7 @@ export class PublishComponent implements OnInit {
           reader.readAsDataURL(file);
         }
       } else {
-        this.scanError = 'Impossible de lire la couverture, remplis manuellement.';
+        this.scanError = 'Impossible d\'analyser l\'image, remplis manuellement.';
       }
     } catch {
       this.scanError = 'Erreur lors de l\'analyse, remplis manuellement.';
