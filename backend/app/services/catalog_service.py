@@ -112,7 +112,7 @@ async def autocomplete(db: Session, q: str) -> list[dict]:
 
     internal, google = await asyncio.gather(
         asyncio.to_thread(search_internal, db, q, 5),
-        search_google_books(q, 8),
+        search_google_books(q, 10),
     )
 
     internal_titles = {r["title"].lower() for r in internal}
@@ -120,7 +120,7 @@ async def autocomplete(db: Session, q: str) -> list[dict]:
     for g in google:
         if g["title"].lower() not in internal_titles:
             merged.append(g)
-        if len(merged) >= 8:
+        if len(merged) >= 10:
             break
 
     return merged

@@ -97,26 +97,54 @@ export class BookDetailComponent implements OnInit {
     } catch {}
   }
 
-  async toggleBookInfo() {
-    this.showBookInfo = !this.showBookInfo;
-    if (this.showBookInfo && !this.bookInfo && this.book?.open_library_id) {
-      this.bookInfoLoading = true;
-      try {
-        const googleId = this.book.open_library_id;
-        const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${googleId}`);
+  openBookInfo() {
+    this.showBookInfo = true;
+    document.body.style.overflow = 'hidden';
+    if (!this.bookInfo) this.loadBookInfo();
+  }
+
+  closeBookInfo() {
+    this.showBookInfo = false;
+    document.body.style.overflow = '';
+  }
+
+  async loadBookInfo() {
+    if (!this.book) return;
+    this.bookInfoLoading = true;
+    try {
+      let volumeInfo: any = null;
+
+      if (this.book.open_library_id) {
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes/${this.book.open_library_id}`);
         if (res.ok) {
           const data = await res.json();
-          const info = data.volumeInfo ?? {};
-          this.bookInfo = {
-            summary: info.description ?? '',
-            subjects: (info.categories ?? []).slice(0, 5),
-            first_publish_year: (info.publishedDate ?? '').slice(0, 4),
-            author_bio: '',
-          };
+          volumeInfo = data.volumeInfo;
         }
-      } catch {}
-      this.bookInfoLoading = false;
+      }
+
+      if (!volumeInfo) {
+        const q = encodeURIComponent(`intitle:${this.book.title}${this.book.author ? '+inauthor:' + this.book.author : ''}`);
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`);
+        if (res.ok) {
+          const data = await res.json();
+          volumeInfo = data.items?.[0]?.volumeInfo ?? null;
+        }
+      }
+
+      if (volumeInfo) {
+        this.bookInfo = {
+          summary: volumeInfo.description ?? '',
+          subjects: (volumeInfo.categories ?? []).slice(0, 6),
+          first_publish_year: (volumeInfo.publishedDate ?? '').slice(0, 4),
+          author_bio: '',
+        };
+      } else {
+        this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '' };
+      }
+    } catch {
+      this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '' };
     }
+    this.bookInfoLoading = false;
   }
 
   get condition() {
