@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,7 +13,7 @@ declare const google: any;
   imports: [RouterLink, CommonModule, FormsModule],
   templateUrl: './login.component.html',
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
   step: 'phone' | 'otp' | 'profile' = 'phone';
   phone = ''; otp = ''; firstName = ''; lastName = ''; address = '';
   loading = false; devCode = ''; error = '';
@@ -25,8 +25,10 @@ export class LoginComponent implements OnInit {
     this.redirectUrl = nav?.extras?.state?.['redirectUrl'] ?? '/';
   }
 
-  ngOnInit() {
-    this.initGoogleButton();
+  ngOnInit() {}
+
+  ngAfterViewInit() {
+    setTimeout(() => this.initGoogleButton(), 100);
   }
 
   private initGoogleButton() {
