@@ -38,7 +38,6 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
         "maxResults": limit,
         "printType": "books",
         "fields": "items(id,volumeInfo(title,authors,industryIdentifiers,imageLinks,publishedDate))",
-        "langRestrict": "fr",
     }
     if settings.GOOGLE_BOOKS_API_KEY:
         params["key"] = settings.GOOGLE_BOOKS_API_KEY
