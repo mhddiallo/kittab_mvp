@@ -66,10 +66,14 @@ async def scan_cover(file: UploadFile = File(...)):
     )
 
     import json as _json
+    import re as _re
     try:
         text = message.content[0].text.strip()
-        data = _json.loads(text)
-        return {"title": data.get("title", ""), "author": data.get("author", "")}
+        match = _re.search(r'\{.*?\}', text, _re.DOTALL)
+        if match:
+            data = _json.loads(match.group())
+            return {"title": data.get("title", ""), "author": data.get("author", "")}
+        raise ValueError("no json")
     except Exception:
         raise HTTPException(status_code=422, detail="Impossible d'extraire les informations du livre")
 
