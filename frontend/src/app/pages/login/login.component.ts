@@ -1,9 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
+
+declare const google: any;
 
 @Component({
   selector: 'app-login',
@@ -11,18 +13,50 @@ import { environment } from '../../../environments/environment';
   imports: [RouterLink, CommonModule, FormsModule],
   templateUrl: './login.component.html',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   step: 'phone' | 'otp' | 'profile' = 'phone';
   phone = ''; otp = ''; firstName = ''; lastName = ''; address = '';
   loading = false; devCode = ''; error = '';
   private redirectUrl = '/';
 
-  constructor(private auth: AuthService, private router: Router) {
-    // Si déjà connecté, redirige vers l'accueil
+  constructor(private auth: AuthService, private router: Router, private zone: NgZone) {
     if (this.auth.isLoggedIn) this.router.navigate(['/']);
-    // Mémorise la page d'origine (si redirigé depuis un guard)
     const nav = this.router.getCurrentNavigation();
     this.redirectUrl = nav?.extras?.state?.['redirectUrl'] ?? '/';
+  }
+
+  ngOnInit() {
+    if (typeof google !== 'undefined') {
+      google.accounts.id.initialize({
+        client_id: '211698271206-1smssf8ul4pp3dn771sdma0np7boblmu.apps.googleusercontent.com',
+        callback: (response: any) => this.zone.run(() => this.handleGoogleCallback(response)),
+      });
+      google.accounts.id.renderButton(
+        document.getElementById('google-btn'),
+        { theme: 'outline', size: 'large', width: '100%', text: 'continue_with' }
+      );
+    }
+  }
+
+  async handleGoogleCallback(response: any) {
+    this.loading = true; this.error = '';
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail);
+      localStorage.setItem('kittab_token', data.access_token);
+      await this.auth.loadUser();
+      if (data.is_new_user && !data.user?.is_profile_complete) {
+        this.step = 'profile';
+      } else {
+        this.router.navigate([this.redirectUrl]);
+      }
+    } catch (e: any) { this.error = e.message || 'Erreur Google'; }
+    this.loading = false;
   }
 
   normalizePhone(phone: string): string {
