@@ -270,7 +270,7 @@ export class PublishComponent implements OnInit {
       };
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
-      if (this.selectedCover) payload.cover_url = this.selectedCover;
+      // Ne pas stocker les covers Google Books (qualité variable), le vendeur uploadera ses propres photos
       if (this.language) payload.language = this.language;
       if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
       if (this.isPack) {

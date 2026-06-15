@@ -97,7 +97,7 @@ def save_to_catalog(db: Session, book_data: dict) -> None:
         title=book_data.get("title", ""),
         author=book_data.get("author", ""),
         isbn=book_data.get("isbn"),
-        cover_url=book_data.get("cover_url"),
+        cover_url=None,
         published_year=book_data.get("published_year"),
         open_library_id=google_id,
     )
