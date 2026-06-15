@@ -67,9 +67,26 @@
       </button>
     </div>
   </div>
+</nav>
 
-  <!-- Menu mobile -->
-  <div *ngIf="menuOpen" class="lg:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1">
+<!-- Backdrop mobile menu -->
+<div *ngIf="menuOpen" (click)="menuOpen=false" class="lg:hidden fixed inset-0 bg-black/40 z-40"></div>
+
+<!-- Sliding panel mobile menu -->
+<div *ngIf="menuOpen" class="lg:hidden fixed top-0 right-0 h-full w-72 bg-white z-50 shadow-xl overflow-y-auto flex flex-col">
+  <!-- Header -->
+  <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+    <a routerLink="/" (click)="menuOpen=false" class="flex items-center gap-2">
+      <img src="assets/logo.png" alt="KITTAB" class="h-8 w-auto" />
+      <span class="font-extrabold text-base text-primary tracking-widest uppercase">Kittab</span>
+    </a>
+    <button (click)="menuOpen=false" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+      <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- Nav links -->
+  <div class="flex-1 px-4 py-4 space-y-1">
     <a routerLink="/" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" [routerLinkActiveOptions]="{exact:true}" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Accueil</a>
     <a routerLink="/catalogue" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Catalogue</a>
     <a routerLink="/how-it-works" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Comment ça marche</a>
@@ -77,6 +94,7 @@
       Communauté <span class="text-[10px] bg-amber-100 text-amber-600 font-bold px-1 py-px rounded leading-none">Bientôt</span>
     </a>
     <a routerLink="/contact" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Contactez-nous</a>
+
     <div class="border-t border-gray-100 pt-3 mt-3 space-y-2">
       <a routerLink="/publish" (click)="menuOpen=false" class="flex items-center justify-center gap-2 w-full btn-outline py-2.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -90,4 +108,4 @@
       </ng-container>
     </div>
   </div>
-</nav>
+</div>
