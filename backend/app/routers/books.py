@@ -77,12 +77,16 @@ async def book_info(
         pass
 
     if not volume_info:
-        return {"summary": None, "subjects": [], "published_year": None}
+        return {"summary": None, "subjects": [], "published_year": None, "cover_url": None, "page_count": None, "publisher": None, "google_books_link": None}
 
     return {
         "summary": volume_info.get("description"),
         "subjects": (volume_info.get("categories") or [])[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
+        "cover_url": (volume_info.get("imageLinks") or {}).get("thumbnail", "").replace("http://", "https://").replace("&zoom=1", "&zoom=3") or None,
+        "page_count": volume_info.get("pageCount"),
+        "publisher": volume_info.get("publisher"),
+        "google_books_link": volume_info.get("infoLink"),
     }
 
 

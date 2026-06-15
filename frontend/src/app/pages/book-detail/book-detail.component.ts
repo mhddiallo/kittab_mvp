@@ -33,6 +33,10 @@ interface BookInfo {
   subjects: string[];
   first_publish_year: string;
   author_bio: string;
+  cover_url: string | null;
+  page_count: number | null;
+  publisher: string | null;
+  google_books_link: string | null;
 }
 
 @Component({
@@ -125,12 +129,16 @@ export class BookDetailComponent implements OnInit {
           subjects: data.subjects ?? [],
           first_publish_year: data.published_year ?? '',
           author_bio: '',
+          cover_url: data.cover_url ?? null,
+          page_count: data.page_count ?? null,
+          publisher: data.publisher ?? null,
+          google_books_link: data.google_books_link ?? null,
         };
       } else {
-        this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '' };
+        this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '', cover_url: null, page_count: null, publisher: null, google_books_link: null };
       }
     } catch {
-      this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '' };
+      this.bookInfo = { summary: '', subjects: [], first_publish_year: '', author_bio: '', cover_url: null, page_count: null, publisher: null, google_books_link: null };
     }
     this.bookInfoLoading = false;
   }
@@ -144,6 +152,10 @@ export class BookDetailComponent implements OnInit {
     const phone = this.book.seller.phone.replace('+', '');
     const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`);
     return `https://wa.me/${phone}?text=${msg}`;
+  }
+
+  onImageError(event: Event) {
+    (event.target as HTMLImageElement).src = 'https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre';
   }
 
   get displayImages(): string[] {

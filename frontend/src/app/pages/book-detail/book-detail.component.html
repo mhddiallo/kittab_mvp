@@ -30,7 +30,8 @@
       <div>
         <div class="card overflow-hidden mb-3 bg-gray-50 flex items-center justify-center" style="aspect-ratio: 3/4">
           <img [src]="displayImages[selectedImage]" [alt]="book.title"
-               class="w-full h-full object-contain" />
+               class="w-full h-full object-contain"
+               (error)="onImageError($event)" />
         </div>
         <div *ngIf="displayImages.length > 1" class="flex gap-2">
           <button *ngFor="let img of displayImages; let i = index"
@@ -156,47 +157,45 @@
 <div *ngIf="showBookInfo"
      class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
      (click)="closeBookInfo()">
-  <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-  <!-- Panel -->
-  <div class="relative bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[85vh] flex flex-col shadow-2xl"
+  <div class="relative bg-white w-full sm:max-w-lg sm:rounded-2xl rounded-t-2xl max-h-[90vh] flex flex-col shadow-2xl"
        (click)="$event.stopPropagation()">
 
-    <!-- Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-      <div>
-        <h2 class="font-bold text-gray-900 text-lg">{{ book?.title }}</h2>
-        <p *ngIf="book?.author && !book?.is_pack" class="text-sm text-gray-500">{{ book?.author }}</p>
+    <!-- Header avec couverture -->
+    <div class="flex items-start gap-4 px-6 py-5 border-b border-gray-100">
+      <img *ngIf="bookInfo?.cover_url"
+           [src]="bookInfo!.cover_url"
+           [alt]="book?.title"
+           class="w-14 h-20 object-cover rounded-lg shadow-sm shrink-0" />
+      <div class="flex-1 min-w-0">
+        <h2 class="font-bold text-gray-900 text-lg leading-tight">{{ book?.title }}</h2>
+        <p *ngIf="book?.author && !book?.is_pack" class="text-sm text-gray-500 mt-0.5">{{ book?.author }}</p>
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-gray-400">
+          <span *ngIf="bookInfo?.first_publish_year">📅 {{ bookInfo!.first_publish_year }}</span>
+          <span *ngIf="bookInfo?.page_count">📄 {{ bookInfo!.page_count }} pages</span>
+          <span *ngIf="bookInfo?.publisher">🏢 {{ bookInfo!.publisher }}</span>
+        </div>
       </div>
       <button (click)="closeBookInfo()"
-              class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-600">
+              class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors text-gray-500 shrink-0">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
 
     <!-- Content -->
     <div class="overflow-y-auto flex-1 px-6 py-5">
-      <!-- Loading -->
       <div *ngIf="bookInfoLoading" class="flex flex-col items-center justify-center py-12 gap-3">
         <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p class="text-sm text-gray-400">Chargement des informations...</p>
       </div>
 
       <div *ngIf="!bookInfoLoading" class="space-y-5">
-        <!-- Année -->
-        <div *ngIf="bookInfo?.first_publish_year" class="flex items-center gap-2 text-sm text-gray-500">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          Publié en {{ bookInfo!.first_publish_year }}
-        </div>
-
-        <!-- Résumé -->
         <div *ngIf="bookInfo?.summary">
           <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Résumé</h4>
           <p class="text-sm text-gray-700 leading-relaxed">{{ bookInfo!.summary }}</p>
         </div>
 
-        <!-- Thèmes -->
         <div *ngIf="bookInfo?.subjects && bookInfo!.subjects.length > 0">
           <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Thèmes</h4>
           <div class="flex flex-wrap gap-1.5">
@@ -205,13 +204,21 @@
           </div>
         </div>
 
-        <!-- Aucune info -->
         <div *ngIf="!bookInfo?.summary && (!bookInfo?.subjects || bookInfo!.subjects.length === 0)"
              class="text-center py-8">
           <div class="text-4xl mb-3">📖</div>
           <p class="text-gray-500 text-sm">Aucune information disponible pour ce livre.</p>
         </div>
       </div>
+    </div>
+
+    <!-- Footer avec lien Google Books -->
+    <div *ngIf="!bookInfoLoading && bookInfo?.google_books_link" class="px-6 py-4 border-t border-gray-100">
+      <a [href]="bookInfo!.google_books_link" target="_blank" rel="noopener"
+         class="flex items-center justify-center gap-2 text-sm text-primary font-medium hover:underline">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        Voir sur Google Books
+      </a>
     </div>
   </div>
 </div>
