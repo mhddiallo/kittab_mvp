@@ -12,25 +12,25 @@
       <a routerLink="/" routerLinkActive="text-primary" [routerLinkActiveOptions]="{exact:true}" class="hover:text-primary transition-colors">Accueil</a>
       <a routerLink="/catalogue" routerLinkActive="text-primary" class="hover:text-primary transition-colors">Catalogue</a>
       <a routerLink="/how-it-works" routerLinkActive="text-primary" class="hover:text-primary transition-colors">Comment ça marche</a>
-      <a routerLink="/community" routerLinkActive="text-primary" class="hover:text-primary transition-colors flex items-center gap-1.5">
-        Communauté <span class="text-xs bg-amber-100 text-amber-600 font-semibold px-1.5 py-0.5 rounded-full leading-none">Bientôt</span>
+      <a routerLink="/community" routerLinkActive="text-primary" class="hover:text-primary transition-colors flex items-center gap-1">
+        Communauté <span class="text-[10px] bg-amber-100 text-amber-600 font-bold px-1 py-px rounded leading-none">Bientôt</span>
       </a>
       <a routerLink="/contact" routerLinkActive="text-primary" class="hover:text-primary transition-colors">Contactez-nous</a>
     </div>
 
-    <!-- Actions -->
+    <!-- Actions desktop + bouton burger mobile -->
     <div class="flex items-center gap-3">
-      <!-- Bouton Publier -->
+      <!-- Bouton Publier (desktop) -->
       <a routerLink="/publish" class="hidden md:flex btn-outline items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
         Vendre un livre
       </a>
 
-      <!-- Non connecté -->
-      <a *ngIf="!auth.isLoggedIn" routerLink="/login" class="btn-primary">Se connecter</a>
+      <!-- Non connecté (desktop) -->
+      <a *ngIf="!auth.isLoggedIn" routerLink="/login" class="hidden md:block btn-primary">Se connecter</a>
 
-      <!-- Connecté -->
-      <div *ngIf="auth.isLoggedIn" class="relative group">
+      <!-- Connecté (desktop) -->
+      <div *ngIf="auth.isLoggedIn" class="hidden md:block relative group">
         <button class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 transition-colors">
           <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
             {{ auth.user?.first_name?.[0]?.toUpperCase() || '?' }}
@@ -38,7 +38,6 @@
           {{ auth.user?.first_name || 'Mon compte' }}
           <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
-        <!-- Dropdown -->
         <div class="absolute right-0 top-full mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
           <a routerLink="/publish" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-primary">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -59,6 +58,36 @@
           </button>
         </div>
       </div>
+
+      <!-- Burger mobile -->
+      <button (click)="menuOpen = !menuOpen" class="md:hidden flex flex-col gap-1.5 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <span class="block w-5 h-0.5 bg-gray-700 transition-transform" [class.rotate-45]="menuOpen" [class.translate-y-2]="menuOpen"></span>
+        <span class="block w-5 h-0.5 bg-gray-700 transition-opacity" [class.opacity-0]="menuOpen"></span>
+        <span class="block w-5 h-0.5 bg-gray-700 transition-transform" [class.-rotate-45]="menuOpen" [class.-translate-y-2]="menuOpen"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Menu mobile -->
+  <div *ngIf="menuOpen" class="md:hidden border-t border-gray-100 bg-white px-6 py-4 space-y-1">
+    <a routerLink="/" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" [routerLinkActiveOptions]="{exact:true}" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Accueil</a>
+    <a routerLink="/catalogue" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Catalogue</a>
+    <a routerLink="/how-it-works" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Comment ça marche</a>
+    <a routerLink="/community" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
+      Communauté <span class="text-[10px] bg-amber-100 text-amber-600 font-bold px-1 py-px rounded leading-none">Bientôt</span>
+    </a>
+    <a routerLink="/contact" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Contactez-nous</a>
+    <div class="border-t border-gray-100 pt-3 mt-3 space-y-2">
+      <a routerLink="/publish" (click)="menuOpen=false" class="flex items-center justify-center gap-2 w-full btn-outline py-2.5">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Vendre un livre
+      </a>
+      <a *ngIf="!auth.isLoggedIn" routerLink="/login" (click)="menuOpen=false" class="flex items-center justify-center w-full btn-primary py-2.5">Se connecter</a>
+      <ng-container *ngIf="auth.isLoggedIn">
+        <a routerLink="/my-listings" (click)="menuOpen=false" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Mes annonces</a>
+        <a routerLink="/profile" (click)="menuOpen=false" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Mon profil</a>
+        <button (click)="logout(); menuOpen=false" class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">Se déconnecter</button>
+      </ng-container>
     </div>
   </div>
 </nav>
