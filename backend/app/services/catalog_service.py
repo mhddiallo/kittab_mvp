@@ -31,6 +31,15 @@ def search_internal(db: Session, q: str, limit: int = 10) -> list[dict]:
     ]
 
 
+async def is_valid_cover(client: httpx.AsyncClient, url: str) -> bool:
+    try:
+        r = await client.head(url, follow_redirects=True, timeout=2.0)
+        size = int(r.headers.get("content-length", 0))
+        return size > 500
+    except Exception:
+        return False
+
+
 async def search_google_books(q: str, limit: int = 10) -> list[dict]:
     url = "https://www.googleapis.com/books/v1/volumes"
     params: dict = {
@@ -47,39 +56,43 @@ async def search_google_books(q: str, limit: int = 10) -> list[dict]:
             resp = await client.get(url, params=params)
             resp.raise_for_status()
             data = resp.json()
+
+            results = []
+            for item in data.get("items", []):
+                info = item.get("volumeInfo", {})
+                authors = info.get("authors", [])
+                image_links = info.get("imageLinks", {})
+                thumbnail = (
+                    image_links.get("extraLarge") or image_links.get("large") or
+                    image_links.get("medium") or image_links.get("thumbnail") or
+                    image_links.get("smallThumbnail")
+                )
+                if thumbnail:
+                    thumbnail = thumbnail.replace("http://", "https://").replace("&zoom=1", "&zoom=3")
+                    if not await is_valid_cover(client, thumbnail):
+                        thumbnail = None
+
+                isbn = None
+                for identifier in info.get("industryIdentifiers", []):
+                    if identifier.get("type") in ("ISBN_13", "ISBN_10"):
+                        isbn = identifier["identifier"]
+                        if identifier["type"] == "ISBN_13":
+                            break
+
+                published_year = (info.get("publishedDate") or "")[:4] or None
+
+                results.append({
+                    "source": "google_books",
+                    "open_library_id": item.get("id", ""),
+                    "title": info.get("title", ""),
+                    "author": ", ".join(authors[:2]) if authors else "",
+                    "isbn": isbn,
+                    "cover_url": thumbnail,
+                    "thumbnail": thumbnail,
+                    "published_year": published_year,
+                })
     except Exception:
         return []
-
-    results = []
-    for item in data.get("items", []):
-        info = item.get("volumeInfo", {})
-        authors = info.get("authors", [])
-        image_links = info.get("imageLinks", {})
-        thumbnail = image_links.get("extraLarge") or image_links.get("large") or image_links.get("medium") or image_links.get("thumbnail") or image_links.get("smallThumbnail")
-        if thumbnail:
-            thumbnail = thumbnail.replace("http://", "https://").replace("&zoom=1", "&zoom=3")
-            if "unavailable" in thumbnail.lower():
-                thumbnail = None
-
-        isbn = None
-        for identifier in info.get("industryIdentifiers", []):
-            if identifier.get("type") in ("ISBN_13", "ISBN_10"):
-                isbn = identifier["identifier"]
-                if identifier["type"] == "ISBN_13":
-                    break
-
-        published_year = (info.get("publishedDate") or "")[:4] or None
-
-        results.append({
-            "source": "google_books",
-            "open_library_id": item.get("id", ""),
-            "title": info.get("title", ""),
-            "author": ", ".join(authors[:2]) if authors else "",
-            "isbn": isbn,
-            "cover_url": thumbnail,
-            "thumbnail": thumbnail,
-            "published_year": published_year,
-        })
     return results
 
 
@@ -97,7 +110,7 @@ def save_to_catalog(db: Session, book_data: dict) -> None:
         title=book_data.get("title", ""),
         author=book_data.get("author", ""),
         isbn=book_data.get("isbn"),
-        cover_url=None,
+        cover_url=book_data.get("cover_url"),
         published_year=book_data.get("published_year"),
         open_library_id=google_id,
     )
