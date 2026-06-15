@@ -25,8 +25,16 @@ export class LoginComponent {
     this.redirectUrl = nav?.extras?.state?.['redirectUrl'] ?? '/';
   }
 
+  normalizePhone(phone: string): string {
+    let p = phone.trim().replace(/\s+/g, '');
+    if (p.startsWith('00')) p = '+' + p.slice(2);
+    if (!p.startsWith('+')) p = '+224' + p;
+    return p;
+  }
+
   async requestOtp() {
     if (!this.phone.trim()) { this.error = 'Veuillez saisir votre numéro'; return; }
+    this.phone = this.normalizePhone(this.phone);
     this.loading = true; this.error = '';
     try {
       const res = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
