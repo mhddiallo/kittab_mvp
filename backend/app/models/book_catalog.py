@@ -17,5 +17,5 @@ class BookCatalog(Base):
     published_year: Mapped[str | None] = mapped_column(String(10))
     cover_url: Mapped[str | None] = mapped_column(String(500))
     description: Mapped[str | None] = mapped_column(Text)
-    google_books_id: Mapped[str | None] = mapped_column(String(50), unique=True)
+    open_library_id: Mapped[str | None] = mapped_column(String(50), unique=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

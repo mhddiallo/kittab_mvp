@@ -9,7 +9,7 @@ interface AutocompleteResult {
   title: string;
   author: string;
   source: string;
-  google_books_id?: string;
+  open_library_id?: string;
   thumbnail?: string;
 }
 
@@ -181,7 +181,7 @@ export class PublishComponent implements OnInit {
   selectSuggestion(s: AutocompleteResult) {
     this.title = s.title;
     this.author = s.author;
-    this.googleBooksId = s.google_books_id ?? '';
+    this.googleBooksId = s.open_library_id ?? '';
     this.selectedCover = s.thumbnail ?? '';
     this.showSuggestions = false;
     this.suggestions = [];
@@ -255,7 +255,7 @@ export class PublishComponent implements OnInit {
       if (this.description) payload.description = this.description;
       if (this.selectedCover) payload.cover_url = this.selectedCover;
       if (this.language) payload.language = this.language;
-      if (this.googleBooksId) payload.google_books_id = this.googleBooksId;
+      if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;
         if (this.educationLevel) payload.education_level = this.educationLevel;

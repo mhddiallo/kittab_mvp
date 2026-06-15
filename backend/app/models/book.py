@@ -49,7 +49,7 @@ class Book(Base):
     pack_items: Mapped[str | None] = mapped_column(Text)  # JSON string list
     cover_url: Mapped[str | None] = mapped_column(String(500))
     language: Mapped[str | None] = mapped_column(String(50))
-    google_books_id: Mapped[str | None] = mapped_column(String(100))
+    open_library_id: Mapped[str | None] = mapped_column(String(100))
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)

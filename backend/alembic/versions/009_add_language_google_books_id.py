@@ -1,4 +1,4 @@
-"""add language and google_books_id to books
+"""add language and open_library_id to books
 
 Revision ID: 009
 Revises: 008
@@ -15,9 +15,9 @@ depends_on = None
 
 def upgrade():
     op.add_column('books', sa.Column('language', sa.String(50), nullable=True))
-    op.add_column('books', sa.Column('google_books_id', sa.String(100), nullable=True))
+    op.add_column('books', sa.Column('open_library_id', sa.String(100), nullable=True))
 
 
 def downgrade():
-    op.drop_column('books', 'google_books_id')
+    op.drop_column('books', 'open_library_id')
     op.drop_column('books', 'language')

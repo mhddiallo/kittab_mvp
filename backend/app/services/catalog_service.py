@@ -24,7 +24,7 @@ def search_internal(db: Session, q: str, limit: int = 10) -> list[dict]:
             "cover_url": b.cover_url,
             "thumbnail": b.cover_url,
             "published_year": b.published_year,
-            "google_books_id": b.google_books_id,
+            "open_library_id": b.open_library_id,
         }
         for b in results
     ]
@@ -48,7 +48,7 @@ async def search_open_library(q: str, limit: int = 10) -> list[dict]:
         thumbnail = f"https://covers.openlibrary.org/b/id/{cover_i}-M.jpg" if cover_i else None
         results.append({
             "source": "open_library",
-            "google_books_id": item.get("key", "").replace("/works/", ""),
+            "open_library_id": item.get("key", "").replace("/works/", ""),
             "title": item.get("title", ""),
             "author": ", ".join(authors[:2]) if authors else "",
             "isbn": item.get("isbn", [None])[0] if item.get("isbn") else None,

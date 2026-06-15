@@ -17,7 +17,7 @@ interface BookDetail {
   seller: { first_name: string; last_name: string; phone: string; address: string };
   cover_url: string | null;
   language: string | null;
-  google_books_id: string | null;
+  open_library_id: string | null;
   is_available: boolean;
   accepts_exchange: boolean;
   views: number;
@@ -99,10 +99,10 @@ export class BookDetailComponent implements OnInit {
 
   async toggleBookInfo() {
     this.showBookInfo = !this.showBookInfo;
-    if (this.showBookInfo && !this.bookInfo && this.book?.google_books_id) {
+    if (this.showBookInfo && !this.bookInfo && this.book?.open_library_id) {
       this.bookInfoLoading = true;
       try {
-        const workId = this.book.google_books_id;
+        const workId = this.book.open_library_id;
         const [workRes, authorRes] = await Promise.all([
           fetch(`https://openlibrary.org/works/${workId}.json`),
           this.book.author ? fetch(`https://openlibrary.org/search/authors.json?q=${encodeURIComponent(this.book.author)}&limit=1`) : Promise.resolve(null),

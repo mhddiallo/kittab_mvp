@@ -48,7 +48,7 @@ class BookCreate(BaseModel):
     pack_items: Optional[List[str]] = None
     cover_url: Optional[str] = None
     language: Optional[str] = None
-    google_books_id: Optional[str] = None
+    open_library_id: Optional[str] = None
 
     @field_validator('pack_items', mode='before')
     @classmethod
@@ -92,7 +92,7 @@ class BookOut(BaseModel):
     pack_items: Optional[List[str]] = None
     cover_url: Optional[str] = None
     language: Optional[str] = None
-    google_books_id: Optional[str] = None
+    open_library_id: Optional[str] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
@@ -157,7 +157,7 @@ class CatalogSuggestion(BaseModel):
     cover_url: Optional[str] = None
     thumbnail: Optional[str] = None
     published_year: Optional[str] = None
-    google_books_id: Optional[str] = None
+    open_library_id: Optional[str] = None
 
     def model_post_init(self, __context: any) -> None:
         if self.thumbnail is None and self.cover_url:
