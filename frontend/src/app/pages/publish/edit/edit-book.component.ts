@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../../components/navbar/navbar.component';
 import { FooterComponent } from '../../../components/footer/footer.component';
 import { AuthService } from '../../../core/auth.service';
+import { environment } from '../../../../environments/environment';
 
 interface Category { id: number; name: string; }
 
@@ -56,14 +57,14 @@ export class EditBookComponent implements OnInit {
 
   async loadCategories() {
     try {
-      const res = await fetch('http://localhost:8000/api/categories');
+      const res = await fetch(`${environment.apiUrl}/api/categories`);
       if (res.ok) this.categories = await res.json();
     } catch {}
   }
 
   async loadBook() {
     try {
-      const res = await fetch(`http://localhost:8000/api/books/${this.bookId}`, {
+      const res = await fetch(`${environment.apiUrl}/api/books/${this.bookId}`, {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) {
@@ -107,7 +108,7 @@ export class EditBookComponent implements OnInit {
       };
       if (this.categoryId) payload.category_id = this.categoryId;
 
-      const res = await fetch(`http://localhost:8000/api/books/${this.bookId}`, {
+      const res = await fetch(`${environment.apiUrl}/api/books/${this.bookId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
         body: JSON.stringify(payload),

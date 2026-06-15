@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
+import { environment } from '../../../environments/environment';
 
 interface BookDetail {
   id: number;
@@ -80,7 +81,7 @@ export class BookDetailComponent implements OnInit {
 
   async loadBook(id: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/books/${id}`);
+      const res = await fetch(`${environment.apiUrl}/api/books/${id}`);
       if (res.ok) {
         this.book = await res.json();
         if (this.book?.category?.id) {
@@ -93,7 +94,7 @@ export class BookDetailComponent implements OnInit {
 
   async loadSimilarBooks(categoryId: number, excludeId: number) {
     try {
-      const res = await fetch(`http://localhost:8000/api/books?category_id=${categoryId}&page_size=5`);
+      const res = await fetch(`${environment.apiUrl}/api/books?category_id=${categoryId}&page_size=5`);
       if (res.ok) {
         const data = await res.json();
         this.similarBooks = (data.items ?? data).filter((b: BookCard) => b.id !== excludeId);
@@ -121,7 +122,7 @@ export class BookDetailComponent implements OnInit {
       if (this.book.title) params.set('title', this.book.title);
       if (this.book.author) params.set('author', this.book.author);
 
-      const res = await fetch(`http://localhost:8000/api/books/info?${params}`);
+      const res = await fetch(`${environment.apiUrl}/api/books/info?${params}`);
       if (res.ok) {
         const data = await res.json();
         this.bookInfo = {
@@ -164,7 +165,7 @@ export class BookDetailComponent implements OnInit {
 
   get displayImages(): string[] {
     if (!this.book) return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];
-    const uploaded = this.book.images.map(i => (i as any).url ? `http://localhost:8000${(i as any).url}` : i as unknown as string);
+    const uploaded = this.book.images.map(i => (i as any).url ? `${environment.apiUrl}${(i as any).url}` : i as unknown as string);
     if (uploaded.length) return uploaded;
     if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return [this.book.cover_url];
     return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];

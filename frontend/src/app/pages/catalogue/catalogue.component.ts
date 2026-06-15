@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
+import { environment } from '../../../environments/environment';
 
 interface Category { id: number; name: string; }
 
@@ -71,14 +72,14 @@ export class CatalogueComponent implements OnInit {
 
   async loadCategories() {
     try {
-      const res = await fetch('http://localhost:8000/api/categories');
+      const res = await fetch(`${environment.apiUrl}/api/categories`);
       if (res.ok) this.categories = await res.json();
     } catch {}
   }
 
   async loadBoostedBooks() {
     try {
-      const res = await fetch('http://localhost:8000/api/books?boosted=true&page_size=6');
+      const res = await fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6`);
       if (res.ok) {
         const data = await res.json();
         this.boostedBooks = data.items ?? data;
@@ -89,7 +90,7 @@ export class CatalogueComponent implements OnInit {
   async loadBooks(page = this.currentPage) {
     this.loading = true;
     try {
-      let url = `http://localhost:8000/api/books?page=${page}&page_size=${this.pageSize}`;
+      let url = `${environment.apiUrl}/api/books?page=${page}&page_size=${this.pageSize}`;
       if (this.searchQuery) url += `&q=${encodeURIComponent(this.searchQuery)}`;
       if (this.selectedCategoryId) url += `&category_id=${this.selectedCategoryId}`;
       if (this.selectedCondition) url += `&condition=${this.selectedCondition}`;
@@ -145,13 +146,13 @@ export class CatalogueComponent implements OnInit {
 
   getImageUrl(url: string | undefined): string {
     if (!url) return 'https://placehold.co/176x128/f3f4f6/9ca3af?text=Livre';
-    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+    return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
   }
 
   async sendAlert() {
     if (!this.alertPhone || !this.searchQuery) return;
     try {
-      await fetch('http://localhost:8000/api/books/alerts', {
+      await fetch(`${environment.apiUrl}/api/books/alerts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: this.searchQuery, notification_phone: this.alertPhone }),

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
+import { environment } from '../../../environments/environment';
 
 interface AutocompleteResult {
   title: string;
@@ -157,13 +158,14 @@ export class PublishComponent implements OnInit {
 
   constructor(private router: Router) {}
 
+
   ngOnInit() {
     this.loadCategories();
   }
 
   async loadCategories() {
     try {
-      const res = await fetch('http://localhost:8000/api/categories');
+      const res = await fetch(`${environment.apiUrl}/api/categories`);
       if (res.ok) this.categories = await res.json();
     } catch {}
   }
@@ -174,7 +176,7 @@ export class PublishComponent implements OnInit {
     this.autocompleteLoading = true;
     this.autocompleteTimeout = setTimeout(async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/books/autocomplete?q=${encodeURIComponent(this.title)}`);
+        const res = await fetch(`${environment.apiUrl}/api/books/autocomplete?q=${encodeURIComponent(this.title)}`);
         if (res.ok) { this.suggestions = await res.json(); this.showSuggestions = this.suggestions.length > 0; }
       } catch {}
       this.autocompleteLoading = false;
@@ -194,7 +196,7 @@ export class PublishComponent implements OnInit {
     this.suggestions = [];
 
     if (s.source === 'google_books' && s.open_library_id) {
-      fetch('http://localhost:8000/api/books/catalog/save', {
+      fetch(`${environment.apiUrl}/api/books/catalog/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -206,7 +208,7 @@ export class PublishComponent implements OnInit {
       }).catch(() => {});
 
       // Récupérer la catégorie depuis Google Books
-      fetch(`http://localhost:8000/api/books/info?google_id=${s.open_library_id}`)
+      fetch(`${environment.apiUrl}/api/books/info?google_id=${s.open_library_id}`)
         .then(r => r.ok ? r.json() : null)
         .then(data => {
           if (data?.kittab_category) {
@@ -228,7 +230,7 @@ export class PublishComponent implements OnInit {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch('http://localhost:8000/api/books/scan-cover', {
+      const res = await fetch(`${environment.apiUrl}/api/books/scan-cover`, {
         method: 'POST',
         body: form,
       });
@@ -337,7 +339,7 @@ export class PublishComponent implements OnInit {
         if (this.educationLevel) payload.education_level = this.educationLevel;
       }
 
-      const res = await fetch('http://localhost:8000/api/books', {
+      const res = await fetch(`${environment.apiUrl}/api/books`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify(payload),
@@ -357,7 +359,7 @@ export class PublishComponent implements OnInit {
       for (const img of this.images) {
         const form = new FormData();
         form.append('file', img);
-        await fetch(`http://localhost:8000/api/books/${book.id}/images`, {
+        await fetch(`${environment.apiUrl}/api/books/${book.id}/images`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
           body: form,

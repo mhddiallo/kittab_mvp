@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { AuthService } from '../../core/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface MyBook {
   id: number; title: string; author: string; price: number;
@@ -58,7 +59,7 @@ export class MyListingsComponent implements OnInit {
   async loadBooks() {
     this.loading = true;
     try {
-      const res = await fetch('http://localhost:8000/api/books/me/listings', {
+      const res = await fetch(`${environment.apiUrl}/api/books/me/listings`, {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) this.books = await res.json();
@@ -68,7 +69,7 @@ export class MyListingsComponent implements OnInit {
 
   async toggleAvailable(book: MyBook) {
     try {
-      await fetch(`http://localhost:8000/api/books/${book.id}`, {
+      await fetch(`${environment.apiUrl}/api/books/${book.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
         body: JSON.stringify({ is_available: !book.is_available }),
@@ -81,7 +82,7 @@ export class MyListingsComponent implements OnInit {
     if (!confirm('Supprimer cette annonce ?')) return;
     this.deletingId = id;
     try {
-      await fetch(`http://localhost:8000/api/books/${id}`, {
+      await fetch(`${environment.apiUrl}/api/books/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
@@ -112,7 +113,7 @@ export class MyListingsComponent implements OnInit {
     const bookId = this.selectedBook.id;
     this.closeBoostModal();
     try {
-      const res = await fetch(`http://localhost:8000/api/books/${bookId}/boost-request`, {
+      const res = await fetch(`${environment.apiUrl}/api/books/${bookId}/boost-request`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
         body: JSON.stringify({ duration_days: this.selectedDays }),
@@ -133,6 +134,6 @@ export class MyListingsComponent implements OnInit {
   getImageUrl(book: MyBook): string {
     const url = book.images?.[0]?.url;
     if (!url) return 'https://placehold.co/80x80/f3f4f6/9ca3af?text=📚';
-    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+    return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
   }
 }

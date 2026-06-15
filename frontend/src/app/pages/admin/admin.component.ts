@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { AuthService } from '../../core/auth.service';
+import { environment } from '../../../environments/environment';
 
 interface AdminStats {
   total_books: number; total_views: number; boosted_books: number; total_users: number;
@@ -54,7 +55,7 @@ export class AdminComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/stats', {
+      const res = await fetch(`${environment.apiUrl}/api/admin/stats`, {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) this.stats = await res.json();
@@ -67,7 +68,7 @@ export class AdminComponent implements OnInit {
   async loadBoostRequests() {
     this.requestsLoading = true;
     try {
-      const res = await fetch('http://localhost:8000/api/admin/boost-requests', {
+      const res = await fetch(`${environment.apiUrl}/api/admin/boost-requests`, {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) this.boostRequests = await res.json();
@@ -81,7 +82,7 @@ export class AdminComponent implements OnInit {
   async approveRequest(req: BoostRequest) {
     this.processingId = req.id;
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/boost-requests/${req.id}/approve`, {
+      const res = await fetch(`${environment.apiUrl}/api/admin/boost-requests/${req.id}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
         body: JSON.stringify({ days: req.duration_days }),
@@ -99,7 +100,7 @@ export class AdminComponent implements OnInit {
   async rejectRequest(req: BoostRequest) {
     this.processingId = req.id;
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/boost-requests/${req.id}/reject`, {
+      const res = await fetch(`${environment.apiUrl}/api/admin/boost-requests/${req.id}/reject`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
@@ -122,7 +123,7 @@ export class AdminComponent implements OnInit {
   async loadBooks() {
     this.booksLoading = true;
     try {
-      const url = `http://localhost:8000/api/admin/books${this.searchQuery ? '?q=' + encodeURIComponent(this.searchQuery) : ''}`;
+      const url = `${environment.apiUrl}/api/admin/books${this.searchQuery ? '?q=' + encodeURIComponent(this.searchQuery) : ''}`;
       const res = await fetch(url, { headers: { Authorization: `Bearer ${this.auth.token}` } });
       if (res.ok) this.books = await res.json();
     } catch {}
@@ -132,7 +133,7 @@ export class AdminComponent implements OnInit {
   async boost(book: AdminBook) {
     this.boostingId = book.id;
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/books/${book.id}/boost`, {
+      const res = await fetch(`${environment.apiUrl}/api/admin/books/${book.id}/boost`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
         body: JSON.stringify({ days: this.bookBoostDays }),
@@ -151,7 +152,7 @@ export class AdminComponent implements OnInit {
   async unboost(book: AdminBook) {
     this.boostingId = book.id;
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/books/${book.id}/boost`, {
+      const res = await fetch(`${environment.apiUrl}/api/admin/books/${book.id}/boost`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });

@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 export interface BookCard {
   id: number; title: string; author: string; price: number;
@@ -29,7 +30,7 @@ export class BookCardComponent {
   get conditionClass(): string {
     return ({ new: 'bg-green-100 text-green-700', like_new: 'bg-blue-100 text-blue-700', good: 'bg-amber-100 text-amber-700', fair: 'bg-gray-100 text-gray-600' } as any)[this.book.condition] || 'bg-gray-100 text-gray-600';
   }
-  private readonly API = 'http://localhost:8000';
+  private readonly API = environment.apiUrl;
 
   private isValidCover(url: string): boolean {
     return !url.toLowerCase().includes('unavailable') && !url.toLowerCase().includes('nocover');

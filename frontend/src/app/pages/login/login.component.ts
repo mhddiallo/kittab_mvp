@@ -3,6 +3,7 @@ import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +29,7 @@ export class LoginComponent {
     if (!this.phone.trim()) { this.error = 'Veuillez saisir votre numéro'; return; }
     this.loading = true; this.error = '';
     try {
-      const res = await fetch('http://localhost:8000/api/auth/request-otp', {
+      const res = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: this.phone }),
@@ -45,7 +46,7 @@ export class LoginComponent {
     if (!this.otp.trim()) { this.error = 'Veuillez saisir le code'; return; }
     this.loading = true; this.error = '';
     try {
-      const res = await fetch('http://localhost:8000/api/auth/verify-otp', {
+      const res = await fetch(`${environment.apiUrl}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: this.phone, code: this.otp }),
@@ -69,7 +70,7 @@ export class LoginComponent {
     }
     this.loading = true; this.error = '';
     try {
-      const res = await fetch('http://localhost:8000/api/auth/complete-profile', {
+      const res = await fetch(`${environment.apiUrl}/api/auth/complete-profile`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

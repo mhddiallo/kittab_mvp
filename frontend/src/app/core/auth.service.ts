@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 export interface CurrentUser {
   first_name: string;
@@ -29,7 +30,7 @@ export class AuthService {
   async loadUser(): Promise<void> {
     if (!this.token) return;
     try {
-      const res = await fetch('http://localhost:8000/api/auth/me', {
+      const res = await fetch(`${environment.apiUrl}/api/auth/me`, {
         headers: { Authorization: `Bearer ${this.token}` },
       });
       if (res.ok) this._user = await res.json();

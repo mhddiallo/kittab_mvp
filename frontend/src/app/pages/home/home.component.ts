@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-home',
@@ -99,7 +100,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   getImageUrl(book: BookCard): string {
     const url = book.images?.find(i => i.is_primary)?.url || book.images?.[0]?.url;
     if (!url) return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=📚';
-    return url.startsWith('http') ? url : `http://localhost:8000${url}`;
+    return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
   }
 
   async ngOnInit() {
@@ -111,8 +112,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     try {
       // À la une : livres boostés uniquement
       const [boostedRes, latestRes] = await Promise.all([
-        fetch('http://localhost:8000/api/books?boosted=true&page_size=6&page=1'),
-        fetch('http://localhost:8000/api/books?page_size=6&page=1'),
+        fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6&page=1`),
+        fetch(`${environment.apiUrl}/api/books?page_size=6&page=1`),
       ]);
       if (latestRes.ok) {
         const data = await latestRes.json();
@@ -137,7 +138,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.searchQuery.length < 2) { this.suggestions = []; return; }
     this.searchTimeout = setTimeout(async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/books/autocomplete?q=${encodeURIComponent(this.searchQuery)}`);
+        const res = await fetch(`${environment.apiUrl}/api/books/autocomplete?q=${encodeURIComponent(this.searchQuery)}`);
         if (res.ok) this.suggestions = await res.json();
       } catch {}
     }, 300);
