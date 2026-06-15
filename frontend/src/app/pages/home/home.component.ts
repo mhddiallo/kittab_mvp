@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.heroInterval = setInterval(() => {
       this.heroVisible = false;
       this.heroFadeTimeout = setTimeout(() => {
-        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroTexts.length;
+        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroPhrases.length;
         this.heroVisible = true;
       }, 500);
     }, 3500);
