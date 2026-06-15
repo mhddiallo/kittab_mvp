@@ -52,7 +52,7 @@
               type="text"
               [(ngModel)]="title"
               (input)="onTitleInput()"
-              (blur)="showSuggestions = false"
+              (blur)="hideSuggestionsDelayed()"
               placeholder="Recherche un livre..."
               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary pr-10"
             />
