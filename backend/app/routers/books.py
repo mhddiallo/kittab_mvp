@@ -24,6 +24,7 @@ from app.schemas.book import (
 )
 from app.services.alert_service import check_and_notify_alerts
 from app.services.catalog_service import autocomplete, save_to_catalog
+from app.services.category_mapping import map_to_kittab_category
 from app.models.alert import BookAlert
 
 router = APIRouter(prefix="/books", tags=["books"])
@@ -59,7 +60,7 @@ async def scan_cover(file: UploadFile = File(...)):
                 },
                 {
                     "type": "text",
-                    "text": "This is a book cover. Extract the book title and author name. Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\"}. If you cannot determine one of the fields, use an empty string.",
+                    "text": "This is a book cover. Extract the book title, author name, and category. For category, use ONE of these values only: Autobiographies, Romans, Histoire, Sciences, Manuels scolaires, Développement personnel, Religion & Spiritualité, Philosophie, Économie & Business, Droit, Médecine & Santé, Informatique, Littérature africaine, Jeunesse, Poésie, BD & Comics, Langues & Dictionnaires, Autres. Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\", \"category\": \"...\"}. If you cannot determine a field, use an empty string.",
                 },
             ],
         }],
@@ -72,7 +73,7 @@ async def scan_cover(file: UploadFile = File(...)):
         match = _re.search(r'\{.*?\}', text, _re.DOTALL)
         if match:
             data = _json.loads(match.group())
-            return {"title": data.get("title", ""), "author": data.get("author", "")}
+            return {"title": data.get("title", ""), "author": data.get("author", ""), "category": data.get("category", "")}
         raise ValueError("no json")
     except Exception:
         raise HTTPException(status_code=422, detail="Impossible d'extraire les informations du livre")
@@ -121,16 +122,18 @@ async def book_info(
         pass
 
     if not volume_info:
-        return {"summary": None, "subjects": [], "published_year": None, "cover_url": None, "page_count": None, "publisher": None, "google_books_link": None}
+        return {"summary": None, "subjects": [], "published_year": None, "cover_url": None, "page_count": None, "publisher": None, "google_books_link": None, "kittab_category": None}
 
+    gb_categories = volume_info.get("categories") or []
     return {
         "summary": volume_info.get("description"),
-        "subjects": (volume_info.get("categories") or [])[:6],
+        "subjects": gb_categories[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
         "cover_url": (volume_info.get("imageLinks") or {}).get("thumbnail", "").replace("http://", "https://").replace("&zoom=1", "&zoom=3") or None,
         "page_count": volume_info.get("pageCount"),
         "publisher": volume_info.get("publisher"),
         "google_books_link": volume_info.get("infoLink"),
+        "kittab_category": map_to_kittab_category(gb_categories),
     }
 
 

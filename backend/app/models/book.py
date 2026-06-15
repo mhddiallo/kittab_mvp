@@ -50,6 +50,7 @@ class Book(Base):
     cover_url: Mapped[str | None] = mapped_column(String(500))
     language: Mapped[str | None] = mapped_column(String(50))
     open_library_id: Mapped[str | None] = mapped_column(String(100))
+    page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)

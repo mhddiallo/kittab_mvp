@@ -37,6 +37,7 @@ export class PublishComponent implements OnInit {
   googleBooksId = '';
   selectedCover = '';
   language = '';
+  pageCount: number | null = null;
   acceptsExchange = false;
   educationLevel = '';
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
@@ -203,6 +204,18 @@ export class PublishComponent implements OnInit {
           cover_url: s.thumbnail ?? null,
         }),
       }).catch(() => {});
+
+      // Récupérer la catégorie depuis Google Books
+      fetch(`http://localhost:8000/api/books/info?google_id=${s.open_library_id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.kittab_category) {
+            const match = this.categories.find(c => c.name === data.kittab_category);
+            if (match) this.categoryId = match.id;
+          }
+          if (data?.page_count) this.pageCount = data.page_count;
+        })
+        .catch(() => {});
     }
   }
 
@@ -223,6 +236,10 @@ export class PublishComponent implements OnInit {
         const data = await res.json();
         if (data.title) this.title = data.title;
         if (data.author) this.author = data.author;
+        if (data.category) {
+          const match = this.categories.find(c => c.name === data.category);
+          if (match) this.categoryId = match.id;
+        }
       } else {
         this.scanError = 'Impossible de lire la couverture, remplis manuellement.';
       }
@@ -302,6 +319,7 @@ export class PublishComponent implements OnInit {
       if (this.selectedCover) payload.cover_url = this.selectedCover;
       if (this.language) payload.language = this.language;
       if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
+      if (this.pageCount) payload.page_count = this.pageCount;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;
         if (this.educationLevel) payload.education_level = this.educationLevel;

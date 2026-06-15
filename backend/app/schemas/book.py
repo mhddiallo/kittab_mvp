@@ -49,6 +49,7 @@ class BookCreate(BaseModel):
     cover_url: Optional[str] = None
     language: Optional[str] = None
     open_library_id: Optional[str] = None
+    page_count: Optional[int] = None
 
     @field_validator('pack_items', mode='before')
     @classmethod
@@ -93,6 +94,7 @@ class BookOut(BaseModel):
     cover_url: Optional[str] = None
     language: Optional[str] = None
     open_library_id: Optional[str] = None
+    page_count: Optional[int] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
