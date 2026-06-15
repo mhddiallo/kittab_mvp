@@ -158,11 +158,15 @@ export class BookDetailComponent implements OnInit {
     (event.target as HTMLImageElement).src = 'https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre';
   }
 
+  private isValidCover(url: string): boolean {
+    return !url.toLowerCase().includes('unavailable') && !url.toLowerCase().includes('nocover');
+  }
+
   get displayImages(): string[] {
-    if (!this.book) return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
+    if (!this.book) return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];
     const uploaded = this.book.images.map(i => (i as any).url ? `http://localhost:8000${(i as any).url}` : i as unknown as string);
     if (uploaded.length) return uploaded;
-    if (this.book.cover_url) return [this.book.cover_url];
-    return ['https://placehold.co/600x400/f3f4f6/9ca3af?text=Livre'];
+    if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return [this.book.cover_url];
+    return ['https://placehold.co/600x800/f3f4f6/9ca3af?text=Livre'];
   }
 }

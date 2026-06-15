@@ -31,10 +31,14 @@ export class BookCardComponent {
   }
   private readonly API = 'http://localhost:8000';
 
+  private isValidCover(url: string): boolean {
+    return !url.toLowerCase().includes('unavailable') && !url.toLowerCase().includes('nocover');
+  }
+
   get primaryImage(): string {
     const url = this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url;
     if (url) return url.startsWith('http') ? url : `${this.API}${url}`;
-    if (this.book.cover_url) return this.book.cover_url;
+    if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return this.book.cover_url;
     return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
   }
 
