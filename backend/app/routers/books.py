@@ -34,6 +34,46 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 # ── Catalogue autocomplete ────────────────────────────────────────────────
 
+@router.post("/scan-cover")
+async def scan_cover(file: UploadFile = File(...)):
+    import base64
+    import anthropic as _anthropic
+
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="Scan non disponible")
+
+    content = await file.read()
+    b64 = base64.standard_b64encode(content).decode("utf-8")
+    ext = (file.content_type or "image/jpeg")
+
+    client = _anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=256,
+        messages=[{
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "source": {"type": "base64", "media_type": ext, "data": b64},
+                },
+                {
+                    "type": "text",
+                    "text": "This is a book cover. Extract the book title and author name. Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\"}. If you cannot determine one of the fields, use an empty string.",
+                },
+            ],
+        }],
+    )
+
+    import json as _json
+    try:
+        text = message.content[0].text.strip()
+        data = _json.loads(text)
+        return {"title": data.get("title", ""), "author": data.get("author", "")}
+    except Exception:
+        raise HTTPException(status_code=422, detail="Impossible d'extraire les informations du livre")
+
+
 @router.get("/autocomplete", response_model=list[CatalogSuggestion])
 async def book_autocomplete(q: str = Query(..., min_length=2), db: Session = Depends(get_db)):
     return await autocomplete(db, q)

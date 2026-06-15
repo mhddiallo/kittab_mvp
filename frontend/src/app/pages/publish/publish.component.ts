@@ -54,6 +54,8 @@ export class PublishComponent implements OnInit {
   submitting = false;
   error = '';
   autocompleteTimeout: any;
+  scanLoading = false;
+  scanError = '';
 
   conditions = [
     { value: 'new', label: 'Neuf', emoji: '✨', desc: 'Jamais utilisé', cls: 'border-green-400 bg-green-50', textCls: 'text-green-600' },
@@ -202,6 +204,34 @@ export class PublishComponent implements OnInit {
         }),
       }).catch(() => {});
     }
+  }
+
+  async onScanImage(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.scanLoading = true;
+    this.scanError = '';
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('http://localhost:8000/api/books/scan-cover', {
+        method: 'POST',
+        body: form,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.title) this.title = data.title;
+        if (data.author) this.author = data.author;
+        if (data.title) this.onTitleInput();
+      } else {
+        this.scanError = 'Impossible de lire la couverture, remplis manuellement.';
+      }
+    } catch {
+      this.scanError = 'Erreur lors de l\'analyse, remplis manuellement.';
+    }
+    this.scanLoading = false;
+    input.value = '';
   }
 
   onImageChange(event: Event) {

@@ -37,6 +37,21 @@
         </div>
 
         <!-- Titre (livre seul avec autocomplete / pack sans autocomplete) -->
+        <!-- Scan couverture -->
+        <div *ngIf="!isPack" class="mb-4">
+          <button type="button" (click)="scanInput.click()"
+                  [disabled]="scanLoading"
+                  class="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
+            <span *ngIf="!scanLoading">📷 Scanner la couverture du livre</span>
+            <span *ngIf="scanLoading" class="flex items-center gap-2">
+              <span class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span>
+              Analyse en cours...
+            </span>
+          </button>
+          <input #scanInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event)" />
+          <p *ngIf="scanError" class="text-xs text-red-500 mt-1 text-center">{{ scanError }}</p>
+        </div>
+
         <div class="mb-4 relative">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">
             {{ isPack ? 'Nom du pack' : 'Titre du livre' }} <span class="text-primary">*</span>
