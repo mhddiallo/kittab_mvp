@@ -75,7 +75,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
   normalizePhone(phone: string): string {
     let p = phone.trim().replace(/\s+/g, '');
     if (p.startsWith('00')) p = '+' + p.slice(2);
-    if (!p.startsWith('+')) p = '+224' + p;
+    if (!p.startsWith('+')) p = '+221' + p;
     return p;
   }
 

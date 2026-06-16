@@ -149,6 +149,8 @@ def update_me(
         current_user.address = payload.address.strip()
     if payload.phone is not None and current_user.phone.startswith('google_'):
         current_user.phone = payload.phone.strip()
+    if current_user.first_name and current_user.last_name:
+        current_user.is_profile_complete = True
     db.commit()
     db.refresh(current_user)
     return UserOut.model_validate(current_user)
