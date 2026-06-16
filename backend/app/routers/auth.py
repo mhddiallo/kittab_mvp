@@ -119,6 +119,64 @@ def google_login(payload: GoogleTokenInput, db: Session = Depends(get_db)):
     )
 
 
+class GoogleCompleteInput(BaseModel):
+    first_name: str
+    last_name: str
+    phone: str
+    otp_code: str
+    email: str | None = None
+    address: str | None = None
+
+
+@router.post("/google/complete", response_model=TokenResponse)
+def google_complete(
+    payload: GoogleCompleteInput,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    if not current_user.phone.startswith('google_'):
+        raise HTTPException(status_code=400, detail="Action non autorisée")
+
+    phone = payload.phone.strip()
+    _validate_phone(phone)
+
+    if not verify_otp(db, phone, payload.otp_code):
+        raise HTTPException(status_code=400, detail="Code OTP invalide ou expiré")
+
+    existing = db.query(User).filter(User.phone == phone, User.id != current_user.id).first()
+
+    if existing:
+        # Fusionner : ajouter google_id/email au compte téléphone existant
+        existing.google_id = current_user.google_id
+        if payload.email and not existing.email:
+            existing.email = payload.email.strip()
+        if payload.first_name and not existing.first_name:
+            existing.first_name = payload.first_name.strip()
+        if payload.last_name and not existing.last_name:
+            existing.last_name = payload.last_name.strip()
+        existing.is_profile_complete = True
+        # Supprimer le compte Google temporaire
+        db.delete(current_user)
+        db.commit()
+        db.refresh(existing)
+        token = create_access_token(subject=str(existing.id))
+        return TokenResponse(access_token=token, is_new_user=False, user=UserOut.model_validate(existing))
+    else:
+        # Nouveau numéro → compléter le compte Google actuel
+        current_user.phone = phone
+        current_user.first_name = payload.first_name.strip()
+        current_user.last_name = payload.last_name.strip()
+        if payload.email:
+            current_user.email = payload.email.strip()
+        if payload.address:
+            current_user.address = payload.address.strip()
+        current_user.is_profile_complete = True
+        db.commit()
+        db.refresh(current_user)
+        token = create_access_token(subject=str(current_user.id))
+        return TokenResponse(access_token=token, is_new_user=True, user=UserOut.model_validate(current_user))
+
+
 @router.post("/complete-profile", response_model=UserOut)
 def complete_profile(
     payload: CompleteProfileInput,
