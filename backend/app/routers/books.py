@@ -230,9 +230,7 @@ def list_books(
     if education_level:
         query = query.filter(Book.education_level.ilike(f"%{education_level}%"))
     if city:
-        query = query.join(User, Book.seller_id == User.id).filter(
-            User.address.ilike(f"%{city}%")
-        )
+        query = query.filter(Book.location_label.ilike(f"%{city}%"))
 
     total = query.count()
     items = query.order_by(Book.is_boosted.desc(), Book.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()

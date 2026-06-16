@@ -44,6 +44,13 @@ export class PublishComponent implements OnInit, OnDestroy {
   pageCount: number | null = null;
   acceptsExchange = false;
   educationLevel = '';
+  locationLabel = '';
+  locationLat: number | null = null;
+  locationLng: number | null = null;
+  locationSuggestions: { label: string; lat: number; lng: number }[] = [];
+  locationLoading = false;
+  locationTimeout: any;
+  showLocationSuggestions = false;
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
   languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
@@ -255,6 +262,35 @@ export class PublishComponent implements OnInit, OnDestroy {
   }
 
 
+  onLocationInput() {
+    clearTimeout(this.locationTimeout);
+    this.locationLat = null; this.locationLng = null;
+    if (this.locationLabel.length < 2) { this.locationSuggestions = []; this.showLocationSuggestions = false; return; }
+    this.locationLoading = true;
+    this.locationTimeout = setTimeout(async () => {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.locationLabel)}&format=json&limit=5&countrycodes=sn,gn,ci,ml,fr&accept-language=fr`;
+        const res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
+        const data = await res.json();
+        this.locationSuggestions = data.map((item: any) => ({
+          label: item.display_name,
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+        }));
+        this.showLocationSuggestions = this.locationSuggestions.length > 0;
+      } catch {}
+      this.locationLoading = false;
+    }, 400);
+  }
+
+  selectLocation(s: { label: string; lat: number; lng: number }) {
+    this.locationLabel = s.label;
+    this.locationLat = s.lat;
+    this.locationLng = s.lng;
+    this.locationSuggestions = [];
+    this.showLocationSuggestions = false;
+  }
+
   ngOnInit() {
     this.loadCategories();
   }
@@ -402,7 +438,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   get isValid() {
     if (!this.condition || !this.price || this.price <= 0) return false;
     if (this.isPack) return this.title.trim().length > 0 && this.validPackItems.length >= 2;
-    return this.title.trim().length > 0 && this.author.trim().length > 0;
+    return this.title.trim().length > 0 && this.author.trim().length > 0 && this.locationLabel.trim().length > 0;
   }
 
   async submit() {
@@ -438,6 +474,9 @@ export class PublishComponent implements OnInit, OnDestroy {
       if (this.language) payload.language = this.language;
       if (this.pageCount) payload.page_count = this.pageCount;
       if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
+      if (this.locationLabel) payload.location_label = this.locationLabel;
+      if (this.locationLat !== null) payload.latitude = this.locationLat;
+      if (this.locationLng !== null) payload.longitude = this.locationLng;
       if (this.pageCount) payload.page_count = this.pageCount;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;

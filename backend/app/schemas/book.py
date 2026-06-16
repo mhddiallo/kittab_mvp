@@ -50,6 +50,9 @@ class BookCreate(BaseModel):
     language: Optional[str] = None
     open_library_id: Optional[str] = None
     page_count: Optional[int] = None
+    location_label: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     @field_validator('pack_items', mode='before')
     @classmethod
@@ -95,6 +98,9 @@ class BookOut(BaseModel):
     language: Optional[str] = None
     open_library_id: Optional[str] = None
     page_count: Optional[int] = None
+    location_label: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
