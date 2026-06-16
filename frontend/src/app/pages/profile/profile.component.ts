@@ -24,11 +24,13 @@ export class ProfileComponent implements OnInit {
   success = false;
   error = '';
   isNewUser = false;
+  isIncomplete = false;
 
   constructor(public auth: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.isNewUser = this.route.snapshot.queryParamMap.get('nouveau') === '1';
+    this.isIncomplete = this.route.snapshot.queryParamMap.get('incomplet') === '1';
     const u = this.auth.user;
     const load = (u: any) => {
       this.firstName = u.first_name || '';
