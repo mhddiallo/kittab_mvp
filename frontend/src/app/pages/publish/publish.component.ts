@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -156,7 +157,7 @@ export class PublishComponent implements OnInit {
     { value: 'other', label: 'Autre' },
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private auth: AuthService) {}
 
 
   ngOnInit() {
@@ -315,6 +316,14 @@ export class PublishComponent implements OnInit {
 
     const token = localStorage.getItem('kittab_token');
     if (!token) { this.router.navigate(['/login']); return; }
+
+    const userPhone = this.auth.user?.phone;
+    if (!userPhone || userPhone.startsWith('google_')) {
+      this.error = 'Vous devez ajouter un numéro de téléphone dans votre profil avant de publier une annonce.';
+      this.submitting = false;
+      this.router.navigate(['/profile']);
+      return;
+    }
 
     try {
       // Étape 1 : créer le livre en JSON

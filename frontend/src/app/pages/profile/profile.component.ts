@@ -19,6 +19,7 @@ export class ProfileComponent implements OnInit {
   address = '';
   phone = '';
   newPhone = '';
+  email = '';
   loading = false;
   success = false;
   error = '';
@@ -27,21 +28,17 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit() {
     const u = this.auth.user;
-    if (u) {
+    const load = (u: any) => {
       this.firstName = u.first_name || '';
       this.lastName = u.last_name || '';
       this.address = u.address || '';
       this.phone = u.phone || '';
+      this.email = u.email || '';
+    };
+    if (u) {
+      load(u);
     } else {
-      this.auth.loadUser().then(() => {
-        const u2 = this.auth.user;
-        if (u2) {
-          this.firstName = u2.first_name || '';
-          this.lastName = u2.last_name || '';
-          this.address = u2.address || '';
-          this.phone = u2.phone || '';
-        }
-      });
+      this.auth.loadUser().then(() => { if (this.auth.user) load(this.auth.user); });
     }
   }
 
@@ -54,6 +51,7 @@ export class ProfileComponent implements OnInit {
     try {
       const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
       if (this.isGoogleUser && this.newPhone.trim()) body.phone = this.newPhone.trim();
+      if (this.email.trim()) body.email = this.email.trim();
       const res = await fetch(`${environment.apiUrl}/api/auth/me`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
