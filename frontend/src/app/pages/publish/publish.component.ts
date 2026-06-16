@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { BrowserMultiFormatReader } from '@zxing/browser';
@@ -163,7 +163,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     { value: 'other', label: 'Autre' },
   ];
 
-  constructor(private router: Router, private auth: AuthService) {}
+  constructor(private router: Router, private auth: AuthService, private ngZone: NgZone) {}
 
   ngOnDestroy() { this.stopBarcodeCamera(); }
 
@@ -176,11 +176,11 @@ export class PublishComponent implements OnInit, OnDestroy {
         this.barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
         this.barcodeVideo.nativeElement.srcObject = this.barcodeStream;
         this.barcodeReader = new BrowserMultiFormatReader();
-        this.barcodeReader.decodeFromVideoElement(this.barcodeVideo.nativeElement, async (result, err) => {
+        this.barcodeReader.decodeFromVideoElement(this.barcodeVideo.nativeElement, (result, err) => {
           if (result) {
             const isbn = result.getText();
             this.stopBarcodeCamera();
-            await this.lookupByIsbn(isbn);
+            this.ngZone.run(() => this.lookupByIsbn(isbn));
           }
         });
       } catch {

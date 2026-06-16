@@ -148,7 +148,10 @@ async def book_info(
         return {"summary": None, "subjects": [], "published_year": None, "cover_url": None, "page_count": None, "publisher": None, "google_books_link": None, "kittab_category": None}
 
     gb_categories = volume_info.get("categories") or []
+    authors = volume_info.get("authors") or []
     return {
+        "title": volume_info.get("title") or None,
+        "author": ", ".join(authors) if authors else None,
         "summary": volume_info.get("description"),
         "subjects": gb_categories[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
