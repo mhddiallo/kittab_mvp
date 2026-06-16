@@ -101,6 +101,7 @@ async def book_info(
     google_id: Optional[str] = Query(None),
     title: Optional[str] = Query(None),
     author: Optional[str] = Query(None),
+    isbn: Optional[str] = Query(None),
 ):
     from app.services.catalog_service import search_google_books
     import httpx
@@ -110,7 +111,17 @@ async def book_info(
 
     try:
         async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
-            if google_id:
+            if isbn:
+                params = {"q": f"isbn:{isbn}"}
+                if api_key:
+                    params["key"] = api_key
+                r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
+                if r.status_code == 200:
+                    items = r.json().get("items", [])
+                    if items:
+                        volume_info = items[0].get("volumeInfo")
+
+            if not volume_info and google_id:
                 params = {}
                 if api_key:
                     params["key"] = api_key

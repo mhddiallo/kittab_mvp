@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -26,7 +27,8 @@ interface Category {
   imports: [CommonModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
   templateUrl: './publish.component.html',
 })
-export class PublishComponent implements OnInit {
+export class PublishComponent implements OnInit, OnDestroy {
+  @ViewChild('barcodeVideo') barcodeVideo!: ElementRef<HTMLVideoElement>;
   // Form fields
   isPack = false;
   title = '';
@@ -57,8 +59,12 @@ export class PublishComponent implements OnInit {
   submitting = false;
   error = '';
   autocompleteTimeout: any;
-  scanLoading: false | 'cover' | 'back' = false;
+  scanLoading: false | 'cover' | 'back' | 'barcode' = false;
   scanError = '';
+  showScanMenu = false;
+  showBarcodeCamera = false;
+  private barcodeReader: BrowserMultiFormatReader | null = null;
+  private barcodeStream: MediaStream | null = null;
 
   conditions = [
     { value: 'new', label: 'Neuf', emoji: '✨', desc: 'Jamais utilisé', cls: 'border-green-400 bg-green-50', textCls: 'text-green-600' },
@@ -158,6 +164,90 @@ export class PublishComponent implements OnInit {
   ];
 
   constructor(private router: Router, private auth: AuthService) {}
+
+  ngOnDestroy() { this.stopBarcodeCamera(); }
+
+  async startBarcodeCamera() {
+    this.showScanMenu = false;
+    this.showBarcodeCamera = true;
+    this.scanError = '';
+    setTimeout(async () => {
+      try {
+        this.barcodeStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        this.barcodeVideo.nativeElement.srcObject = this.barcodeStream;
+        this.barcodeReader = new BrowserMultiFormatReader();
+        this.barcodeReader.decodeFromVideoElement(this.barcodeVideo.nativeElement, async (result, err) => {
+          if (result) {
+            const isbn = result.getText();
+            this.stopBarcodeCamera();
+            await this.lookupByIsbn(isbn);
+          }
+        });
+      } catch {
+        this.scanError = 'Impossible d\'accéder à la caméra.';
+        this.showBarcodeCamera = false;
+      }
+    }, 200);
+  }
+
+  stopBarcodeCamera() {
+    try { (this.barcodeReader as any)?.reset?.(); } catch {}
+    this.barcodeStream?.getTracks().forEach(t => t.stop());
+    this.barcodeReader = null;
+    this.barcodeStream = null;
+    this.showBarcodeCamera = false;
+  }
+
+  async onScanUpload(event: Event) {
+    this.showScanMenu = false;
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.scanError = '';
+
+    // Essayer d'abord le code-barres
+    try {
+      const reader = new BrowserMultiFormatReader();
+      const img = await createImageBitmap(file);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width; canvas.height = img.height;
+      canvas.getContext('2d')!.drawImage(img, 0, 0);
+      const result = await reader.decodeFromCanvas(canvas);
+      if (result) {
+        await this.lookupByIsbn(result.getText());
+        input.value = '';
+        return;
+      }
+    } catch {}
+
+    // Sinon scan couverture avec Claude
+    await this.onScanImage({ target: input } as any, 'cover');
+  }
+
+  async lookupByIsbn(isbn: string) {
+    this.scanLoading = 'barcode';
+    this.scanError = '';
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/books/info?isbn=${encodeURIComponent(isbn)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.title) this.title = data.title;
+        if (data.author && !this.author) this.author = data.author;
+        if (data.cover_url) this.selectedCover = data.cover_url;
+        if (data.page_count) this.pageCount = data.page_count;
+        if (data.kittab_category) {
+          const match = this.categories.find(c => c.name === data.kittab_category);
+          if (match) this.categoryId = match.id;
+        }
+        this.scanError = '';
+      } else {
+        this.scanError = 'ISBN non trouvé dans Google Books, remplis manuellement.';
+      }
+    } catch {
+      this.scanError = 'Erreur lors de la recherche par ISBN.';
+    }
+    this.scanLoading = false;
+  }
 
 
   ngOnInit() {

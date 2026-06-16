@@ -36,32 +36,67 @@
           </button>
         </div>
 
-        <!-- Titre (livre seul avec autocomplete / pack sans autocomplete) -->
-        <!-- Scan couverture / dos -->
-        <div *ngIf="!isPack" class="mb-4 space-y-2">
-          <p class="text-xs text-gray-500 font-medium">📷 Scanner pour remplir automatiquement</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" (click)="scanCoverInput.click()" [disabled]="scanLoading"
-                    class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-xs font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
-              <span *ngIf="scanLoading !== 'cover'">📖 Couverture</span>
-              <span *ngIf="scanLoading === 'cover'" class="flex items-center gap-1">
-                <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Analyse...
-              </span>
+        <!-- Scan livre -->
+        <div *ngIf="!isPack" class="mb-4">
+          <!-- Bouton principal -->
+          <button type="button" (click)="showScanMenu = !showScanMenu"
+                  class="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-600 hover:border-primary hover:text-primary transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+            📷 Scanner le livre
+          </button>
+
+          <!-- Menu options -->
+          <div *ngIf="showScanMenu" class="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+            <!-- Option 1 : Caméra code-barres -->
+            <button type="button" (click)="startBarcodeCamera()" [disabled]="scanLoading"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors border-b border-gray-100">
+              <span class="text-lg">📷</span>
+              <div class="text-left">
+                <div class="font-medium">Scanner avec la caméra</div>
+                <div class="text-xs text-gray-400">Pointez vers le code-barres ISBN</div>
+              </div>
             </button>
-            <button type="button" (click)="scanBackInput.click()" [disabled]="scanLoading"
-                    class="flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-xs font-medium text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-50">
-              <span *ngIf="scanLoading !== 'back'">📄 Dos du livre</span>
-              <span *ngIf="scanLoading === 'back'" class="flex items-center gap-1">
-                <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Analyse...
-              </span>
+            <!-- Option 2 : Upload image -->
+            <button type="button" (click)="scanUploadInput.click()" [disabled]="scanLoading"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors border-b border-gray-100">
+              <span class="text-lg">🖼️</span>
+              <div class="text-left">
+                <div class="font-medium">Uploader une photo</div>
+                <div class="text-xs text-gray-400">Code-barres ou couverture du livre</div>
+              </div>
+            </button>
+            <!-- Option 3 : Saisie manuelle -->
+            <button type="button" (click)="showScanMenu = false"
+                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors">
+              <span class="text-lg">✏️</span>
+              <div class="text-left">
+                <div class="font-medium">Saisir manuellement</div>
+                <div class="text-xs text-gray-400">Remplir le formulaire à la main</div>
+              </div>
             </button>
           </div>
-          <input #scanCoverInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event, 'cover')" />
-          <input #scanBackInput type="file" accept="image/*" capture="environment" class="hidden" (change)="onScanImage($event, 'back')" />
-          <p *ngIf="scanError" class="text-xs text-red-500 text-center">{{ scanError }}</p>
+
+          <!-- Caméra code-barres -->
+          <div *ngIf="showBarcodeCamera" class="mt-3 relative rounded-xl overflow-hidden bg-black">
+            <video #barcodeVideo class="w-full h-48 object-cover" autoplay playsinline></video>
+            <button type="button" (click)="stopBarcodeCamera()"
+                    class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">✕</button>
+            <div class="absolute bottom-2 left-0 right-0 text-center text-white text-xs">
+              Centrez le code-barres dans le cadre
+            </div>
+          </div>
+
+          <!-- Loading / erreur -->
+          <div *ngIf="scanLoading" class="mt-2 flex items-center gap-2 text-xs text-primary">
+            <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span>
+            {{ scanLoading === 'barcode' ? 'Recherche du livre...' : 'Analyse de l\'image...' }}
+          </div>
+          <p *ngIf="scanError" class="text-xs text-red-500 mt-1">{{ scanError }}</p>
+
+          <!-- Inputs cachés -->
+          <input #scanUploadInput type="file" accept="image/*" class="hidden" (change)="onScanUpload($event)" />
         </div>
 
-        <div class="mb-4 relative">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">
             {{ isPack ? 'Nom du pack' : 'Titre du livre' }} <span class="text-primary">*</span>
           </label>
