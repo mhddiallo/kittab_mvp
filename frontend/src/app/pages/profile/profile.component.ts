@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { AuthService } from '../../core/auth.service';
@@ -23,10 +23,12 @@ export class ProfileComponent implements OnInit {
   loading = false;
   success = false;
   error = '';
+  isNewUser = false;
 
-  constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit() {
+    this.isNewUser = this.route.snapshot.queryParamMap.get('nouveau') === '1';
     const u = this.auth.user;
     const load = (u: any) => {
       this.firstName = u.first_name || '';
@@ -55,11 +57,12 @@ export class ProfileComponent implements OnInit {
       const res = await fetch(`${environment.apiUrl}/api/auth/me`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
-        body: JSON.stringify({ first_name: this.firstName, last_name: this.lastName, address: this.address }),
+        body: JSON.stringify(body),
       });
       if (res.ok) {
         await this.auth.loadUser();
         this.success = true;
+        this.isNewUser = false;
       } else {
         const d = await res.json();
         this.error = d.detail || 'Erreur lors de la mise à jour';

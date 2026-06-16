@@ -11,6 +11,14 @@
     </div>
   </div>
 
+  <div *ngIf="isNewUser" class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-4 mb-6 flex items-start gap-3">
+    <span class="text-2xl">👋</span>
+    <div>
+      <p class="text-sm font-bold text-blue-800">Bienvenue sur Kittab !</p>
+      <p class="text-xs text-blue-600 mt-0.5">Remplis ton prénom et ton nom pour activer ton compte et pouvoir publier des annonces.</p>
+    </div>
+  </div>
+
   <div class="card p-6 mb-6">
     <h2 class="font-bold text-gray-800 mb-5">Informations personnelles</h2>
 

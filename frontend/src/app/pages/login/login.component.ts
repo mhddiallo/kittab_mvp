@@ -111,7 +111,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       localStorage.setItem('kittab_token', data.access_token);
       await this.auth.loadUser();
       if (data.is_new_user) {
-        this.step = 'profile';
+        this.router.navigate(['/profile'], { queryParams: { nouveau: '1' } });
       } else {
         this.router.navigate([this.redirectUrl]);
       }
