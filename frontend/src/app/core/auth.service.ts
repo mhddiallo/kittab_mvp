@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 
 export interface CurrentUser {
+  id: number;
   first_name: string;
   last_name: string;
   phone: string;
