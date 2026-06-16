@@ -26,11 +26,19 @@ class GoogleTokenInput(BaseModel):
     credential: str
 
 
+def _validate_phone(phone: str):
+    import re
+    digits = re.sub(r'\D', '', phone)
+    if len(digits) < 7 or len(digits) > 15:
+        raise HTTPException(status_code=400, detail="Numéro de téléphone invalide (7 à 15 chiffres)")
+
+
 @router.post("/request-otp", status_code=status.HTTP_200_OK)
 def request_otp(payload: RequestOTPInput, db: Session = Depends(get_db)):
     phone = payload.phone.strip()
     if not phone:
         raise HTTPException(status_code=400, detail="Numéro de téléphone invalide")
+    _validate_phone(phone)
 
     code = create_otp(db, phone)
     result = send_otp(phone, code)

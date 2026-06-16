@@ -48,11 +48,22 @@ export class ProfileComponent implements OnInit {
     return this.phone.startsWith('google_');
   }
 
+  isValidPhone(phone: string): boolean {
+    const digits = phone.replace(/\D/g, '');
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
   async save() {
     this.loading = true; this.success = false; this.error = '';
     try {
       const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
-      if (this.isGoogleUser && this.newPhone.trim()) body.phone = this.newPhone.trim();
+      if (this.isGoogleUser && this.newPhone.trim()) {
+        if (!this.isValidPhone(this.newPhone)) {
+          this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)';
+          this.loading = false; return;
+        }
+        body.phone = this.newPhone.trim();
+      }
       if (this.email.trim()) body.email = this.email.trim();
       const res = await fetch(`${environment.apiUrl}/api/auth/me`, {
         method: 'PUT',

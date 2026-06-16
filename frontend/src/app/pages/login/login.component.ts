@@ -73,15 +73,21 @@ export class LoginComponent implements OnInit, AfterViewInit {
   }
 
   normalizePhone(phone: string): string {
-    let p = phone.trim().replace(/\s+/g, '');
+    let p = phone.trim().replace(/\s+/g, '').replace(/-/g, '');
     if (p.startsWith('00')) p = '+' + p.slice(2);
     if (!p.startsWith('+')) p = '+221' + p;
     return p;
   }
 
+  isValidPhone(phone: string): boolean {
+    const digits = phone.replace(/\D/g, '');
+    return digits.length >= 7 && digits.length <= 15;
+  }
+
   async requestOtp() {
     if (!this.phone.trim()) { this.error = 'Veuillez saisir votre numéro'; return; }
     this.phone = this.normalizePhone(this.phone);
+    if (!this.isValidPhone(this.phone)) { this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)'; return; }
     this.loading = true; this.error = '';
     try {
       const res = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
@@ -126,8 +132,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
     if (!this.phone.trim() && !this.profilePhone.trim()) {
       this.error = 'Le numéro de téléphone est obligatoire'; return;
     }
-    this.loading = true; this.error = '';
     const phoneToUse = this.normalizePhone(this.profilePhone.trim() || this.phone.trim());
+    if (!this.isValidPhone(phoneToUse)) { this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)'; return; }
+    this.loading = true; this.error = '';
     try {
       const res = await fetch(`${environment.apiUrl}/api/auth/complete-profile`, {
         method: 'POST',
