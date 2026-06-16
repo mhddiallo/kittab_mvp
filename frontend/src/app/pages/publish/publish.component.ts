@@ -242,6 +242,7 @@ export class PublishComponent implements OnInit, OnDestroy {
           const match = this.categories.find(c => c.name === data.kittab_category);
           if (match) this.categoryId = match.id;
         }
+        if (data.language && this.languages.includes(data.language)) this.language = data.language;
         this.scanError = '';
       } else {
         this.scanError = 'ISBN non trouvé dans Google Books, remplis manuellement.';

@@ -149,9 +149,13 @@ async def book_info(
 
     gb_categories = volume_info.get("categories") or []
     authors = volume_info.get("authors") or []
+    lang_map = {"fr": "Français", "en": "Anglais", "ar": "Arabe", "pt": "Portugais", "wo": "Wolof", "ff": "Peul"}
+    raw_lang = volume_info.get("language") or ""
+    language = lang_map.get(raw_lang[:2], None)
     return {
         "title": volume_info.get("title") or None,
         "author": ", ".join(authors) if authors else None,
+        "language": language,
         "summary": volume_info.get("description"),
         "subjects": gb_categories[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
