@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, NgZone, ChangeDetectorRef } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
 import { BrowserMultiFormatReader } from '@zxing/browser';
@@ -163,7 +163,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     { value: 'other', label: 'Autre' },
   ];
 
-  constructor(private router: Router, private auth: AuthService, private ngZone: NgZone) {}
+  constructor(private router: Router, private auth: AuthService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
   ngOnDestroy() { this.stopBarcodeCamera(); }
 
@@ -247,6 +247,7 @@ export class PublishComponent implements OnInit, OnDestroy {
       this.scanError = 'Erreur lors de la recherche par ISBN.';
     }
     this.scanLoading = false;
+    this.cdr.detectChanges();
   }
 
 
