@@ -15,7 +15,9 @@ class VerifyOTPInput(BaseModel):
 class CompleteProfileInput(BaseModel):
     first_name: str
     last_name: str
-    address: str
+    address: str = ''
+    phone: Optional[str] = None
+    email: Optional[str] = None
 
 
 class UserUpdate(BaseModel):

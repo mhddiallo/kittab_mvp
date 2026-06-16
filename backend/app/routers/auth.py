@@ -119,7 +119,11 @@ def complete_profile(
 ):
     current_user.first_name = payload.first_name.strip()
     current_user.last_name = payload.last_name.strip()
-    current_user.address = payload.address.strip()
+    current_user.address = payload.address.strip() if payload.address else ''
+    if payload.phone and current_user.phone.startswith('google_'):
+        current_user.phone = payload.phone.strip()
+    if payload.email:
+        current_user.email = payload.email.strip()
     current_user.is_profile_complete = True
     db.commit()
     db.refresh(current_user)

@@ -15,7 +15,8 @@ declare const google: any;
 })
 export class LoginComponent implements OnInit, AfterViewInit {
   step: 'phone' | 'otp' | 'profile' = 'phone';
-  phone = ''; otp = ''; firstName = ''; lastName = ''; address = '';
+  phone = ''; otp = ''; firstName = ''; lastName = ''; address = ''; email = '';
+  profilePhone = '';
   loading = false; devCode = ''; error = '';
   private redirectUrl = '/';
 
@@ -59,7 +60,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
       if (!res.ok) throw new Error(data.detail);
       localStorage.setItem('kittab_token', data.access_token);
       await this.auth.loadUser();
-      if (data.is_new_user && !data.user?.is_profile_complete) {
+      if (!data.user?.is_profile_complete || data.user?.phone?.startsWith('google_')) {
+        this.firstName = data.user?.first_name || '';
+        this.lastName = data.user?.last_name || '';
+        this.email = data.user?.email || '';
         this.step = 'profile';
       } else {
         this.router.navigate([this.redirectUrl]);
@@ -119,7 +123,11 @@ export class LoginComponent implements OnInit, AfterViewInit {
     if (!this.firstName.trim() || !this.lastName.trim()) {
       this.error = 'Prénom et nom sont obligatoires'; return;
     }
+    if (!this.phone.trim() && !this.profilePhone.trim()) {
+      this.error = 'Le numéro de téléphone est obligatoire'; return;
+    }
     this.loading = true; this.error = '';
+    const phoneToUse = this.normalizePhone(this.profilePhone.trim() || this.phone.trim());
     try {
       const res = await fetch(`${environment.apiUrl}/api/auth/complete-profile`, {
         method: 'POST',
@@ -127,7 +135,13 @@ export class LoginComponent implements OnInit, AfterViewInit {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.auth.token}`,
         },
-        body: JSON.stringify({ first_name: this.firstName, last_name: this.lastName, address: this.address }),
+        body: JSON.stringify({
+          first_name: this.firstName,
+          last_name: this.lastName,
+          address: this.address,
+          phone: phoneToUse,
+          email: this.email || undefined,
+        }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.detail); }
       await this.auth.loadUser();
