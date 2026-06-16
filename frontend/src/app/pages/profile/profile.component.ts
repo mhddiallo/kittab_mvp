@@ -18,6 +18,7 @@ export class ProfileComponent implements OnInit {
   lastName = '';
   address = '';
   phone = '';
+  newPhone = '';
   loading = false;
   success = false;
   error = '';
@@ -44,9 +45,15 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  get isGoogleUser(): boolean {
+    return this.phone.startsWith('google_');
+  }
+
   async save() {
     this.loading = true; this.success = false; this.error = '';
     try {
+      const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
+      if (this.isGoogleUser && this.newPhone.trim()) body.phone = this.newPhone.trim();
       const res = await fetch(`${environment.apiUrl}/api/auth/me`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },

@@ -143,6 +143,8 @@ def update_me(
         current_user.last_name = payload.last_name.strip()
     if payload.address is not None:
         current_user.address = payload.address.strip()
+    if payload.phone is not None and current_user.phone.startswith('google_'):
+        current_user.phone = payload.phone.strip()
     db.commit()
     db.refresh(current_user)
     return UserOut.model_validate(current_user)
