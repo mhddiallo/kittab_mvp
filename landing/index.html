@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kittab — Bientôt disponible</title>
+  <meta name="description" content="Vends, achète et échange tes livres. Partout en Afrique. La première marketplace du livre en Afrique arrive le 15 juillet 2026." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#C0392B' },
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+        }
+      }
+    }
+  </script>
+  <style>
+    .countdown-box { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); }
+    .gradient-bg { background: linear-gradient(135deg, #1a0a08 0%, #2d0f0a 40%, #1a0a08 100%); }
+    .book-float { animation: float 6s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform: translateY(0px) rotate(-3deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
+    .fade-in { animation: fadeIn 0.8s ease-out forwards; opacity: 0; }
+    @keyframes fadeIn { to { opacity: 1; } }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen font-sans text-white overflow-x-hidden">
+
+  <!-- Lang toggle -->
+  <div class="flex justify-end p-4 md:p-6">
+    <button id="lang-toggle" onclick="toggleLang()"
+            class="text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20 hover:border-white/40 transition-colors text-white/70 hover:text-white">
+      EN
+    </button>
+  </div>
+
+  <!-- Hero -->
+  <main class="max-w-5xl mx-auto px-6 pt-8 pb-20 text-center">
+
+    <!-- Logo -->
+    <div class="fade-in mb-10" style="animation-delay:0.1s">
+      <div class="inline-flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-2xl font-black">K</div>
+        <span class="text-3xl font-black tracking-tight">KITTAB</span>
+      </div>
+    </div>
+
+    <!-- Floating books decoration -->
+    <div class="relative mb-10">
+      <div class="flex justify-center gap-4 md:gap-8">
+        <div class="book-float text-5xl md:text-7xl opacity-80" style="animation-delay:0s">📗</div>
+        <div class="book-float text-6xl md:text-8xl" style="animation-delay:1s">📕</div>
+        <div class="book-float text-5xl md:text-7xl opacity-80" style="animation-delay:2s">📘</div>
+      </div>
+    </div>
+
+    <!-- Accroche -->
+    <div class="fade-in" style="animation-delay:0.2s">
+      <h1 class="text-4xl md:text-6xl font-black leading-tight mb-4">
+        <span id="h1-line1">Vends, achète et échange</span><br/>
+        <span class="text-primary" id="h1-line2">tes livres.</span>
+        <span id="h1-line3"> Partout en Afrique.</span>
+      </h1>
+      <p class="text-white/60 text-lg md:text-xl mt-4 max-w-xl mx-auto" id="subtitle">
+        La première marketplace dédiée au livre en Afrique. Rejoins la liste d'attente et sois parmi les premiers à l'utiliser.
+      </p>
+    </div>
+
+    <!-- Countdown -->
+    <div class="fade-in mt-12 mb-12" style="animation-delay:0.4s">
+      <p class="text-white/50 text-sm font-semibold uppercase tracking-widest mb-5" id="launch-label">Lancement le 15 juillet 2026</p>
+      <div class="flex justify-center gap-3 md:gap-5">
+        <div class="countdown-box rounded-2xl px-4 md:px-6 py-4 min-w-[70px] md:min-w-[90px]">
+          <div class="text-3xl md:text-5xl font-black" id="days">00</div>
+          <div class="text-white/40 text-xs mt-1 uppercase tracking-wider" id="label-days">Jours</div>
+        </div>
+        <div class="countdown-box rounded-2xl px-4 md:px-6 py-4 min-w-[70px] md:min-w-[90px]">
+          <div class="text-3xl md:text-5xl font-black" id="hours">00</div>
+          <div class="text-white/40 text-xs mt-1 uppercase tracking-wider" id="label-hours">Heures</div>
+        </div>
+        <div class="countdown-box rounded-2xl px-4 md:px-6 py-4 min-w-[70px] md:min-w-[90px]">
+          <div class="text-3xl md:text-5xl font-black" id="minutes">00</div>
+          <div class="text-white/40 text-xs mt-1 uppercase tracking-wider" id="label-minutes">Minutes</div>
+        </div>
+        <div class="countdown-box rounded-2xl px-4 md:px-6 py-4 min-w-[70px] md:min-w-[90px]">
+          <div class="text-3xl md:text-5xl font-black" id="seconds">00</div>
+          <div class="text-white/40 text-xs mt-1 uppercase tracking-wider" id="label-seconds">Secondes</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div class="fade-in max-w-md mx-auto" style="animation-delay:0.6s">
+      <div id="form-container" class="countdown-box rounded-2xl p-6">
+        <h2 class="font-bold text-lg mb-1" id="form-title">Sois notifié au lancement</h2>
+        <p class="text-white/50 text-sm mb-5" id="form-subtitle">Rejoins la liste d'attente · Gratuit</p>
+
+        <div id="form-error" class="hidden bg-red-500/20 border border-red-500/40 rounded-xl px-4 py-3 text-sm text-red-300 mb-4"></div>
+
+        <div class="space-y-3 mb-4">
+          <input id="input-email" type="email" placeholder="votre@email.com"
+                 class="w-full bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+          <input id="input-phone" type="tel" placeholder="+221 XX XXX XX XX"
+                 class="w-full bg-white/10 border border-white/15 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" />
+        </div>
+
+        <button onclick="submitWaitlist()"
+                class="w-full bg-primary hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition-colors text-sm" id="submit-btn">
+          <span id="btn-text">Me notifier au lancement →</span>
+        </button>
+
+        <p class="text-white/30 text-xs mt-3" id="form-privacy">Aucun spam. Juste une notification au lancement.</p>
+      </div>
+
+      <!-- Success -->
+      <div id="success-msg" class="hidden countdown-box rounded-2xl p-8 text-center">
+        <div class="text-5xl mb-4">🎉</div>
+        <h3 class="font-bold text-xl mb-2" id="success-title">Tu es sur la liste !</h3>
+        <p class="text-white/50 text-sm" id="success-sub">On te contacte dès l'ouverture. Merci de nous faire confiance.</p>
+      </div>
+    </div>
+
+    <!-- Countries -->
+    <div class="fade-in mt-14" style="animation-delay:0.8s">
+      <p class="text-white/30 text-xs uppercase tracking-widest mb-4" id="countries-label">Lancement dans</p>
+      <div class="flex justify-center gap-6 flex-wrap">
+        <div class="flex items-center gap-2 text-white/60 text-sm font-medium">🇸🇳 Sénégal</div>
+        <div class="flex items-center gap-2 text-white/60 text-sm font-medium">🇬🇳 Guinée</div>
+        <div class="flex items-center gap-2 text-white/60 text-sm font-medium">🇨🇮 Côte d'Ivoire</div>
+        <div class="flex items-center gap-2 text-white/60 text-sm font-medium">🇲🇱 Mali</div>
+        <div class="flex items-center gap-2 text-white/60 text-sm font-medium">🇫🇷 France</div>
+      </div>
+    </div>
+
+    <!-- Social -->
+    <div class="fade-in mt-10 flex justify-center gap-5" style="animation-delay:1s">
+      <a href="https://instagram.com/kittab.africa" target="_blank"
+         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors">
+        <svg class="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://twitter.com/kittab_africa" target="_blank"
+         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors">
+        <svg class="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://facebook.com/kittab.africa" target="_blank"
+         class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:border-white/50 transition-colors">
+        <svg class="w-4 h-4 text-white/60" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+    </div>
+
+  </main>
+
+  <script>
+    const BACKEND = 'https://kittab-backend.onrender.com';
+    const LAUNCH = new Date('2026-07-15T00:00:00');
+
+    // Countdown
+    function updateCountdown() {
+      const now = new Date();
+      const diff = LAUNCH - now;
+      if (diff <= 0) { document.querySelector('.countdown-box')?.remove(); return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('days').textContent = String(d).padStart(2,'0');
+      document.getElementById('hours').textContent = String(h).padStart(2,'0');
+      document.getElementById('minutes').textContent = String(m).padStart(2,'0');
+      document.getElementById('seconds').textContent = String(s).padStart(2,'0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Form
+    async function submitWaitlist() {
+      const email = document.getElementById('input-email').value.trim();
+      const phone = document.getElementById('input-phone').value.trim();
+      const err = document.getElementById('form-error');
+      const btn = document.getElementById('btn-text');
+      const lang = document.documentElement.lang;
+
+      if (!email && !phone) {
+        err.textContent = lang === 'en' ? 'Please enter your email or phone.' : 'Renseigne ton email ou ton téléphone.';
+        err.classList.remove('hidden'); return;
+      }
+      err.classList.add('hidden');
+      btn.textContent = lang === 'en' ? 'Sending...' : 'Envoi...';
+
+      try {
+        const res = await fetch(`${BACKEND}/api/waitlist`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email || null, phone: phone || null, lang }),
+        });
+        if (res.ok) {
+          document.getElementById('form-container').classList.add('hidden');
+          document.getElementById('success-msg').classList.remove('hidden');
+        } else {
+          btn.textContent = lang === 'en' ? 'Notify me →' : 'Me notifier au lancement →';
+          err.textContent = lang === 'en' ? 'An error occurred. Try again.' : 'Une erreur est survenue.';
+          err.classList.remove('hidden');
+        }
+      } catch {
+        btn.textContent = lang === 'en' ? 'Notify me →' : 'Me notifier au lancement →';
+        err.textContent = lang === 'en' ? 'Connection error. Try again.' : 'Impossible de contacter le serveur.';
+        err.classList.remove('hidden');
+      }
+    }
+
+    // Lang toggle
+    const translations = {
+      fr: {
+        'h1-line1': 'Vends, achète et échange',
+        'h1-line2': 'tes livres.',
+        'h1-line3': ' Partout en Afrique.',
+        'subtitle': "La première marketplace dédiée au livre en Afrique. Rejoins la liste d'attente et sois parmi les premiers à l'utiliser.",
+        'launch-label': 'Lancement le 15 juillet 2026',
+        'label-days': 'Jours', 'label-hours': 'Heures', 'label-minutes': 'Minutes', 'label-seconds': 'Secondes',
+        'form-title': 'Sois notifié au lancement',
+        'form-subtitle': "Rejoins la liste d'attente · Gratuit",
+        'btn-text': 'Me notifier au lancement →',
+        'form-privacy': 'Aucun spam. Juste une notification au lancement.',
+        'countries-label': 'Lancement dans',
+        'success-title': 'Tu es sur la liste !',
+        'success-sub': 'On te contacte dès l\'ouverture. Merci de nous faire confiance.',
+        'input-email': 'votre@email.com',
+        'input-phone': '+221 XX XXX XX XX',
+        'lang-toggle': 'EN',
+      },
+      en: {
+        'h1-line1': 'Buy, sell and exchange',
+        'h1-line2': 'your books.',
+        'h1-line3': ' Across Africa.',
+        'subtitle': "Africa's first dedicated book marketplace. Join the waitlist and be among the first to use it.",
+        'launch-label': 'Launching July 15, 2026',
+        'label-days': 'Days', 'label-hours': 'Hours', 'label-minutes': 'Minutes', 'label-seconds': 'Seconds',
+        'form-title': 'Get notified at launch',
+        'form-subtitle': 'Join the waitlist · Free',
+        'btn-text': 'Notify me at launch →',
+        'form-privacy': 'No spam. Just a launch notification.',
+        'countries-label': 'Launching in',
+        'success-title': "You're on the list!",
+        'success-sub': "We'll reach out when we launch. Thanks for trusting us.",
+        'input-email': 'your@email.com',
+        'input-phone': '+221 XX XXX XX XX',
+        'lang-toggle': 'FR',
+      }
+    };
+
+    let currentLang = 'fr';
+    function toggleLang() {
+      currentLang = currentLang === 'fr' ? 'en' : 'fr';
+      document.documentElement.lang = currentLang;
+      const t = translations[currentLang];
+      for (const [id, val] of Object.entries(t)) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        if (el.tagName === 'INPUT') el.placeholder = val;
+        else el.textContent = val;
+      }
+    }
+  </script>
+</body>
+</html>
