@@ -194,6 +194,7 @@ def list_books(
     education_level: Optional[str] = Query(None),
     boosted: Optional[bool] = Query(None),
     accepts_exchange: Optional[bool] = Query(None),
+    city: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -228,6 +229,10 @@ def list_books(
         query = query.filter(Book.price <= max_price)
     if education_level:
         query = query.filter(Book.education_level.ilike(f"%{education_level}%"))
+    if city:
+        query = query.join(User, Book.seller_id == User.id).filter(
+            User.address.ilike(f"%{city}%")
+        )
 
     total = query.count()
     items = query.order_by(Book.is_boosted.desc(), Book.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()

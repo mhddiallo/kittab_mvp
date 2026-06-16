@@ -23,6 +23,9 @@ export class CatalogueComponent implements OnInit {
   maxPrice: number | null = null;
   onlyExchange = false;
   showFilters = false;
+  cityFilter = '';
+  cityLoading = false;
+  cityError = '';
 
   books: BookCard[] = [];
   boostedBooks: BookCard[] = [];
@@ -98,6 +101,7 @@ export class CatalogueComponent implements OnInit {
       if (range.min !== null) url += `&min_price=${range.min}`;
       if (range.max !== null) url += `&max_price=${range.max}`;
       if (this.onlyExchange) url += `&accepts_exchange=true`;
+      if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -133,7 +137,32 @@ export class CatalogueComponent implements OnInit {
     this.selectedCondition = '';
     this.selectedPriceRange = 0;
     this.onlyExchange = false;
+    this.cityFilter = '';
+    this.cityError = '';
     this.loadBooks(1);
+  }
+
+  async detectLocation() {
+    if (!navigator.geolocation) { this.cityError = 'Géolocalisation non supportée'; return; }
+    this.cityLoading = true; this.cityError = '';
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { 'Accept-Language': 'fr' } }
+          );
+          const data = await res.json();
+          const city = data.address?.city || data.address?.town || data.address?.village || data.address?.county || '';
+          if (city) { this.cityFilter = city; this.loadBooks(1); }
+          else this.cityError = 'Ville non détectée, saisie manuelle possible';
+        } catch { this.cityError = 'Impossible de détecter la ville'; }
+        this.cityLoading = false;
+      },
+      () => { this.cityError = 'Localisation refusée'; this.cityLoading = false; },
+      { timeout: 8000 }
+    );
   }
 
   get activeFilterCount(): number {
@@ -141,6 +170,7 @@ export class CatalogueComponent implements OnInit {
     if (this.selectedCondition) count++;
     if (this.selectedPriceRange > 0) count++;
     if (this.onlyExchange) count++;
+    if (this.cityFilter.trim()) count++;
     return count;
   }
 
