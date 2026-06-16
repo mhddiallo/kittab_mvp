@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../core/auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
@@ -15,11 +16,12 @@ interface BookDetail {
   book_type: string;
   description: string;
   images: string[];
-  seller: { first_name: string; last_name: string; phone: string; address: string };
+  seller: { id: number; first_name: string; last_name: string; phone: string; address: string };
   cover_url: string | null;
   language: string | null;
   open_library_id: string | null;
   is_available: boolean;
+  is_sold: boolean;
   accepts_exchange: boolean;
   views: number;
   is_pack: boolean;
@@ -56,6 +58,7 @@ export class BookDetailComponent implements OnInit {
   showBookInfo = false;
   bookInfo: BookInfo | null = null;
   bookInfoLoading = false;
+  markingSold = false;
 
   conditionMap: Record<string, { label: string; cls: string }> = {
     new: { label: 'Neuf', cls: 'bg-green-100 text-green-700' },
@@ -64,7 +67,7 @@ export class BookDetailComponent implements OnInit {
     fair: { label: 'Correct', cls: 'bg-orange-100 text-orange-700' },
   };
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute, private auth: AuthService) {}
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
@@ -153,6 +156,26 @@ export class BookDetailComponent implements OnInit {
     const phone = this.book.seller.phone.replace('+', '');
     const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`);
     return `https://wa.me/${phone}?text=${msg}`;
+  }
+
+  get isOwner(): boolean {
+    return !!this.auth.user && this.book?.seller?.id === this.auth.user.id;
+  }
+
+  async markSold() {
+    if (!this.book || !confirm(`Marquer "${this.book.title}" comme vendu ?`)) return;
+    this.markingSold = true;
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/books/${this.book.id}/mark-sold`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) {
+        this.book.is_sold = true;
+        this.book.is_available = false;
+      }
+    } catch {}
+    this.markingSold = false;
   }
 
   onImageError(event: Event) {

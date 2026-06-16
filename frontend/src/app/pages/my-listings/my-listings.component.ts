@@ -9,7 +9,7 @@ import { environment } from '../../../environments/environment';
 
 interface MyBook {
   id: number; title: string; author: string; price: number;
-  condition: string; is_available: boolean; views: number;
+  condition: string; is_available: boolean; is_sold: boolean; views: number;
   is_boosted: boolean; images: { url: string; is_primary: boolean }[];
   created_at: string;
 }
@@ -31,6 +31,7 @@ export class MyListingsComponent implements OnInit {
   books: MyBook[] = [];
   loading = true;
   deletingId: number | null = null;
+  markingSoldId: number | null = null;
   boostingId: number | null = null;
   boostMessage = '';
 
@@ -76,6 +77,22 @@ export class MyListingsComponent implements OnInit {
       });
       book.is_available = !book.is_available;
     } catch {}
+  }
+
+  async markSold(book: MyBook) {
+    if (!confirm(`Marquer "${book.title}" comme vendu ? Cette action est irréversible.`)) return;
+    this.markingSoldId = book.id;
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/books/${book.id}/mark-sold`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) {
+        book.is_sold = true;
+        book.is_available = false;
+      }
+    } catch {}
+    this.markingSoldId = null;
   }
 
   async deleteBook(id: number) {

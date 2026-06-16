@@ -206,7 +206,7 @@ def list_books(
     ).update({"is_boosted": False, "boost_expires_at": None}, synchronize_session=False)
     db.commit()
 
-    query = db.query(Book).filter(Book.is_available == True)
+    query = db.query(Book).filter(Book.is_available == True, Book.is_sold == False)
 
     if boosted:
         query = query.filter(Book.is_boosted == True)
@@ -312,6 +312,26 @@ def delete_book(
         raise HTTPException(status_code=403, detail="Action non autorisée")
     db.delete(book)
     db.commit()
+
+
+# ── Mark as sold ────────────────────────────────────────────────────────────────────
+
+@router.patch("/{book_id}/mark-sold", response_model=BookOut)
+def mark_book_sold(
+    book_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    book = db.get(Book, book_id)
+    if not book:
+        raise HTTPException(status_code=404, detail="Annonce introuvable")
+    if book.seller_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Action non autorisée")
+    book.is_sold = True
+    book.is_available = False
+    db.commit()
+    db.refresh(book)
+    return book
 
 
 # ── Images ──────────────────────────────────────────────────────────────────────────

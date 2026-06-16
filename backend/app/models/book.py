@@ -55,6 +55,7 @@ class Book(Base):
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_sold: Mapped[bool] = mapped_column(Boolean, default=False)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)
     is_boosted: Mapped[bool] = mapped_column(Boolean, default=False)

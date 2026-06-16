@@ -90,6 +90,7 @@ class BookOut(BaseModel):
     education_level: Optional[str] = None
     subject: Optional[str] = None
     is_available: bool
+    is_sold: bool = False
     accepts_exchange: bool = False
     views: int = 0
     is_pack: bool = False
@@ -127,6 +128,7 @@ class BookListOut(BaseModel):
     condition: BookCondition
     book_type: BookType
     is_available: bool
+    is_sold: bool = False
     accepts_exchange: bool = False
     views: int = 0
     is_pack: bool = False
