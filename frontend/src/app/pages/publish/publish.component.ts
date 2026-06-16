@@ -65,6 +65,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   showBarcodeCamera = false;
   private barcodeReader: BrowserMultiFormatReader | null = null;
   private barcodeStream: MediaStream | null = null;
+  private barcodeDetected = false;
 
   conditions = [
     { value: 'new', label: 'Neuf', emoji: '✨', desc: 'Jamais utilisé', cls: 'border-green-400 bg-green-50', textCls: 'text-green-600' },
@@ -170,6 +171,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   async startBarcodeCamera() {
     this.showScanMenu = false;
     this.showBarcodeCamera = true;
+    this.barcodeDetected = false;
     this.scanError = '';
     setTimeout(async () => {
       try {
@@ -177,7 +179,8 @@ export class PublishComponent implements OnInit, OnDestroy {
         this.barcodeVideo.nativeElement.srcObject = this.barcodeStream;
         this.barcodeReader = new BrowserMultiFormatReader();
         this.barcodeReader.decodeFromVideoElement(this.barcodeVideo.nativeElement, (result, err) => {
-          if (result) {
+          if (result && !this.barcodeDetected) {
+            this.barcodeDetected = true;
             const isbn = result.getText();
             this.stopBarcodeCamera();
             this.ngZone.run(() => this.lookupByIsbn(isbn));
@@ -352,6 +355,7 @@ export class PublishComponent implements OnInit, OnDestroy {
       this.scanError = 'Erreur lors de l\'analyse, remplis manuellement.';
     }
     this.scanLoading = false;
+    this.cdr.detectChanges();
     input.value = '';
   }
 
