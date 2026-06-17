@@ -5,8 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'theme/app_theme.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
+import 'screens/explore/explore_screen.dart';
 import 'screens/community/community_screen.dart';
 import 'screens/messages/messages_screen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/book_detail/book_detail_screen.dart';
+import 'screens/my_listings/my_listings_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,26 +22,38 @@ final _router = GoRouter(
   redirect: (context, state) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('kittab_token');
-    final protectedRoutes = ['/publish', '/profile', '/my-listings'];
+    final protectedRoutes = ['/publish', '/my-listings', '/profile/edit'];
     final isProtected = protectedRoutes.any((r) => state.matchedLocation.startsWith(r));
-    if (isProtected && token == null) return '/login';
+    if (isProtected && token == null) return '/login?redirect=${state.matchedLocation}';
     return null;
   },
   routes: [
     ShellRoute(
-      builder: (context, state, child) => MainShell(child: child),
+      builder: (context, state, child) => MainShell(location: state.matchedLocation, child: child),
       routes: [
         GoRoute(path: '/', builder: (_, __) => const HomeScreen()),
-        GoRoute(path: '/explore', builder: (_, __) => const Placeholder()),
+        GoRoute(
+          path: '/explore',
+          builder: (_, state) => ExploreScreen(
+            categoryId: state.uri.queryParameters['category_id'] != null
+                ? int.tryParse(state.uri.queryParameters['category_id']!)
+                : null,
+          ),
+        ),
         GoRoute(path: '/community', builder: (_, __) => const CommunityScreen()),
         GoRoute(path: '/messages', builder: (_, __) => const MessagesScreen()),
-        GoRoute(path: '/profile', builder: (_, __) => const Placeholder()),
+        GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
       ],
     ),
     GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-    GoRoute(path: '/books/:id', builder: (_, __) => const Placeholder()),
+    GoRoute(
+      path: '/books/:id',
+      builder: (_, state) => BookDetailScreen(bookId: int.parse(state.pathParameters['id']!)),
+    ),
     GoRoute(path: '/publish', builder: (_, __) => const Placeholder()),
-    GoRoute(path: '/my-listings', builder: (_, __) => const Placeholder()),
+    GoRoute(path: '/publish/edit/:id', builder: (_, __) => const Placeholder()),
+    GoRoute(path: '/my-listings', builder: (_, __) => const MyListingsScreen()),
+    GoRoute(path: '/profile/edit', builder: (_, __) => const Placeholder()),
   ],
 );
 
@@ -51,45 +67,40 @@ class KittabApp extends StatelessWidget {
       theme: AppTheme.light,
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [],
     );
   }
 }
 
-class MainShell extends StatefulWidget {
+class MainShell extends StatelessWidget {
   final Widget child;
-  const MainShell({super.key, required this.child});
+  final String location;
+  const MainShell({super.key, required this.child, required this.location});
 
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _index = 0;
-
-  final _tabs = [
-    (path: '/', icon: Icons.home_outlined, activeIcon: Icons.home, label: 'Accueil'),
-    (path: '/explore', icon: Icons.search_outlined, activeIcon: Icons.search, label: 'Explorer'),
-    (path: '/community', icon: Icons.people_outline, activeIcon: Icons.people, label: 'Communauté'),
-    (path: '/messages', icon: Icons.chat_bubble_outline, activeIcon: Icons.chat_bubble, label: 'Messages'),
-    (path: '/profile', icon: Icons.person_outline, activeIcon: Icons.person, label: 'Profil'),
-  ];
+  int get _index {
+    if (location.startsWith('/explore')) return 1;
+    if (location.startsWith('/community')) return 2;
+    if (location.startsWith('/messages')) return 3;
+    if (location.startsWith('/profile')) return 4;
+    return 0;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: widget.child,
+      body: child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) {
-          setState(() => _index = i);
-          context.go(_tabs[i].path);
+          const paths = ['/', '/explore', '/community', '/messages', '/profile'];
+          context.go(paths[i]);
         },
-        items: _tabs.map((t) => BottomNavigationBarItem(
-          icon: Icon(t.icon),
-          activeIcon: Icon(t.activeIcon),
-          label: t.label,
-        )).toList(),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Accueil'),
+          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), activeIcon: Icon(Icons.search), label: 'Explorer'),
+          BottomNavigationBarItem(icon: Icon(Icons.people_outline), activeIcon: Icon(Icons.people), label: 'Communauté'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), activeIcon: Icon(Icons.chat_bubble), label: 'Messages'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profil'),
+        ],
       ),
     );
   }
