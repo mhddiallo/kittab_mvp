@@ -1,16 +1,137 @@
 <app-navbar />
 
-<!-- HERO -->
-<section class="bg-gray-50 border-b border-gray-100 py-8">
-  <div class="max-w-7xl mx-auto px-6">
-    <h1 class="text-3xl font-bold text-gray-900 mb-2">Explorez notre <span class="text-primary">collection</span></h1>
-    <p class="text-gray-500 text-sm mb-5">Découvrez des livres de qualité dans toutes les catégories.</p>
-    <div class="flex items-center bg-white border border-gray-200 rounded-full px-4 py-3 max-w-lg shadow-sm">
-      <svg class="h-4 w-4 text-gray-400 mr-2 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-      <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" type="text" placeholder="Rechercher par titre, auteur..." class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
+<!-- BARRE DE RECHERCHE STICKY (style leboncoin) -->
+<div class="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 py-3">
+
+    <!-- Ligne 1 : champ de recherche -->
+    <div class="flex items-center gap-3 mb-3">
+      <div class="flex-1 flex items-center bg-gray-100 rounded-xl px-4 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-white focus-within:border focus-within:border-primary/40 transition-all">
+        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" type="text"
+               placeholder="Titre, auteur, ISBN..."
+               class="flex-1 bg-transparent text-sm outline-none text-gray-800 placeholder-gray-400 min-w-0" />
+        <button *ngIf="searchQuery" (click)="searchQuery=''; onSearch()" class="text-gray-400 hover:text-gray-600 shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ligne 2 : pills de filtre -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
+
+      <!-- Localisation -->
+      <div class="relative shrink-0">
+        <button (click)="showLocationDropdown = !showLocationDropdown; showPriceDropdown = false; showAllFilters = false"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+                [ngClass]="cityFilter ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          {{ cityFilter || 'Localisation' }}
+          <svg class="w-3 h-3 text-gray-400 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <!-- Dropdown localisation -->
+        <div *ngIf="showLocationDropdown"
+             class="absolute top-full left-0 mt-2 w-72 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 z-50">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Localisation</p>
+          <button (click)="detectLocation()" [disabled]="cityLoading"
+                  class="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-gray-300 text-sm text-gray-600 hover:border-primary hover:text-primary hover:bg-red-50 transition-colors mb-2 disabled:opacity-50">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+            <span *ngIf="!cityLoading">Autour de moi</span>
+            <span *ngIf="cityLoading" class="flex items-center gap-1.5">
+              <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></span> Détection...
+            </span>
+          </button>
+          <input [(ngModel)]="cityFilter" (ngModelChange)="applyFilters()" type="text" placeholder="Saisir une ville..."
+                 class="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+          <p *ngIf="cityError" class="text-xs text-red-400 mt-1.5">{{ cityError }}</p>
+          <div class="flex gap-2 mt-3">
+            <button (click)="cityFilter=''; applyFilters(); showLocationDropdown=false"
+                    class="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">Effacer</button>
+            <button (click)="showLocationDropdown=false"
+                    class="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">Valider</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Prix -->
+      <div class="relative shrink-0">
+        <button (click)="showPriceDropdown = !showPriceDropdown; showLocationDropdown = false; showAllFilters = false"
+                class="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+                [ngClass]="selectedPriceRange > 0 ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          {{ selectedPriceRange > 0 ? priceRanges[selectedPriceRange].label : 'Prix' }}
+          <svg class="w-3 h-3 text-gray-400 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <!-- Dropdown prix -->
+        <div *ngIf="showPriceDropdown"
+             class="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl p-4 z-50">
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Fourchette de prix</p>
+          <div class="space-y-1.5">
+            <button *ngFor="let r of priceRanges; let i = index"
+                    (click)="selectedPriceRange = i; applyFilters()"
+                    class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                    [ngClass]="selectedPriceRange === i ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-50'">
+              {{ r.label }}
+            </button>
+          </div>
+          <div class="flex gap-2 mt-3">
+            <button (click)="selectedPriceRange=0; applyFilters(); showPriceDropdown=false"
+                    class="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">Effacer</button>
+            <button (click)="showPriceDropdown=false"
+                    class="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">Valider</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- État -->
+      <div class="relative shrink-0">
+        <select [(ngModel)]="selectedCondition" (ngModelChange)="applyFilters()"
+                class="appearance-none pl-3 pr-8 py-2 rounded-xl border text-sm font-medium bg-white focus:outline-none cursor-pointer transition-colors"
+                [ngClass]="selectedCondition ? 'border-primary text-primary bg-primary/10' : 'border-gray-200 text-gray-700 hover:border-gray-400'">
+          <option *ngFor="let c of conditions" [value]="c.value">{{ c.label }}</option>
+        </select>
+        <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </div>
+
+      <!-- Catégories scroll -->
+      <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+        <button (click)="selectCategory(null)"
+                class="shrink-0 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+                [ngClass]="selectedCategoryId === null ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+          Tous
+        </button>
+        <button *ngFor="let cat of categories"
+                (click)="selectCategory(cat.id)"
+                class="shrink-0 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+                [ngClass]="selectedCategoryId === cat.id ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+          {{ cat.name }}
+        </button>
+      </div>
+
+      <!-- Échange -->
+      <button (click)="onlyExchange = !onlyExchange; applyFilters()"
+              class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+              [ngClass]="onlyExchange ? 'bg-primary/10 border-primary text-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+        🔄 Échange
+        <svg *ngIf="onlyExchange" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      </button>
+
+      <!-- Séparateur -->
+      <div class="shrink-0 w-px h-6 bg-gray-200 mx-1"></div>
+
+      <!-- Réinitialiser -->
+      <button *ngIf="activeFilterCount > 0" (click)="resetFilters()"
+              class="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:text-primary hover:border-primary transition-colors whitespace-nowrap">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        Effacer ({{ activeFilterCount }})
+      </button>
+
     </div>
   </div>
-</section>
+</div>
+
+<!-- Backdrop dropdowns -->
+<div *ngIf="showLocationDropdown || showPriceDropdown" (click)="showLocationDropdown=false; showPriceDropdown=false" class="fixed inset-0 z-40"></div>
 
 <!-- À LA UNE -->
 <section *ngIf="boostedBooks.length > 0" class="max-w-7xl mx-auto px-6 py-6">
@@ -32,231 +153,63 @@
   </div>
 </section>
 
-<!-- MAIN : sidebar gauche + grille -->
-<section class="max-w-7xl mx-auto px-6 pb-16 pt-6">
-  <div class="flex gap-8 items-start">
+<!-- MAIN : grille pleine largeur -->
+<section class="max-w-7xl mx-auto px-6 pb-16 pt-4">
 
-    <!-- SIDEBAR FILTRES -->
-    <aside class="hidden lg:block w-56 shrink-0 space-y-6 sticky top-24">
+  <!-- Header résultats -->
+  <div class="flex items-center justify-between mb-5">
+    <p class="text-sm text-gray-500">
+      <span class="font-bold text-gray-900 text-base">{{ total }}</span> livre{{ total > 1 ? 's' : '' }} trouvé{{ total > 1 ? 's' : '' }}
+      <span *ngIf="searchQuery" class="ml-1">pour « <span class="text-primary font-semibold">{{ searchQuery }}</span> »</span>
+      <span *ngIf="cityFilter" class="ml-1">· 📍 {{ cityFilter }}</span>
+    </p>
+  </div>
 
-      <!-- Catégories -->
-      <div class="card p-4">
-        <h3 class="font-bold text-sm text-gray-800 mb-3">Catégories</h3>
-        <div class="space-y-1">
-          <button (click)="selectCategory(null)"
-                  [ngClass]="selectedCategoryId === null ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary hover:bg-red-50'"
-                  class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-            Toutes les catégories
-          </button>
-          <button *ngFor="let cat of categories"
-                  (click)="selectCategory(cat.id)"
-                  [ngClass]="selectedCategoryId === cat.id ? 'bg-primary text-white' : 'text-gray-600 hover:text-primary hover:bg-red-50'"
-                  class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors">
-            {{ cat.name }}
-          </button>
-        </div>
-      </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
 
-      <!-- État -->
-      <div class="card p-4">
-        <h3 class="font-bold text-sm text-gray-800 mb-3">État du livre</h3>
-        <div class="space-y-1">
-          <select [(ngModel)]="selectedCondition" (ngModelChange)="applyFilters()"
-                  class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
-            <option *ngFor="let c of conditions" [value]="c.value">{{ c.label }}</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Prix -->
-      <div class="card p-4">
-        <h3 class="font-bold text-sm text-gray-800 mb-3">Fourchette de prix</h3>
-        <select [(ngModel)]="selectedPriceRange" (ngModelChange)="applyFilters()"
-                class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white">
-          <option *ngFor="let r of priceRanges; let i = index" [ngValue]="i">{{ r.label }}</option>
-        </select>
-      </div>
-
-      <!-- Échange -->
-      <div class="card p-4">
-        <label class="flex items-center gap-3 cursor-pointer">
-          <div class="relative">
-            <input type="checkbox" [(ngModel)]="onlyExchange" (ngModelChange)="applyFilters()" class="sr-only peer" />
-            <div class="w-10 h-5 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors"></div>
-            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
-          </div>
-          <span class="text-sm text-gray-700 font-medium">🔄 Échange uniquement</span>
-        </label>
-      </div>
-
-      <!-- Localisation -->
-      <div class="card p-4">
-        <h3 class="font-bold text-sm text-gray-800 mb-3">📍 Localisation</h3>
-        <button (click)="detectLocation()" [disabled]="cityLoading"
-                class="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-lg py-2 text-xs text-gray-600 hover:border-primary hover:text-primary transition-colors mb-2 disabled:opacity-50">
-          <span *ngIf="!cityLoading">📍 Utiliser ma position</span>
-          <span *ngIf="cityLoading" class="flex items-center gap-1.5">
-            <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Détection...
-          </span>
-        </button>
-        <input [(ngModel)]="cityFilter" (ngModelChange)="applyFilters()" type="text" placeholder="Ou saisir une ville..."
-               class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        <p *ngIf="cityError" class="text-xs text-red-400 mt-1">{{ cityError }}</p>
-        <p class="text-xs text-gray-400 mt-1.5">Pour voir les livres proches de toi</p>
-      </div>
-
-      <button *ngIf="activeFilterCount > 0" (click)="resetFilters()"
-              class="w-full text-xs text-gray-400 hover:text-primary transition-colors text-center py-2">
-        Réinitialiser les filtres ({{ activeFilterCount }})
-      </button>
-    </aside>
-
-    <!-- CONTENU PRINCIPAL -->
-    <div class="flex-1 min-w-0">
-
-      <!-- Filtres mobiles (top bar) -->
-      <div class="lg:hidden mb-4">
-        <div class="flex items-center gap-2 mb-3">
-          <!-- Catégories scroll -->
-          <div class="flex gap-2 overflow-x-auto pb-1 flex-1">
-            <button (click)="selectCategory(null)"
-                    [ngClass]="selectedCategoryId === null ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-200'"
-                    class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0">Tous</button>
-            <button *ngFor="let cat of categories"
-                    (click)="selectCategory(cat.id)"
-                    [ngClass]="selectedCategoryId === cat.id ? 'bg-primary text-white' : 'bg-white text-gray-600 border border-gray-200'"
-                    class="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap shrink-0">{{ cat.name }}</button>
-          </div>
-          <!-- Bouton filtres -->
-          <button (click)="showFilters = !showFilters"
-                  class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 border rounded-full text-xs font-medium transition-colors"
-                  [ngClass]="activeFilterCount > 0 ? 'border-primary text-primary bg-red-50' : 'border-gray-200 text-gray-600'">
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
-            Filtres
-            <span *ngIf="activeFilterCount > 0" class="bg-primary text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">{{ activeFilterCount }}</span>
-          </button>
-        </div>
-
-      </div>
-
-      <!-- Backdrop filtres mobile -->
-      <div *ngIf="showFilters" (click)="showFilters=false" class="lg:hidden fixed inset-0 bg-black/40 z-40"></div>
-
-      <!-- Bottom sheet filtres mobile -->
-      <div *ngIf="showFilters" class="lg:hidden fixed bottom-0 left-0 right-0 bg-white z-50 rounded-t-2xl shadow-xl p-5 space-y-4">
-        <!-- Drag handle -->
-        <div class="flex justify-center mb-1">
-          <div class="w-10 h-1 bg-gray-300 rounded-full"></div>
-        </div>
-        <!-- Title + close -->
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-base text-gray-900">Filtres</h3>
-          <button (click)="showFilters=false" class="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-            <svg class="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1.5">État</label>
-            <select [(ngModel)]="selectedCondition" (ngModelChange)="applyFilters()"
-                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option *ngFor="let c of conditions" [value]="c.value">{{ c.label }}</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1.5">Prix</label>
-            <select [(ngModel)]="selectedPriceRange" (ngModelChange)="applyFilters()"
-                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <option *ngFor="let r of priceRanges; let i = index" [ngValue]="i">{{ r.label }}</option>
-            </select>
-          </div>
-        </div>
-        <div class="flex items-center justify-between">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <div class="relative">
-              <input type="checkbox" [(ngModel)]="onlyExchange" (ngModelChange)="applyFilters()" class="sr-only peer" />
-              <div class="w-9 h-5 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors"></div>
-              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
-            </div>
-            <span class="text-sm text-gray-700">🔄 Échange uniquement</span>
-          </label>
-          <button *ngIf="activeFilterCount > 0" (click)="resetFilters()" class="text-xs text-gray-400 hover:text-primary">Réinitialiser</button>
-        </div>
-
-        <!-- Localisation mobile -->
-        <div>
-          <label class="block text-xs font-semibold text-gray-700 mb-2">📍 Localisation</label>
-          <button (click)="detectLocation()" [disabled]="cityLoading"
-                  class="w-full flex items-center justify-center gap-2 border border-dashed border-gray-300 rounded-lg py-2 text-xs text-gray-600 hover:border-primary hover:text-primary transition-colors mb-2 disabled:opacity-50">
-            <span *ngIf="!cityLoading">📍 Utiliser ma position</span>
-            <span *ngIf="cityLoading" class="flex items-center gap-1.5">
-              <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span> Détection...
-            </span>
-          </button>
-          <input [(ngModel)]="cityFilter" (ngModelChange)="applyFilters()" type="text" placeholder="Ou saisir une ville..."
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          <p *ngIf="cityError" class="text-xs text-red-400 mt-1">{{ cityError }}</p>
-        </div>
-      </div>
-
-      <!-- Header résultats -->
-      <div class="flex items-center justify-between mb-5">
-        <h2 class="font-bold text-lg text-gray-900">
-          Tous les livres
-          <span class="text-sm font-normal text-gray-400 ml-2">{{ total }} résultats</span>
-        </h2>
-        <div class="flex items-center gap-2 text-xs text-gray-500">
-          <span>{{ categories.length }} catégories</span>
-        </div>
-      </div>
-
-      <!-- Loading -->
-      <div *ngIf="loading" class="flex justify-center py-20">
-        <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-
-      <!-- Vide -->
-      <div *ngIf="!loading && books.length === 0" class="text-center py-20">
-        <div class="text-6xl mb-4">📭</div>
-        <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucun livre trouvé</h3>
-        <p class="text-gray-400 text-sm mb-6">Ce livre n'est pas encore disponible sur Kittab.</p>
-        <div *ngIf="!alertSent" class="card max-w-sm mx-auto p-6">
-          <p class="text-sm text-gray-600 mb-3">Voulez-vous être notifié quand ce livre sera disponible ?</p>
-          <input [(ngModel)]="alertPhone" type="tel" placeholder="Votre numéro WhatsApp" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-primary" />
-          <button (click)="sendAlert()" class="btn-primary w-full">M'alerter par SMS/WhatsApp</button>
-        </div>
-        <div *ngIf="alertSent" class="card max-w-sm mx-auto p-6 bg-green-50 border-green-200">
-          <p class="text-sm text-green-700 font-semibold">✅ Tu seras notifié dès que ce livre sera disponible !</p>
-        </div>
-      </div>
-
-      <!-- Grille -->
-      <div *ngIf="!loading && books.length > 0" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5">
-        <app-book-card *ngFor="let book of books" [book]="book" />
-      </div>
-
-      <!-- Pagination -->
-      <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-center gap-1 mt-10">
-        <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
-                class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        </button>
-        <ng-container *ngFor="let p of pages">
-          <span *ngIf="p === 0" class="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">…</span>
-          <button *ngIf="p !== 0" (click)="goToPage(p)"
-                  [ngClass]="p === currentPage ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary'"
-                  class="w-9 h-9 flex items-center justify-center rounded-lg border text-sm font-medium transition-colors">
-            {{ p }}
-          </button>
-        </ng-container>
-        <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
-                class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        </button>
-      </div>
-
+  <!-- Vide -->
+  <div *ngIf="!loading && books.length === 0" class="text-center py-20">
+    <div class="text-6xl mb-4">📭</div>
+    <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucun livre trouvé</h3>
+    <p class="text-gray-400 text-sm mb-6">Ce livre n'est pas encore disponible sur Kittab.</p>
+    <div *ngIf="!alertSent" class="card max-w-sm mx-auto p-6">
+      <p class="text-sm text-gray-600 mb-3">Voulez-vous être notifié quand ce livre sera disponible ?</p>
+      <input [(ngModel)]="alertPhone" type="tel" placeholder="Votre numéro WhatsApp" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-primary" />
+      <button (click)="sendAlert()" class="btn-primary w-full">M'alerter par SMS/WhatsApp</button>
+    </div>
+    <div *ngIf="alertSent" class="card max-w-sm mx-auto p-6 bg-green-50 border-green-200">
+      <p class="text-sm text-green-700 font-semibold">✅ Tu seras notifié dès que ce livre sera disponible !</p>
     </div>
   </div>
+
+  <!-- Grille -->
+  <div *ngIf="!loading && books.length > 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+    <app-book-card *ngFor="let book of books" [book]="book" />
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-center gap-1 mt-10">
+    <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 1"
+            class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <ng-container *ngFor="let p of pages">
+      <span *ngIf="p === 0" class="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">…</span>
+      <button *ngIf="p !== 0" (click)="goToPage(p)"
+              [ngClass]="p === currentPage ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:border-primary hover:text-primary'"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border text-sm font-medium transition-colors">
+        {{ p }}
+      </button>
+    </ng-container>
+    <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages"
+            class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
 </section>
 
 <app-footer />

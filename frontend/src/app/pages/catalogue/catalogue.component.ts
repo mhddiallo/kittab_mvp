@@ -23,6 +23,9 @@ export class CatalogueComponent implements OnInit {
   maxPrice: number | null = null;
   onlyExchange = false;
   showFilters = false;
+  showLocationDropdown = false;
+  showPriceDropdown = false;
+  showAllFilters = false;
   cityFilter = '';
   cityLoading = false;
   cityError = '';

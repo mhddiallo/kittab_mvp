@@ -22,7 +22,6 @@ export class ProfileComponent implements OnInit {
   newPhone = '';
   email = '';
   loading = false;
-  regenerating = false;
   success = false;
   error = '';
   isNewUser = false;
@@ -56,21 +55,6 @@ export class ProfileComponent implements OnInit {
   isValidPhone(phone: string): boolean {
     const digits = phone.replace(/\D/g, '');
     return digits.length >= 7 && digits.length <= 15;
-  }
-
-  async regenerateUsername() {
-    this.regenerating = true;
-    try {
-      const res = await fetch(`${environment.apiUrl}/api/auth/me/regenerate-username`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${this.auth.token}` },
-      });
-      if (res.ok) {
-        await this.auth.loadUser();
-        this.username = this.auth.user?.username || '';
-      }
-    } catch {}
-    this.regenerating = false;
   }
 
   async save() {

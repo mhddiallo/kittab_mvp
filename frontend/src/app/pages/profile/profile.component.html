@@ -41,15 +41,9 @@
       <!-- Pseudo -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pseudo</label>
-        <div class="flex gap-2">
-          <input [(ngModel)]="username" type="text" placeholder="MonPseudo"
-                 class="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-          <button (click)="regenerateUsername()" [disabled]="regenerating" title="Générer un nouveau pseudo"
-                  class="px-3 py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-60 text-lg">
-            {{ regenerating ? '⏳' : '🎲' }}
-          </button>
-        </div>
-        <p class="text-xs text-gray-400 mt-1">Visible par les autres utilisateurs · Clique sur 🎲 pour en générer un nouveau</p>
+        <input [(ngModel)]="username" type="text" placeholder="MonPseudo"
+               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+        <p class="text-xs text-gray-400 mt-1">Visible par les autres utilisateurs</p>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
