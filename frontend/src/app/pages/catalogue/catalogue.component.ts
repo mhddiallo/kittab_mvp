@@ -23,6 +23,7 @@ export class CatalogueComponent implements OnInit {
   maxPrice: number | null = null;
   onlyExchange = false;
   showFilters = false;
+  showCategoryDropdown = false;
   showLocationDropdown = false;
   showPriceDropdown = false;
   showAllFilters = false;
@@ -166,6 +167,10 @@ export class CatalogueComponent implements OnInit {
       () => { this.cityError = 'Localisation refusée'; this.cityLoading = false; },
       { timeout: 8000 }
     );
+  }
+
+  getCategoryName(id: number): string {
+    return this.categories.find(c => c.id === id)?.name ?? 'Catégories';
   }
 
   get activeFilterCount(): number {

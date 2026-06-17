@@ -54,7 +54,7 @@
     </div>
     <!-- Body -->
     <div class="px-6 py-5 space-y-4">
-      <p class="text-sm text-gray-500">Publie ta recherche pour que la communauté puisse t'aider à trouver ce livre.</p>
+      <p class="text-sm text-gray-500">Vous ne trouvez pas ce livre dans le catalogue ? Publiez votre recherche — un membre de la communauté qui le possède pourra vous contacter.</p>
 
       <div *ngIf="formError" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{{ formError }}</div>
 
@@ -101,14 +101,15 @@
 <section class="max-w-7xl mx-auto px-4 py-8 pb-16">
 
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-extrabold text-gray-900">📚 Livres recherchés</h1>
-      <p class="text-sm text-gray-500 mt-1">
-        <span class="font-bold text-gray-700">{{ books.length }}</span> demande{{ books.length > 1 ? 's' : '' }} en cours
-        <span *ngIf="searchQuery" class="ml-1">pour « <span class="text-primary font-semibold">{{ searchQuery }}</span> »</span>
-      </p>
-    </div>
+  <div class="mb-8">
+    <h1 class="text-2xl font-extrabold text-gray-900 mb-1">📚 Livres recherchés</h1>
+    <p class="text-gray-500 text-sm max-w-2xl">
+      Vous ne trouvez pas un livre dans le catalogue ? Publiez votre recherche ici — un vendeur de la communauté pourra vous contacter s'il le possède.
+    </p>
+    <p *ngIf="books.length > 0" class="text-sm text-gray-400 mt-2">
+      <span class="font-semibold text-gray-700">{{ books.length }}</span> demande{{ books.length > 1 ? 's' : '' }} en cours
+      <span *ngIf="searchQuery"> · « <span class="text-primary font-semibold">{{ searchQuery }}</span> »</span>
+    </p>
   </div>
 
   <!-- Loading -->
@@ -119,14 +120,23 @@
   <!-- Vide -->
   <div *ngIf="!loading && books.length === 0" class="text-center py-20">
     <div class="text-6xl mb-4">🔍</div>
-    <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucune demande pour l'instant</h3>
-    <p class="text-gray-400 text-sm mb-6">Sois le premier à poster un livre recherché !</p>
-    <button (click)="auth.isLoggedIn ? (showForm = true) : null"
-            [routerLink]="auth.isLoggedIn ? null : '/login'"
-            class="btn-primary inline-flex items-center gap-2">
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-      Demander un livre
-    </button>
+    <h3 class="font-semibold text-gray-700 text-lg mb-2">
+      {{ searchQuery ? 'Aucune demande pour « ' + searchQuery + ' »' : 'Aucune demande en cours' }}
+    </h3>
+    <p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+      {{ searchQuery ? 'Personne ne recherche ce livre pour l\'instant. Soyez le premier à poster votre demande !' : 'Vous ne trouvez pas un livre dans le catalogue ? Publiez votre recherche et la communauté vous aidera.' }}
+    </p>
+    <div class="flex items-center justify-center gap-3 flex-wrap">
+      <button (click)="auth.isLoggedIn ? (showForm = true) : null"
+              [routerLink]="auth.isLoggedIn ? null : '/login'"
+              class="btn-primary inline-flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Publier ma recherche
+      </button>
+      <a routerLink="/catalogue" class="btn-outline inline-flex items-center gap-2">
+        Parcourir le catalogue
+      </a>
+    </div>
   </div>
 
   <!-- Liste -->
