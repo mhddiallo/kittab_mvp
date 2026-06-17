@@ -1,0 +1,193 @@
+<app-navbar />
+
+<!-- BARRE DE RECHERCHE STICKY -->
+<div class="sticky top-16 z-30 bg-white border-b border-gray-200 shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 py-3">
+
+    <!-- Ligne 1 : champ de recherche -->
+    <div class="flex items-center gap-3 mb-3">
+      <div class="flex-1 flex items-center bg-gray-100 rounded-xl px-4 py-2.5 gap-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-white focus-within:border focus-within:border-primary/40 transition-all">
+        <svg class="h-4 w-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" type="text"
+               placeholder="Rechercher un titre, un auteur..."
+               class="flex-1 bg-transparent text-sm outline-none text-gray-800 placeholder-gray-400 min-w-0" />
+        <button *ngIf="searchQuery" (click)="searchQuery=''; onSearch()" class="text-gray-400 hover:text-gray-600 shrink-0">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Bouton publier une demande -->
+      <button (click)="auth.isLoggedIn ? (showForm = !showForm) : null"
+              [routerLink]="auth.isLoggedIn ? null : '/login'"
+              class="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors whitespace-nowrap">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        <span class="hidden sm:inline">Demander un livre</span>
+        <span class="sm:hidden">Demander</span>
+      </button>
+    </div>
+
+    <!-- Ligne 2 : catégories -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-none">
+      <button (click)="selectCategory(null)"
+              class="shrink-0 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+              [ngClass]="selectedCategoryId === null ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+        Toutes
+      </button>
+      <button *ngFor="let cat of categories"
+              (click)="selectCategory(cat.id)"
+              class="shrink-0 px-3 py-2 rounded-xl border text-sm font-medium transition-colors whitespace-nowrap"
+              [ngClass]="selectedCategoryId === cat.id ? 'bg-primary text-white border-primary' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'">
+        {{ cat.name }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- FORMULAIRE MODAL -->
+<div *ngIf="showForm" class="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
+  <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="font-bold text-lg text-gray-900">📚 Demander un livre</h2>
+      <button (click)="showForm = false" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+        <svg class="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <!-- Body -->
+    <div class="px-6 py-5 space-y-4">
+      <p class="text-sm text-gray-500">Publie ta recherche pour que la communauté puisse t'aider à trouver ce livre.</p>
+
+      <div *ngIf="formError" class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{{ formError }}</div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Titre du livre <span class="text-primary">*</span></label>
+        <input [(ngModel)]="form.title" type="text" placeholder="Ex: Le Monde s'effondre"
+               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Auteur <span class="text-gray-400 text-xs font-normal">(optionnel)</span></label>
+        <input [(ngModel)]="form.author" type="text" placeholder="Ex: Chinua Achebe"
+               class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Catégorie <span class="text-gray-400 text-xs font-normal">(optionnel)</span></label>
+        <select [(ngModel)]="form.category_id"
+                class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+          <option [ngValue]="null">Choisir une catégorie</option>
+          <option *ngFor="let cat of categories" [ngValue]="cat.id">{{ cat.name }}</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Message <span class="text-gray-400 text-xs font-normal">(optionnel)</span></label>
+        <textarea [(ngModel)]="form.description" rows="2" placeholder="Précisions sur l'édition, la langue, le budget..."
+                  class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"></textarea>
+      </div>
+    </div>
+    <!-- Footer -->
+    <div class="flex gap-3 px-6 py-4 border-t border-gray-100">
+      <button (click)="showForm = false" class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors">Annuler</button>
+      <button (click)="submit()" [disabled]="submitting"
+              class="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+        <span *ngIf="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        {{ submitting ? 'Envoi...' : 'Publier ma demande' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<section class="max-w-7xl mx-auto px-4 py-8 pb-16">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-extrabold text-gray-900">📚 Livres recherchés</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        <span class="font-bold text-gray-700">{{ books.length }}</span> demande{{ books.length > 1 ? 's' : '' }} en cours
+        <span *ngIf="searchQuery" class="ml-1">pour « <span class="text-primary font-semibold">{{ searchQuery }}</span> »</span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Vide -->
+  <div *ngIf="!loading && books.length === 0" class="text-center py-20">
+    <div class="text-6xl mb-4">🔍</div>
+    <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucune demande pour l'instant</h3>
+    <p class="text-gray-400 text-sm mb-6">Sois le premier à poster un livre recherché !</p>
+    <button (click)="auth.isLoggedIn ? (showForm = true) : null"
+            [routerLink]="auth.isLoggedIn ? null : '/login'"
+            class="btn-primary inline-flex items-center gap-2">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+      Demander un livre
+    </button>
+  </div>
+
+  <!-- Liste -->
+  <div *ngIf="!loading && books.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let book of books"
+         class="bg-white border border-gray-200 rounded-2xl p-5 hover:shadow-md hover:border-gray-300 transition-all flex flex-col gap-3">
+
+      <!-- Header carte -->
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex-1 min-w-0">
+          <h3 class="font-bold text-gray-900 text-base leading-tight truncate">{{ book.title }}</h3>
+          <p *ngIf="book.author" class="text-sm text-gray-500 mt-0.5">par {{ book.author }}</p>
+        </div>
+        <!-- Badge catégorie -->
+        <span *ngIf="book.category"
+              class="shrink-0 text-xs font-semibold px-2.5 py-1 bg-red-50 text-primary rounded-full whitespace-nowrap">
+          {{ book.category.name }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <p *ngIf="book.description" class="text-sm text-gray-600 leading-relaxed line-clamp-2">{{ book.description }}</p>
+
+      <!-- Footer carte -->
+      <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
+        <!-- Utilisateur + date -->
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+            {{ (book.user.username || '?')[0].toUpperCase() }}
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-gray-700">{{ book.user.username || 'Anonyme' }}</p>
+            <p class="text-xs text-gray-400">{{ timeAgo(book.created_at) }}</p>
+          </div>
+        </div>
+
+        <!-- Actions propriétaire -->
+        <div *ngIf="isOwner(book)" class="flex items-center gap-1">
+          <button (click)="fulfill(book)" title="Marquer comme trouvé"
+                  class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Trouvé !
+          </button>
+          <button (click)="deleteBook(book)" title="Supprimer"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+
+        <!-- Bouton contacter (non-propriétaire) -->
+        <a *ngIf="!isOwner(book)" routerLink="/catalogue"
+           [queryParams]="{q: book.title}"
+           class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-semibold hover:bg-primary hover:text-white transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Voir si dispo
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</section>
+
+<app-footer />

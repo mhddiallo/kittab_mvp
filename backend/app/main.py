@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
-from app.routers import auth, books, categories, admin, waitlist
+from app.routers import auth, books, categories, admin, waitlist, wanted_books
 
 app = FastAPI(title="Kittab API", version="1.0.0")
 
@@ -25,6 +25,7 @@ app.include_router(books.router, prefix="/api")
 app.include_router(categories.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
 app.include_router(waitlist.router, prefix="/api")
+app.include_router(wanted_books.router, prefix="/api")
 
 
 @app.get("/api/health")
