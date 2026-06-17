@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/api.dart';
 import '../../core/auth_service.dart';
 import '../../theme/app_theme.dart';
 
@@ -11,6 +12,17 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   Map<String, dynamic>? get user => authService.user;
+  bool _regenerating = false;
+
+  Future<void> _regenerateUsername() async {
+    setState(() => _regenerating = true);
+    try {
+      await api.post('/api/auth/me/regenerate-username');
+      await authService.loadUser();
+      if (mounted) setState(() {});
+    } catch (_) {}
+    if (mounted) setState(() => _regenerating = false);
+  }
 
   Future<void> _logout() async {
     final confirm = await showDialog<bool>(
@@ -53,10 +65,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     }
 
-    final firstName = user!['first_name'] ?? '';
-    final lastName = user!['last_name'] ?? '';
-    final phone = user!['phone'] ?? '';
-    final initials = '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}'.toUpperCase();
+    final username = user!['username'] as String? ?? '';
+    final phone = user!['phone'] as String? ?? '';
+    final initial = username.isNotEmpty ? username[0].toUpperCase() : '?';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -78,12 +89,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 CircleAvatar(
                   radius: 36,
                   backgroundColor: Colors.white.withOpacity(0.2),
-                  child: Text(initials.isNotEmpty ? initials : '?',
+                  child: Text(initial,
                       style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Colors.white)),
                 ),
                 const SizedBox(height: 12),
-                Text('$firstName $lastName'.trim().isNotEmpty ? '$firstName $lastName' : 'Utilisateur',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(username.isNotEmpty ? username : 'Utilisateur',
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Colors.white)),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: _regenerating ? null : _regenerateUsername,
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                      child: _regenerating
+                          ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Text('🎲', style: TextStyle(fontSize: 14)),
+                    ),
+                  ),
+                ]),
                 const SizedBox(height: 4),
                 Text(phone, style: TextStyle(fontSize: 13, color: Colors.white.withOpacity(0.8))),
               ]),

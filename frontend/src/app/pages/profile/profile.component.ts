@@ -14,6 +14,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
+  username = '';
   firstName = '';
   lastName = '';
   address = '';
@@ -21,6 +22,7 @@ export class ProfileComponent implements OnInit {
   newPhone = '';
   email = '';
   loading = false;
+  regenerating = false;
   success = false;
   error = '';
   isNewUser = false;
@@ -33,6 +35,7 @@ export class ProfileComponent implements OnInit {
     this.isIncomplete = this.route.snapshot.queryParamMap.get('incomplet') === '1';
     const u = this.auth.user;
     const load = (u: any) => {
+      this.username = u.username || '';
       this.firstName = u.first_name || '';
       this.lastName = u.last_name || '';
       this.address = u.address || '';
@@ -55,10 +58,26 @@ export class ProfileComponent implements OnInit {
     return digits.length >= 7 && digits.length <= 15;
   }
 
+  async regenerateUsername() {
+    this.regenerating = true;
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/auth/me/regenerate-username`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) {
+        await this.auth.loadUser();
+        this.username = this.auth.user?.username || '';
+      }
+    } catch {}
+    this.regenerating = false;
+  }
+
   async save() {
     this.loading = true; this.success = false; this.error = '';
     try {
       const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
+      if (this.username.trim()) body.username = this.username.trim();
       if (this.isGoogleUser && this.newPhone.trim()) {
         if (!this.isValidPhone(this.newPhone)) {
           this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)';

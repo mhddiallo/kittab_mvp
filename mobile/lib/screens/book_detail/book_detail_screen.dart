@@ -220,7 +220,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           children: [
                             const Text('Contacter le vendeur', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
                             const SizedBox(height: 4),
-                            Text(book!.seller.fullName.isNotEmpty ? book!.seller.fullName : 'Vendeur Kittab',
+                            Text(book!.seller.displayName,
                                 style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                             if (book!.seller.address != null) ...[
                               const SizedBox(height: 2),

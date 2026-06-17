@@ -21,6 +21,7 @@ class CompleteProfileInput(BaseModel):
 
 
 class UserUpdate(BaseModel):
+    username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     address: Optional[str] = None
@@ -31,6 +32,7 @@ class UserOut(BaseModel):
     id: int
     phone: str
     email: Optional[str] = None
+    username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     address: Optional[str] = None

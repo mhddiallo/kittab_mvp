@@ -24,6 +24,7 @@ class BookImageOut(BaseModel):
 
 class SellerBrief(BaseModel):
     id: int
+    username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     phone: str

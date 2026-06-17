@@ -18,8 +18,17 @@ from app.schemas.user import (
     VerifyOTPInput,
 )
 from app.services.otp_service import create_otp, send_otp, verify_otp
+from app.services.username_generator import generate_username
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _unique_username(db: Session) -> str:
+    for _ in range(20):
+        candidate = generate_username()
+        if not db.query(User).filter(User.username == candidate).first():
+            return candidate
+    return generate_username()  # fallback — collision très improbable
 
 
 class GoogleTokenInput(BaseModel):
@@ -60,7 +69,8 @@ def verify_otp_endpoint(payload: VerifyOTPInput, db: Session = Depends(get_db)):
     is_new_user = user is None
 
     if is_new_user:
-        user = User(phone=phone)
+        username = _unique_username(db)
+        user = User(phone=phone, username=username)
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -105,6 +115,7 @@ def google_login(payload: GoogleTokenInput, db: Session = Depends(get_db)):
                 first_name=first_name,
                 last_name=last_name,
                 phone=f"google_{google_id}",
+                username=_unique_username(db),
                 is_profile_complete=bool(first_name and last_name),
             )
             db.add(user)
@@ -207,6 +218,14 @@ def update_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    if payload.username is not None:
+        new_username = payload.username.strip()
+        if len(new_username) < 3 or len(new_username) > 30:
+            raise HTTPException(status_code=400, detail="Le pseudo doit faire entre 3 et 30 caractères")
+        conflict = db.query(User).filter(User.username == new_username, User.id != current_user.id).first()
+        if conflict:
+            raise HTTPException(status_code=409, detail="Ce pseudo est déjà pris")
+        current_user.username = new_username
     if payload.first_name is not None:
         current_user.first_name = payload.first_name.strip()
     if payload.last_name is not None:
@@ -217,6 +236,17 @@ def update_me(
         current_user.phone = payload.phone.strip()
     if current_user.first_name and current_user.last_name:
         current_user.is_profile_complete = True
+    db.commit()
+    db.refresh(current_user)
+    return UserOut.model_validate(current_user)
+
+
+@router.post("/me/regenerate-username", response_model=UserOut)
+def regenerate_username(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    current_user.username = _unique_username(db)
     db.commit()
     db.refresh(current_user)
     return UserOut.model_validate(current_user)

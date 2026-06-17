@@ -101,8 +101,8 @@
           </h3>
           <div class="space-y-2 text-sm">
             <div class="flex items-center gap-2 text-gray-700">
-              <span class="font-medium">Nom :</span>
-              <span>{{ book.seller.first_name }} {{ book.seller.last_name }}</span>
+              <span class="font-medium">Vendeur :</span>
+              <span>{{ book.seller.username || (book.seller.first_name + ' ' + book.seller.last_name) }}</span>
             </div>
             <div class="flex items-center gap-2 text-gray-700">
               <span class="font-medium">Téléphone :</span>

@@ -16,7 +16,7 @@ interface BookDetail {
   book_type: string;
   description: string;
   images: string[];
-  seller: { id: number; first_name: string; last_name: string; phone: string; address: string };
+  seller: { id: number; username?: string; first_name: string; last_name: string; phone: string; address: string };
   cover_url: string | null;
   language: string | null;
   open_library_id: string | null;

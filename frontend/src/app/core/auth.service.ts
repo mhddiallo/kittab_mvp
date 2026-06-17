@@ -3,6 +3,7 @@ import { environment } from '../../environments/environment';
 
 export interface CurrentUser {
   id: number;
+  username?: string;
   first_name: string;
   last_name: string;
   phone: string;

@@ -33,9 +33,9 @@
       <div *ngIf="auth.isLoggedIn" class="hidden lg:block relative group">
         <button class="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 transition-colors">
           <span class="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">
-            {{ auth.user?.first_name?.[0]?.toUpperCase() || '?' }}
+            {{ auth.user?.username?.[0]?.toUpperCase() || '?' }}
           </span>
-          {{ auth.user?.first_name || 'Mon compte' }}
+          {{ auth.user?.username || 'Mon compte' }}
           <svg class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
         </button>
         <div class="absolute right-0 top-full mt-2 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">

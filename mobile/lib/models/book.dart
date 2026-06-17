@@ -9,19 +9,25 @@ class BookImage {
 
 class Seller {
   final int id;
+  final String? username;
   final String? firstName;
   final String? lastName;
   final String phone;
   final String? address;
-  Seller({required this.id, this.firstName, this.lastName, required this.phone, this.address});
+  Seller({required this.id, this.username, this.firstName, this.lastName, required this.phone, this.address});
   factory Seller.fromJson(Map<String, dynamic> j) => Seller(
         id: j['id'],
+        username: j['username'],
         firstName: j['first_name'],
         lastName: j['last_name'],
         phone: j['phone'],
         address: j['address'],
       );
-  String get fullName => '${firstName ?? ''} ${lastName ?? ''}'.trim();
+  String get displayName {
+    if (username != null && username!.isNotEmpty) return username!;
+    final full = '${firstName ?? ''} ${lastName ?? ''}'.trim();
+    return full.isNotEmpty ? full : 'Vendeur Kittab';
+  }
 }
 
 class Book {
