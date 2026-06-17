@@ -75,11 +75,47 @@ export class PublishComponent implements OnInit, OnDestroy {
   private barcodeDetected = false;
 
   conditions = [
-    { value: 'new', label: 'Neuf', emoji: '✨', desc: 'Jamais utilisé', cls: 'border-green-400 bg-green-50', textCls: 'text-green-600' },
-    { value: 'like_new', label: 'Très bon', emoji: '👍', desc: 'Peu de traces', cls: 'border-blue-400 bg-blue-50', textCls: 'text-blue-600' },
-    { value: 'good', label: 'Bon état', emoji: '📖', desc: 'Quelques marques', cls: 'border-yellow-400 bg-yellow-50', textCls: 'text-yellow-600' },
-    { value: 'fair', label: 'Correct', emoji: '📝', desc: 'Très annoté', cls: 'border-orange-400 bg-orange-50', textCls: 'text-orange-600' },
+    {
+      value: 'new',
+      label: 'Parfait état',
+      desc: 'Livre comme neuf, aucune marque d\'usure. Couverture intacte, coins parfaits, pas de pli ni de rayure.',
+      img: 'assets/conditions/condition-new.jpg',
+      color: 'border-green-400',
+      bg: 'bg-green-50',
+      badge: 'bg-green-100 text-green-700',
+    },
+    {
+      value: 'like_new',
+      label: 'Très bon état',
+      desc: 'Légères traces d\'usage sur la couverture : petits frottements ou pliures légères. Intérieur propre.',
+      img: 'assets/conditions/condition-like-new.jpg',
+      color: 'border-green-300',
+      bg: 'bg-green-50/50',
+      badge: 'bg-teal-100 text-teal-700',
+    },
+    {
+      value: 'good',
+      label: 'État correct',
+      desc: 'Traces d\'usure visibles : rayures, plis marqués ou coins abîmés. Intérieur en bon état.',
+      img: 'assets/conditions/condition-correct.jpg',
+      color: 'border-yellow-400',
+      bg: 'bg-yellow-50',
+      badge: 'bg-yellow-100 text-yellow-700',
+    },
+    {
+      value: 'fair',
+      label: 'Dégradé',
+      desc: 'Couverture très abîmée : déchirures, taches, fortes plis ou coins manquants. Intérieur peut être altéré.',
+      img: 'assets/conditions/condition-degrade.jpg',
+      color: 'border-red-300',
+      bg: 'bg-red-50',
+      badge: 'bg-red-100 text-red-700',
+    },
   ];
+
+  get selectedCondition() {
+    return this.conditions.find(c => c.value === this.condition) ?? null;
+  }
 
   // Questionnaire état
   showConditionQuiz = false;
@@ -144,13 +180,13 @@ export class PublishComponent implements OnInit, OnDestroy {
   computeQuizResult() {
     const total = this.quizAnswers.reduce((a, b) => a + b, 0);
     if (total === 0) {
-      this.quizSuggestion = { condition: 'new', label: 'Neuf', priceMin: 8000, priceMax: 25000 };
+      this.quizSuggestion = { condition: 'new', label: 'Parfait état', priceMin: 8000, priceMax: 25000 };
     } else if (total <= 2) {
       this.quizSuggestion = { condition: 'like_new', label: 'Très bon état', priceMin: 5000, priceMax: 15000 };
     } else if (total <= 4) {
-      this.quizSuggestion = { condition: 'good', label: 'Bon état', priceMin: 3000, priceMax: 8000 };
+      this.quizSuggestion = { condition: 'good', label: 'État correct', priceMin: 3000, priceMax: 8000 };
     } else {
-      this.quizSuggestion = { condition: 'fair', label: 'Correct', priceMin: 1000, priceMax: 4000 };
+      this.quizSuggestion = { condition: 'fair', label: 'Dégradé', priceMin: 1000, priceMax: 4000 };
     }
   }
 

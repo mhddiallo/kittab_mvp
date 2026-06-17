@@ -53,10 +53,10 @@ export class CatalogueComponent implements OnInit {
 
   conditions = [
     { value: '', label: 'Tous les états' },
-    { value: 'new', label: 'Neuf' },
-    { value: 'like_new', label: 'Très bon' },
-    { value: 'good', label: 'Bon état' },
-    { value: 'fair', label: 'Correct' },
+    { value: 'new', label: 'Parfait état' },
+    { value: 'like_new', label: 'Très bon état' },
+    { value: 'good', label: 'État correct' },
+    { value: 'fair', label: 'Dégradé' },
   ];
 
   priceRanges = [

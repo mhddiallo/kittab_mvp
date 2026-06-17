@@ -270,24 +270,61 @@
         <!-- État -->
         <div class="mb-6">
           <label class="block text-sm font-semibold text-gray-700 mb-3">État du livre <span class="text-primary">*</span></label>
-          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            <button
-              *ngFor="let c of conditions"
-              (click)="condition = c.value"
-              [class]="'border-2 rounded-xl p-3 text-center cursor-pointer transition-all ' + (condition === c.value ? c.cls : 'border-gray-200 hover:border-gray-300 bg-white')"
-            >
-              <div class="text-2xl mb-1">{{ c.emoji }}</div>
-              <p [class]="'text-xs font-bold ' + (condition === c.value ? c.textCls : 'text-gray-600')">{{ c.label }}</p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ c.desc }}</p>
-            </button>
-            <!-- Bouton questionnaire -->
-            <button type="button" (click)="openConditionQuiz()"
-                    class="border-2 border-dashed border-gray-300 rounded-xl p-3 text-center cursor-pointer hover:border-primary hover:bg-red-50 transition-all">
-              <div class="text-2xl mb-1">🤔</div>
-              <p class="text-xs font-bold text-gray-600">Je ne sais pas</p>
-              <p class="text-xs text-gray-400 mt-0.5">On t'aide</p>
+
+          <!-- Illustration + description dynamique -->
+          <div class="rounded-2xl overflow-hidden border border-gray-200 mb-4 bg-gray-50">
+            <div class="relative">
+              <img
+                [src]="selectedCondition ? selectedCondition.img : 'assets/conditions/condition-new.jpg'"
+                alt="État du livre"
+                class="w-full h-48 object-cover transition-all duration-300"
+                [class.opacity-30]="!condition"
+              />
+              <!-- Badge état sélectionné -->
+              <div *ngIf="selectedCondition"
+                   class="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
+                   [ngClass]="selectedCondition.badge">
+                {{ selectedCondition.label }}
+              </div>
+              <!-- Overlay si rien sélectionné -->
+              <div *ngIf="!condition"
+                   class="absolute inset-0 flex items-center justify-center bg-black/20">
+                <p class="text-white font-semibold text-sm bg-black/40 px-4 py-2 rounded-full">Sélectionne un état ci-dessous</p>
+              </div>
+            </div>
+            <!-- Description -->
+            <div *ngIf="selectedCondition" class="px-4 py-3">
+              <p class="text-sm text-gray-600 leading-relaxed">{{ selectedCondition.desc }}</p>
+            </div>
+          </div>
+
+          <!-- Options radio 2x2 -->
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <button *ngFor="let c of conditions"
+                    type="button"
+                    (click)="condition = c.value"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all"
+                    [ngClass]="condition === c.value ? c.color + ' ' + c.bg : 'border-gray-200 bg-white hover:border-gray-300'">
+              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
+                   [ngClass]="condition === c.value ? 'border-current' : 'border-gray-300'">
+                <div *ngIf="condition === c.value" class="w-2 h-2 rounded-full bg-current"></div>
+              </div>
+              <span class="text-sm font-semibold text-gray-800">{{ c.label }}</span>
             </button>
           </div>
+
+          <!-- Je ne sais pas -->
+          <button type="button" (click)="openConditionQuiz()"
+                  class="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-red-50 transition-all group">
+            <div class="flex items-center gap-3">
+              <span class="text-xl">🤔</span>
+              <div class="text-left">
+                <p class="text-sm font-semibold text-gray-700 group-hover:text-primary">Je ne sais pas quel état choisir</p>
+                <p class="text-xs text-gray-400">Réponds à quelques questions et on t'aide à évaluer</p>
+              </div>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
         </div>
 
         <!-- Prix -->
