@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme/app_theme.dart';
+import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/explore/explore_screen.dart';
@@ -11,6 +12,7 @@ import 'screens/messages/messages_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/book_detail/book_detail_screen.dart';
 import 'screens/my_listings/my_listings_screen.dart';
+import 'screens/publish/publish_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,8 +20,9 @@ void main() async {
 }
 
 final _router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   redirect: (context, state) async {
+    if (state.matchedLocation == '/splash') return null;
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('kittab_token');
     final protectedRoutes = ['/publish', '/my-listings', '/profile/edit'];
@@ -28,6 +31,19 @@ final _router = GoRouter(
     return null;
   },
   routes: [
+    GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
+    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+    GoRoute(
+      path: '/books/:id',
+      builder: (_, state) => BookDetailScreen(bookId: int.parse(state.pathParameters['id']!)),
+    ),
+    GoRoute(path: '/publish', builder: (_, __) => const PublishScreen()),
+    GoRoute(
+      path: '/publish/edit/:id',
+      builder: (_, state) => PublishScreen(editId: int.tryParse(state.pathParameters['id'] ?? '')),
+    ),
+    GoRoute(path: '/my-listings', builder: (_, __) => const MyListingsScreen()),
+    GoRoute(path: '/profile/edit', builder: (_, __) => const Placeholder()),
     ShellRoute(
       builder: (context, state, child) => MainShell(location: state.matchedLocation, child: child),
       routes: [
@@ -45,15 +61,6 @@ final _router = GoRouter(
         GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
       ],
     ),
-    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-    GoRoute(
-      path: '/books/:id',
-      builder: (_, state) => BookDetailScreen(bookId: int.parse(state.pathParameters['id']!)),
-    ),
-    GoRoute(path: '/publish', builder: (_, __) => const Placeholder()),
-    GoRoute(path: '/publish/edit/:id', builder: (_, __) => const Placeholder()),
-    GoRoute(path: '/my-listings', builder: (_, __) => const MyListingsScreen()),
-    GoRoute(path: '/profile/edit', builder: (_, __) => const Placeholder()),
   ],
 );
 
