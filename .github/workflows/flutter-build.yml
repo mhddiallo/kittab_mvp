@@ -1,0 +1,59 @@
+name: Build Flutter APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        working-directory: mobile
+        run: flutter pub get
+
+      - name: Download Inter fonts
+        working-directory: mobile
+        run: |
+          mkdir -p assets/fonts
+          curl -L "https://github.com/rsms/inter/releases/download/v4.0/Inter-4.0.zip" -o inter.zip
+          unzip -j inter.zip "Inter Desktop/Inter-Regular.otf" -d assets/fonts/ || true
+          unzip -j inter.zip "Inter Desktop/Inter-Medium.otf" -d assets/fonts/ || true
+          unzip -j inter.zip "Inter Desktop/Inter-SemiBold.otf" -d assets/fonts/ || true
+          unzip -j inter.zip "Inter Desktop/Inter-Bold.otf" -d assets/fonts/ || true
+          unzip -j inter.zip "Inter Desktop/Inter-ExtraBold.otf" -d assets/fonts/ || true
+          unzip -j inter.zip "Inter Desktop/Inter-Black.otf" -d assets/fonts/ || true
+          rm inter.zip
+          ls assets/fonts/
+
+      - name: Build APK (debug)
+        working-directory: mobile
+        run: flutter build apk --debug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kittab-debug-${{ github.run_number }}
+          path: mobile/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
