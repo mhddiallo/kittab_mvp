@@ -47,6 +47,12 @@ jobs:
           rm inter.zip
           ls assets/fonts/
 
+      - name: Create local.properties
+        working-directory: mobile/android
+        run: |
+          echo "flutter.sdk=$(flutter --version --machine | python3 -c "import sys,json; print(json.load(sys.stdin).get('flutterRoot',''))" 2>/dev/null || dirname $(dirname $(which flutter)))" > local.properties
+          echo "sdk.dir=$ANDROID_SDK_ROOT" >> local.properties
+
       - name: Build APK (debug)
         working-directory: mobile
         run: flutter build apk --debug
