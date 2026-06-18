@@ -16,5 +16,7 @@ export const routes: Routes = [
   { path: 'profile', loadComponent: () => import('./pages/profile/profile.component').then(m => m.ProfileComponent), canActivate: [authGuard] },
   { path: 'my-listings', loadComponent: () => import('./pages/my-listings/my-listings.component').then(m => m.MyListingsComponent), canActivate: [authGuard] },
   { path: 'admin', loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent), canActivate: [authGuard] },
+  { path: 'messages', loadComponent: () => import('./pages/messages/messages.component').then(m => m.MessagesComponent), canActivate: [authGuard] },
+  { path: 'messages/:id', loadComponent: () => import('./pages/messages/messages.component').then(m => m.MessagesComponent), canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];

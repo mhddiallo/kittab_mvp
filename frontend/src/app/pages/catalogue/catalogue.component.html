@@ -443,10 +443,10 @@
               class="py-2 px-3 rounded-xl bg-red-50 text-red-500 text-xs font-semibold hover:bg-red-100 transition-colors">Suppr.</button>
           </div>
           <!-- CTA autre utilisateur -->
-          <a *ngIf="!isOwnerWanted(book)" [routerLink]="['/catalogue']" [queryParams]="{q: book.title}"
+          <button *ngIf="!isOwnerWanted(book)" (click)="contactForWantedBook(book)"
             class="block w-full text-center py-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-colors">
             J'ai ce livre →
-          </a>
+          </button>
         </div>
       </div>
 

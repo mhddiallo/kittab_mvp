@@ -1,0 +1,166 @@
+<app-navbar />
+
+<div class="min-h-screen bg-gray-50 flex flex-col">
+  <div class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex gap-4" style="height: calc(100vh - 4rem - 2rem);">
+
+    <!-- Conversations list -->
+    <div class="w-full md:w-80 lg:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
+         [class.hidden]="activeConversation && isMobile()">
+
+      <div class="px-5 py-4 border-b border-gray-100">
+        <h2 class="text-lg font-bold text-gray-900">Messages</h2>
+        <p class="text-xs text-gray-400 mt-0.5">{{ conversations.length }} conversation{{ conversations.length !== 1 ? 's' : '' }}</p>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <!-- Loading state -->
+        <div *ngIf="loading" class="flex items-center justify-center py-12">
+          <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading && conversations.length === 0" class="flex flex-col items-center justify-center py-16 px-6 text-center">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+            </svg>
+          </div>
+          <p class="text-sm font-semibold text-gray-600">Aucun message</p>
+          <p class="text-xs text-gray-400 mt-1">Vos conversations apparaîtront ici.</p>
+        </div>
+
+        <!-- Conversation items -->
+        <button
+          *ngFor="let conv of conversations"
+          (click)="selectConversation(conv.id)"
+          class="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors border-b border-gray-50 text-left"
+          [class.bg-primary/5]="activeConversation?.id === conv.id"
+        >
+          <!-- Avatar -->
+          <div class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center text-base font-bold shrink-0">
+            {{ getInitial(conv.other_user.username) }}
+          </div>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <span class="text-sm font-semibold text-gray-900 truncate">
+                {{ conv.other_user.username || 'Utilisateur' }}
+              </span>
+              <span class="text-[11px] text-gray-400 shrink-0 ml-2">
+                {{ conv.last_message ? timeAgo(conv.last_message.created_at) : timeAgo(conv.created_at) }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <p class="text-xs text-gray-500 truncate flex-1">
+                <span *ngIf="conv.last_message?.is_mine" class="text-gray-400">Vous : </span>
+                {{ conv.last_message?.content || (conv.book?.title || conv.wanted_book?.title || 'Nouvelle conversation') }}
+              </p>
+              <span *ngIf="conv.unread_count > 0"
+                class="ml-2 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                {{ conv.unread_count > 9 ? '9+' : conv.unread_count }}
+              </span>
+            </div>
+            <p *ngIf="conv.book || conv.wanted_book" class="text-[11px] text-primary/70 truncate mt-0.5">
+              📚 {{ conv.book?.title || conv.wanted_book?.title }}
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Conversation detail -->
+    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
+         [class.hidden]="!activeConversation && isMobile()">
+
+      <!-- No conversation selected -->
+      <div *ngIf="!activeConversation" class="flex-1 flex flex-col items-center justify-center text-center px-8">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5">
+          <svg class="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-gray-700 mb-2">Sélectionnez une conversation</h3>
+        <p class="text-sm text-gray-400">Choisissez une conversation dans la liste pour afficher les messages.</p>
+      </div>
+
+      <!-- Active conversation -->
+      <ng-container *ngIf="activeConversation">
+        <!-- Header -->
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
+          <!-- Back button mobile -->
+          <button class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 mr-1" (click)="activeConversation = null; router.navigate(['/messages'])">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shrink-0">
+            {{ getInitial(activeConversation.other_user.username) }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-gray-900">{{ activeConversation.other_user.username || 'Utilisateur' }}</p>
+            <p *ngIf="activeConversation.book || activeConversation.wanted_book" class="text-xs text-primary/70 truncate">
+              📚 {{ activeConversation.book?.title || activeConversation.wanted_book?.title }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Messages -->
+        <div id="messages-container" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+          <div *ngIf="loadingConv" class="flex justify-center py-8">
+            <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+
+          <div *ngIf="activeConversation.messages.length === 0 && !loadingConv"
+               class="text-center text-sm text-gray-400 py-8">
+            Aucun message pour le moment. Commencez la conversation !
+          </div>
+
+          <div *ngFor="let msg of activeConversation.messages"
+               class="flex"
+               [class.justify-end]="msg.is_mine"
+               [class.justify-start]="!msg.is_mine">
+            <div class="max-w-xs lg:max-w-md">
+              <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                   [class.bg-primary]="msg.is_mine"
+                   [class.text-white]="msg.is_mine"
+                   [class.rounded-br-sm]="msg.is_mine"
+                   [class.bg-gray-100]="!msg.is_mine"
+                   [class.text-gray-800]="!msg.is_mine"
+                   [class.rounded-bl-sm]="!msg.is_mine">
+                {{ msg.content }}
+              </div>
+              <p class="text-[10px] text-gray-400 mt-1"
+                 [class.text-right]="msg.is_mine">
+                {{ formatTime(msg.created_at) }}
+                <span *ngIf="msg.is_mine && msg.read_at" class="ml-1 text-primary">✓✓</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="px-4 py-3 border-t border-gray-100 flex items-end gap-3">
+          <textarea
+            [(ngModel)]="newMessage"
+            (keydown)="onKeydown($event)"
+            placeholder="Écrire un message..."
+            rows="1"
+            class="flex-1 bg-gray-100 rounded-2xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none focus:ring-2 focus:ring-primary/20 transition-all"
+            style="max-height: 120px;"
+          ></textarea>
+          <button
+            (click)="sendMessage()"
+            [disabled]="!newMessage.trim() || sending"
+            class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shrink-0 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg *ngIf="!sending" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            <div *ngIf="sending" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          </button>
+        </div>
+      </ng-container>
+    </div>
+
+  </div>
+</div>
+
+<app-footer />
