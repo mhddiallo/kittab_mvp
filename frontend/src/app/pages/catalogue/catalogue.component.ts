@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -111,7 +111,7 @@ export class CatalogueComponent implements OnInit {
     return count;
   }
 
-  constructor(public auth: AuthService, private route: ActivatedRoute) {}
+  constructor(public auth: AuthService, private route: ActivatedRoute, private router: Router) {}
 
   async ngOnInit() {
     const q = this.route.snapshot.queryParamMap.get('q');
@@ -375,6 +375,16 @@ export class CatalogueComponent implements OnInit {
 
   isOwnerWanted(book: WantedBook): boolean {
     return !!this.auth.user && this.auth.user.id === book.user.id;
+  }
+
+  contactForWantedBook(book: WantedBook) {
+    if (!this.auth.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/messages'], {
+      queryParams: { new: '1', wanted_book_id: book.id, other_user_id: book.user.id },
+    });
   }
 
   timeAgo(dateStr: string): string {
