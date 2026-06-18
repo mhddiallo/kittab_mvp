@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kittab — Maquette Accueil</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#E53E3E' }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    * { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- NAVBAR -->
+<nav class="border-b border-gray-100 px-6 py-4 flex items-center justify-between sticky top-0 bg-white z-50">
+  <div class="flex items-center gap-2">
+    <div class="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-sm">K</div>
+    <span class="font-black text-lg tracking-tight text-red-600">KITTAB</span>
+  </div>
+  <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+    <a href="#" class="text-red-600 font-semibold">Accueil</a>
+    <a href="#">Catalogue</a>
+    <a href="#">Communauté <span class="bg-amber-400 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">Bientôt</span></a>
+    <a href="#">Messages</a>
+    <a href="#">Plus ▾</a>
+  </div>
+  <div class="flex items-center gap-3">
+    <button class="border border-red-600 text-red-600 text-sm font-semibold px-4 py-2 rounded-full hover:bg-red-50">+ Vendre un livre</button>
+    <div class="w-9 h-9 bg-red-600 rounded-full text-white flex items-center justify-center font-bold text-sm">G</div>
+  </div>
+</nav>
+
+<!-- ① HERO -->
+<section class="max-w-7xl mx-auto px-6 py-16 flex flex-col md:flex-row items-center gap-10">
+  <div class="flex-1">
+    <div class="inline-flex items-center gap-2 bg-red-50 text-red-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
+      📚 La marketplace du livre en Afrique
+    </div>
+    <h1 class="text-5xl font-black text-gray-900 leading-tight mb-6">
+      Vends, achète et<br>échange tes <span class="text-red-600">livres</span><br>facilement
+    </h1>
+    <p class="text-gray-500 text-base mb-8 max-w-md">Rejoins des milliers de lecteurs qui achètent et vendent des livres dans leur communauté locale.</p>
+    <!-- Search -->
+    <div class="flex items-center bg-gray-50 border border-gray-200 rounded-full px-4 py-3 max-w-md shadow-sm">
+      <svg class="w-4 h-4 text-gray-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <input type="text" placeholder="Quel livre recherchez-vous ?" class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
+      <button class="bg-red-600 text-white rounded-full px-4 py-1.5 text-sm font-semibold ml-2">Rechercher</button>
+    </div>
+    <!-- Stats -->
+    <div class="flex gap-8 mt-8">
+      <div>
+        <p class="text-2xl font-black text-gray-900">1 000+</p>
+        <p class="text-xs text-gray-400 mt-0.5">Livres disponibles</p>
+      </div>
+      <div class="w-px bg-gray-100"></div>
+      <div>
+        <p class="text-2xl font-black text-gray-900">500+</p>
+        <p class="text-xs text-gray-400 mt-0.5">Lecteurs actifs</p>
+      </div>
+      <div class="w-px bg-gray-100"></div>
+      <div>
+        <p class="text-2xl font-black text-gray-900">15</p>
+        <p class="text-xs text-gray-400 mt-0.5">Villes couvertes</p>
+      </div>
+    </div>
+  </div>
+  <div class="flex-1 flex justify-center">
+    <div class="w-96 h-80 bg-red-50 rounded-3xl flex items-center justify-center text-8xl">📚</div>
+  </div>
+</section>
+
+<!-- ② DERNIÈRES ANNONCES -->
+<section class="max-w-7xl mx-auto px-6 pb-16">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Dernières annonces</h2>
+      <p class="text-sm text-gray-400 mt-1">Les livres récemment mis en vente</p>
+    </div>
+    <a href="#" class="text-sm text-red-600 font-medium hover:underline">Voir tout le catalogue →</a>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <!-- Book cards -->
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-4xl">📖</div>
+        <span class="absolute top-2 left-2 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Neuf</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">5 000 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">The Productive Muslim</p>
+        <p class="text-[11px] text-gray-500">par Mohammed Faris</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Dakar</p>
+        <p class="text-sm font-black text-red-600 mt-2">5 000 FCFA</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-4xl">📗</div>
+        <span class="absolute top-2 left-2 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Bon état</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">3 000 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">Le feu du milieu</p>
+        <p class="text-[11px] text-gray-500">par Touhfat Mouhtare</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Dakar</p>
+        <p class="text-sm font-black text-red-600 mt-2">3 000 FCFA</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center text-4xl">📕</div>
+        <span class="absolute top-2 left-2 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Bon état</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">2 500 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">So Good They Can't Ignore You</p>
+        <p class="text-[11px] text-gray-500">par Cal Newport</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Dakar</p>
+        <p class="text-sm font-black text-red-600 mt-2">2 500 FCFA</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-4xl">📘</div>
+        <span class="absolute top-2 left-2 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Neuf</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">8 500 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">Mathématiques Terminale</p>
+        <p class="text-[11px] text-gray-500">par Seydou Traoré</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Conakry</p>
+        <p class="text-sm font-black text-red-600 mt-2">8 500 FCFA</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-4xl">📙</div>
+        <span class="absolute top-2 left-2 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Bon état</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">6 000 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">Une si longue lettre</p>
+        <p class="text-[11px] text-gray-500">par Mariama Bâ</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Bamako</p>
+        <p class="text-sm font-black text-red-600 mt-2">6 000 FCFA</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-md transition-all cursor-pointer group">
+      <div class="relative">
+        <div class="w-full h-44 bg-gradient-to-br from-teal-100 to-teal-200 flex items-center justify-center text-4xl">📚</div>
+        <span class="absolute top-2 left-2 bg-yellow-100 text-yellow-700 text-[10px] font-bold px-2 py-0.5 rounded-full">Bon état</span>
+        <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">9 500 FCFA</span>
+      </div>
+      <div class="p-3">
+        <p class="text-xs font-bold text-gray-900 truncate">Soundjata ou l'épopée</p>
+        <p class="text-[11px] text-gray-500">par D. T. Niane</p>
+        <p class="text-[11px] text-gray-400 mt-1">📍 Bamako</p>
+        <p class="text-sm font-black text-red-600 mt-2">9 500 FCFA</p>
+      </div>
+    </div>
+  </div>
+  <div class="text-center mt-8">
+    <button class="border border-red-600 text-red-600 font-semibold px-8 py-3 rounded-full text-sm hover:bg-red-50 transition-colors">Voir tous les livres →</button>
+  </div>
+</section>
+
+<!-- ③ COMMENT ÇA MARCHE -->
+<section class="bg-gray-50 py-16">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-2xl font-bold text-gray-900">Comment ça marche ?</h2>
+      <p class="text-gray-500 text-sm mt-2">Simple, rapide et local</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">🔍</div>
+        <div class="w-7 h-7 bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold mx-auto -mt-10 mb-6 relative z-10 ml-auto" style="margin-left: calc(50% + 12px); margin-top:-52px; position:relative">1</div>
+        <h3 class="font-bold text-gray-900 mb-2">Parcourez le catalogue</h3>
+        <p class="text-sm text-gray-500">Recherchez le livre que vous voulez parmi des centaines d'annonces locales.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">💬</div>
+        <h3 class="font-bold text-gray-900 mb-2">Contactez le vendeur</h3>
+        <p class="text-sm text-gray-500">Envoyez un message directement via la messagerie intégrée ou WhatsApp.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">🤝</div>
+        <h3 class="font-bold text-gray-900 mb-2">Récupérez votre livre</h3>
+        <p class="text-sm text-gray-500">Convenez d'un lieu de rencontre et récupérez votre livre en main propre.</p>
+      </div>
+    </div>
+    <div class="text-center mt-10">
+      <button class="bg-red-600 text-white font-semibold px-8 py-3 rounded-full text-sm hover:bg-red-700 transition-colors">Commencer maintenant →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ④ LIVRES RECHERCHÉS -->
+<section class="max-w-7xl mx-auto px-6 py-16">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">🔍 Livres recherchés par la communauté</h2>
+      <p class="text-sm text-gray-400 mt-1">Tu as l'un de ces livres ? Tu peux aider quelqu'un !</p>
+    </div>
+    <a href="#" class="text-sm text-red-600 font-medium hover:underline hidden md:block">Voir toutes les demandes →</a>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">Vol de nuit</p>
+          <p class="text-xs text-gray-500 mt-0.5 truncate">Antoine de Saint-Exupéry</p>
+        </div>
+      </div>
+      <span class="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">Autobiographies</span>
+      <p class="text-xs text-gray-500 mb-3 line-clamp-2">j'ai vraiment besoin de ce livre, en recherche active</p>
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">G</div>
+        <span class="text-xs text-gray-400 flex-1 truncate">GorilleDiscret478</span>
+      </div>
+      <button class="block w-full text-center mt-3 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors">
+        J'ai ce livre →
+      </button>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">Chaka</p>
+          <p class="text-xs text-gray-500 mt-0.5 truncate">Thomas Mofolo</p>
+        </div>
+      </div>
+      <span class="inline-block bg-green-50 text-green-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">Littérature africaine</span>
+      <p class="text-xs text-gray-500 mb-3 line-clamp-2">Recherche pour mon cours de littérature</p>
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">L</div>
+        <span class="text-xs text-gray-400 flex-1 truncate">LapinSexy95</span>
+      </div>
+      <button class="block w-full text-center mt-3 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors">
+        J'ai ce livre →
+      </button>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">Mathématiques BAC</p>
+          <p class="text-xs text-gray-500 mt-0.5 truncate">Collectif</p>
+        </div>
+      </div>
+      <span class="inline-block bg-purple-50 text-purple-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">Scolaire</span>
+      <p class="text-xs text-gray-500 mb-3 line-clamp-2">Besoin urgent pour les examens</p>
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">A</div>
+        <span class="text-xs text-gray-400 flex-1 truncate">AlphaOumar22</span>
+      </div>
+      <button class="block w-full text-center mt-3 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors">
+        J'ai ce livre →
+      </button>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">L'aventure ambiguë</p>
+          <p class="text-xs text-gray-500 mt-0.5 truncate">Cheikh Hamidou Kane</p>
+        </div>
+      </div>
+      <span class="inline-block bg-amber-50 text-amber-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">Roman</span>
+      <p class="text-xs text-gray-500 mb-3 line-clamp-2">Introduction à la philo africaine</p>
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div class="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center text-xs font-bold text-red-600">F</div>
+        <span class="text-xs text-gray-400 flex-1 truncate">Fatou_Lit</span>
+      </div>
+      <button class="block w-full text-center mt-3 py-2 rounded-xl bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-600 hover:text-white transition-colors">
+        J'ai ce livre →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-gray-100 bg-white">
+  <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-4 gap-8">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-7 h-7 bg-red-600 rounded-lg flex items-center justify-center text-white font-black text-sm">K</div>
+        <span class="font-black text-lg tracking-tight text-red-600">KITTAB</span>
+      </div>
+      <p class="text-sm text-gray-500 leading-relaxed">La marketplace du livre en Afrique. Achetez, vendez, échangez.</p>
+    </div>
+    <div>
+      <h4 class="font-semibold text-sm mb-4 text-gray-800">ENTREPRISE</h4>
+      <ul class="space-y-2 text-sm text-gray-500">
+        <li><a href="#" class="hover:text-red-600">À propos</a></li>
+        <li><a href="#" class="hover:text-red-600">Comment ça marche</a></li>
+        <li><a href="#" class="hover:text-red-600">Communauté</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold text-sm mb-4 text-gray-800">AIDE</h4>
+      <ul class="space-y-2 text-sm text-gray-500">
+        <li><a href="#" class="hover:text-red-600">Support client</a></li>
+        <li><a href="#" class="hover:text-red-600">CGU</a></li>
+        <li><a href="#" class="hover:text-red-600">Confidentialité</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold text-sm mb-4 text-gray-800">NEWSLETTER</h4>
+      <div class="flex flex-col gap-2">
+        <input type="email" placeholder="Votre email" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-red-400" />
+        <button class="bg-red-600 text-white text-sm font-semibold py-2 rounded-lg hover:bg-red-700">S'abonner</button>
+      </div>
+    </div>
+  </div>
+  <div class="border-t border-gray-100 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
+    <span class="text-xs text-gray-400">© 2024 KITTAB. Tous droits réservés.</span>
+    <div class="flex gap-2">
+      <a href="#" class="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-red-400 hover:text-red-600 text-xs">in</a>
+      <a href="#" class="w-8 h-8 border border-gray-200 rounded-lg flex items-center justify-center text-gray-400 hover:border-red-400 hover:text-red-600 text-xs">tw</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
