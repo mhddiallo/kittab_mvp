@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
+import '../../core/auth_service.dart';
 import '../../models/book.dart';
 import '../../widgets/book_card.dart';
 import '../../widgets/book_bottom_sheet.dart';
@@ -313,7 +314,13 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               ),
               const SizedBox(width: 12),
               GestureDetector(
-                onTap: () => context.push('/publish'),
+                onTap: () {
+                  if (!authService.isLoggedIn) { context.push('/login'); return; }
+                  final userId = w['user']?['id'] ?? w['requester']?['id'];
+                  if (userId != null) {
+                    context.go('/messages?other_user_id=$userId&wanted_book_id=${w['id']}');
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(

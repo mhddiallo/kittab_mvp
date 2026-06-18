@@ -72,7 +72,10 @@ class _BookBottomSheetContentState extends State<_BookBottomSheetContent> {
       return;
     }
     Navigator.pop(context);
-    context.go('/messages?other_user_id=${book!.seller.id}&book_id=${book!.id}');
+    context.push(Uri(path: '/messages', queryParameters: {
+      'other_user_id': book!.seller.id.toString(),
+      'book_id': book!.id.toString(),
+    }).toString());
   }
 
   @override

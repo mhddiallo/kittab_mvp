@@ -90,12 +90,18 @@ class _MessagesScreenState extends State<MessagesScreen> {
         final body = <String, dynamic>{'other_user_id': otherUserId};
         if (widget.bookId != null) body['book_id'] = int.tryParse(widget.bookId!);
         if (widget.wantedBookId != null) body['wanted_book_id'] = int.tryParse(widget.wantedBookId!);
-        body['content'] = 'Bonjour, je suis intéressé !';
+        body['content'] = widget.bookId != null
+            ? 'Bonjour, je suis intéressé par votre livre.'
+            : 'Bonjour, j\'ai le livre que vous recherchez !';
         final res = await api.post('/api/conversations', data: body);
-        final conv = res.data is Map ? Map<String, dynamic>.from(res.data) : null;
-        if (conv != null) {
-          setState(() => conversations.insert(0, conv));
-          _openConversation(conv);
+        final convId = res.data is Map ? res.data['id'] : null;
+        if (convId != null) {
+          // Reload list to get full conversation object then open it
+          final listRes = await api.get('/api/conversations');
+          final items = listRes.data is List ? listRes.data : (listRes.data['items'] ?? []);
+          setState(() => conversations = List<Map<String, dynamic>>.from(items));
+          final created = conversations.firstWhere((c) => c['id'] == convId, orElse: () => {});
+          if (created.isNotEmpty) _openConversation(created);
         }
       } catch (_) {}
     }
