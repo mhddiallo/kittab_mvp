@@ -71,16 +71,13 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        automaticallyImplyLeading: false,
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (context.canPop()) context.pop();
-              else context.go('/');
-            },
-            child: const Text('Passer →', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-          ),
-        ],
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.textSecondary),
+          onPressed: () {
+            if (context.canPop()) context.pop();
+            else context.go('/');
+          },
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

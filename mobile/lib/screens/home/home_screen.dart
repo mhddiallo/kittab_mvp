@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/api.dart';
+import '../../core/auth_service.dart';
 import '../../models/book.dart';
 import '../../widgets/book_card.dart';
 import '../../widgets/book_bottom_sheet.dart';
@@ -83,7 +84,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push('/publish'),
+        onPressed: () {
+          if (authService.isLoggedIn) context.push('/publish');
+          else context.push('/login');
+        },
         backgroundColor: AppColors.primary,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Vendre un livre', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
@@ -204,7 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       const Spacer(),
                       GestureDetector(
-                        onTap: () => context.push('/publish'),
+                        onTap: () {
+                          if (authService.isLoggedIn) context.push('/publish');
+                          else context.push('/login');
+                        },
                         child: const Text("J'ai ce livre →", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w700)),
                       ),
                     ],

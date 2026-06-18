@@ -34,7 +34,6 @@ final _router = GoRouter(
   },
   routes: [
     GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-    GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
     GoRoute(
       path: '/books/:id',
       builder: (_, state) => BookDetailScreen(bookId: int.parse(state.pathParameters['id']!)),
@@ -58,6 +57,7 @@ final _router = GoRouter(
                 : null,
           ),
         ),
+        GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
         GoRoute(path: '/community', builder: (_, __) => const CommunityScreen()),
         GoRoute(
           path: '/messages',
@@ -105,6 +105,7 @@ class _MainShellState extends State<MainShell> {
     if (widget.location.startsWith('/community')) return 2;
     if (widget.location.startsWith('/messages')) return 3;
     if (widget.location.startsWith('/profile')) return 4;
+    if (widget.location.startsWith('/login')) return -1;
     return 0;
   }
 
@@ -134,7 +135,7 @@ class _MainShellState extends State<MainShell> {
     return Scaffold(
       body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
+        currentIndex: _index < 0 ? 0 : _index,
         onTap: (i) {
           const paths = ['/', '/explore', '/community', '/messages', '/profile'];
           context.go(paths[i]);
