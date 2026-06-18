@@ -1,10 +1,10 @@
 <app-navbar />
 
-<div class="min-h-screen bg-gray-50 flex flex-col">
-  <div class="flex-1 max-w-7xl mx-auto w-full px-4 py-6 flex gap-4" style="height: calc(100vh - 4rem - 2rem);">
+<div class="bg-gray-50 flex flex-col" style="height: calc(100vh - 4rem); overflow: hidden;">
+  <div class="flex-1 max-w-7xl mx-auto w-full px-4 py-4 flex gap-4 min-h-0">
 
     <!-- Conversations list -->
-    <div class="w-full md:w-80 lg:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
+    <div class="w-full md:w-80 lg:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden min-h-0"
          [class.hidden]="activeConversation && isMobile()">
 
       <div class="px-5 py-4 border-b border-gray-100">
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Conversation detail -->
-    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden"
+    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden min-h-0"
          [class.hidden]="!activeConversation && isMobile()">
 
       <!-- No conversation selected -->
@@ -197,5 +197,3 @@
 
   </div>
 </div>
-
-<app-footer />
