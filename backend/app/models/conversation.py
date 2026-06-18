@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
+import sqlalchemy as sa
 from sqlalchemy import ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -37,6 +38,7 @@ class Message(Base):
     conversation_id: Mapped[int] = mapped_column(ForeignKey("conversations.id", ondelete="CASCADE"))
     sender_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     content: Mapped[str] = mapped_column(Text)
+    image_url: Mapped[Optional[str]] = mapped_column(sa.String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     read_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 

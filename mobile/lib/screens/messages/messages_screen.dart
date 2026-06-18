@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dio/dio.dart';
 import '../../core/api.dart';
 import '../../core/auth_service.dart';
 import '../../theme/app_theme.dart';
+
 
 class MessagesScreen extends StatefulWidget {
   final String? otherUserId;
@@ -336,9 +340,8 @@ class _MessagesScreenState extends State<MessagesScreen> {
                         itemCount: messages.length,
                         itemBuilder: (_, i) {
                           final msg = messages[i];
-                          final sender = msg['sender'] as Map<String, dynamic>?;
-                          final isMine = sender?['id'] == myId;
-                          return _buildBubble(msg['content'] ?? '', isMine, msg['created_at']);
+                          final isMine = msg['is_mine'] == true || (msg['sender'] as Map<String, dynamic>?)?['id'] == myId;
+                          return _buildBubble(msg, isMine);
                         },
                       ),
           ),
@@ -348,7 +351,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
     );
   }
 
-  Widget _buildBubble(String content, bool isMine, String? time) {
+  Widget _buildBubble(Map<String, dynamic> msg, bool isMine) {
+    final content = msg['content'] as String? ?? '';
+    final time = msg['created_at'] as String?;
+    final imageUrl = msg['image_url'] as String?;
+
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -369,7 +376,19 @@ class _MessagesScreenState extends State<MessagesScreen> {
         child: Column(
           crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
-            Text(content, style: TextStyle(fontSize: 14, color: isMine ? Colors.white : AppColors.textPrimary)),
+            if (imageUrl != null)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: '$kBaseUrl$imageUrl',
+                  width: 200,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            if (content.isNotEmpty) ...[
+              if (imageUrl != null) const SizedBox(height: 6),
+              Text(content, style: TextStyle(fontSize: 14, color: isMine ? Colors.white : AppColors.textPrimary)),
+            ],
             if (time != null) ...[
               const SizedBox(height: 4),
               Text(_formatTime(time), style: TextStyle(fontSize: 11, color: isMine ? Colors.white70 : AppColors.textHint)),
@@ -393,6 +412,21 @@ class _MessagesScreenState extends State<MessagesScreen> {
     }
   }
 
+  Future<void> _pickAndSendImage() async {
+    final img = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 75);
+    if (img == null || activeConversation == null) return;
+
+    setState(() => sendingMsg = true);
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(img.path, filename: img.path.split('/').last),
+      });
+      await api.post('/api/conversations/${activeConversation!['id']}/messages/image', data: formData);
+      await _loadMessages(activeConversation!['id']);
+    } catch (_) {}
+    setState(() => sendingMsg = false);
+  }
+
   Widget _buildInputBar() {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
@@ -404,6 +438,11 @@ class _MessagesScreenState extends State<MessagesScreen> {
         top: false,
         child: Row(
           children: [
+            IconButton(
+              icon: const Icon(Icons.image_outlined, color: AppColors.textHint),
+              onPressed: sendingMsg ? null : _pickAndSendImage,
+              tooltip: 'Envoyer une image',
+            ),
             Expanded(
               child: TextField(
                 controller: _msgCtrl,

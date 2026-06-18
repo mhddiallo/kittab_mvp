@@ -1,10 +1,13 @@
+import os
+import uuid
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.conversation import Conversation, ConversationParticipant, Message
@@ -21,6 +24,7 @@ class MessageOut(BaseModel):
     sender_id: int
     sender_username: Optional[str]
     content: str
+    image_url: Optional[str] = None
     created_at: datetime
     read_at: Optional[datetime]
     is_mine: bool
@@ -56,6 +60,7 @@ class CreateConversationIn(BaseModel):
 
 class SendMessageIn(BaseModel):
     content: str
+    image_url: Optional[str] = None
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -66,6 +71,7 @@ def _msg_out(msg: Message, current_user_id: int) -> MessageOut:
         sender_id=msg.sender_id,
         sender_username=msg.sender.username if msg.sender else None,
         content=msg.content,
+        image_url=msg.image_url,
         created_at=msg.created_at,
         read_at=msg.read_at,
         is_mine=msg.sender_id == current_user_id,
@@ -293,6 +299,48 @@ def send_message(
         conversation_id=conv.id,
         sender_id=current_user.id,
         content=body.content,
+        image_url=body.image_url,
+    )
+    db.add(msg)
+    db.commit()
+    db.refresh(msg)
+    return _msg_out(msg, current_user.id)
+
+
+@router.post("/{conv_id}/messages/image", response_model=MessageOut, status_code=201)
+async def send_image_message(
+    conv_id: int,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    conv = db.get(Conversation, conv_id)
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation introuvable")
+
+    part = next((p for p in conv.participants if p.user_id == current_user.id), None)
+    if not part:
+        raise HTTPException(status_code=403, detail="Accès refusé")
+
+    # Save the uploaded image
+    upload_dir = os.path.join(settings.UPLOAD_DIR, "messages")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    ext = os.path.splitext(file.filename or "image")[1] or ".jpg"
+    filename = f"{uuid.uuid4().hex}{ext}"
+    file_path = os.path.join(upload_dir, filename)
+
+    contents = await file.read()
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    image_url = f"/uploads/messages/{filename}"
+
+    msg = Message(
+        conversation_id=conv.id,
+        sender_id=current_user.id,
+        content="",
+        image_url=image_url,
     )
     db.add(msg)
     db.commit()

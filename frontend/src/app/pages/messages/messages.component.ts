@@ -12,6 +12,7 @@ interface MessageOut {
   sender_id: number;
   sender_username?: string;
   content: string;
+  image_url?: string;
   created_at: string;
   read_at?: string;
   is_mine: boolean;
@@ -49,6 +50,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
   loadingConv = false;
   sending = false;
   error = '';
+  selectedImages: File[] = [];
+  imagePreviews: string[] = [];
 
   private pollInterval: any;
 
@@ -177,23 +180,66 @@ export class MessagesComponent implements OnInit, OnDestroy {
     this.router.navigate(['/messages', id]);
   }
 
+  onImagesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+    const files = Array.from(input.files);
+    this.selectedImages.push(...files);
+    for (const file of files) {
+      const reader = new FileReader();
+      reader.onload = (e) => this.imagePreviews.push(e.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+    // Reset input so same files can be re-selected if needed
+    input.value = '';
+  }
+
+  removeImage(index: number) {
+    this.selectedImages.splice(index, 1);
+    this.imagePreviews.splice(index, 1);
+  }
+
   async sendMessage() {
-    if (!this.newMessage.trim() || !this.activeConversation || this.sending) return;
+    const hasText = this.newMessage.trim().length > 0;
+    const hasImages = this.selectedImages.length > 0;
+    if ((!hasText && !hasImages) || !this.activeConversation || this.sending) return;
     this.sending = true;
     try {
-      const res = await fetch(`${environment.apiUrl}/api/conversations/${this.activeConversation.id}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
-        body: JSON.stringify({ content: this.newMessage.trim() }),
-      });
-      if (res.ok) {
-        const msg: MessageOut = await res.json();
-        this.activeConversation.messages.push(msg);
-        this.newMessage = '';
-        setTimeout(() => this.scrollToBottom(), 50);
-        // Refresh list for last message update
-        this.loadConversations();
+      const convId = this.activeConversation.id;
+
+      // Upload each image as a separate message
+      for (const file of this.selectedImages) {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch(`${environment.apiUrl}/api/conversations/${convId}/messages/image`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${this.auth.token}` },
+          body: formData,
+        });
+        if (res.ok) {
+          const msg: MessageOut = await res.json();
+          this.activeConversation.messages.push(msg);
+        }
       }
+      this.selectedImages = [];
+      this.imagePreviews = [];
+
+      // Send text message if any
+      if (hasText) {
+        const res = await fetch(`${environment.apiUrl}/api/conversations/${convId}/messages`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
+          body: JSON.stringify({ content: this.newMessage.trim() }),
+        });
+        if (res.ok) {
+          const msg: MessageOut = await res.json();
+          this.activeConversation.messages.push(msg);
+          this.newMessage = '';
+        }
+      }
+
+      setTimeout(() => this.scrollToBottom(), 50);
+      this.loadConversations();
     } catch {}
     this.sending = false;
   }
@@ -225,6 +271,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   getInitial(username?: string): string {
     return username?.[0]?.toUpperCase() || '?';
+  }
+
+  getImageUrl(url: string): string {
+    if (url.startsWith('http')) return url;
+    return `${environment.apiUrl}${url}`;
   }
 
   isMobile(): boolean {
