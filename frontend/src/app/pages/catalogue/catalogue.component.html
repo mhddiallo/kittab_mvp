@@ -268,15 +268,27 @@
       <div *ngIf="!loading && books.length === 0" class="text-center py-16">
         <div class="text-5xl mb-4">📭</div>
         <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucun livre trouvé</h3>
-        <p class="text-gray-400 text-sm mb-6">Ce livre n'est pas encore disponible sur Kittab.</p>
-        <div *ngIf="!alertSent" class="max-w-sm mx-auto bg-gray-50 rounded-2xl p-6 border border-gray-200">
-          <p class="text-sm text-gray-600 mb-3">Voulez-vous être notifié quand ce livre sera disponible ?</p>
-          <input [(ngModel)]="alertPhone" type="tel" placeholder="Votre numéro WhatsApp"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm mb-3 focus:outline-none focus:border-primary" />
-          <button (click)="sendAlert()" class="w-full bg-primary text-white font-semibold py-2.5 rounded-xl hover:bg-primary/90 transition-colors text-sm">M'alerter par SMS/WhatsApp</button>
+        <p class="text-gray-500 text-sm mb-6">Ce livre n'est pas encore disponible dans le catalogue.</p>
+
+        <!-- CTA livres demandés -->
+        <div class="max-w-sm mx-auto bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4">
+          <p class="text-sm font-semibold text-amber-900 mb-1">📣 Publie une demande !</p>
+          <p class="text-sm text-amber-700 mb-4">Signale ce livre à la communauté — quelqu'un l'a peut-être et pourra te le vendre.</p>
+          <button (click)="activeTab = 'demandes'; showWantedForm = true"
+            class="w-full bg-primary text-white font-semibold py-2.5 rounded-xl hover:bg-primary/90 transition-colors text-sm">
+            Demander ce livre →
+          </button>
         </div>
-        <div *ngIf="alertSent" class="max-w-sm mx-auto bg-green-50 rounded-2xl p-6 border border-green-200">
-          <p class="text-sm text-green-700 font-semibold">✅ Tu seras notifié dès que ce livre sera disponible !</p>
+
+        <!-- Alerte SMS -->
+        <div *ngIf="searchQuery">
+          <p class="text-xs text-gray-400 mb-3">Ou reçois une alerte dès qu'il arrive sur Kittab :</p>
+          <div *ngIf="!alertSent" class="max-w-sm mx-auto flex gap-2">
+            <input [(ngModel)]="alertPhone" type="tel" placeholder="Ton numéro WhatsApp"
+              class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+            <button (click)="sendAlert()" class="bg-gray-800 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-700 transition-colors text-sm shrink-0">M'alerter</button>
+          </div>
+          <p *ngIf="alertSent" class="text-sm text-green-600 font-semibold">✅ Tu seras notifié dès que ce livre arrive !</p>
         </div>
       </div>
 
