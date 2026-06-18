@@ -89,6 +89,10 @@ export class CatalogueComponent implements OnInit {
     return [1,0,this.currentPage-1,this.currentPage,this.currentPage+1,0,p];
   }
 
+  get selectedConditionLabel(): string {
+    return this.conditions.find(c => c.value === this.selectedCondition)?.label ?? 'État';
+  }
+
   get activeFilterCount(): number {
     let count = 0;
     if (this.selectedCondition) count++;
