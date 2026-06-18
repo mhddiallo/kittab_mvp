@@ -80,6 +80,15 @@ export class CatalogueComponent implements OnInit {
   wantedFormError = '';
   wantedForm = { title: '', author: '', category_id: null as number | null, description: '' };
 
+  // Wanted form autocomplete + image scan
+  wantedSuggestions: any[] = [];
+  wantedShowSuggestions = false;
+  wantedAutocompleteLoading = false;
+  wantedScanLoading = false;
+  wantedScanError = '';
+  wantedCoverPreview = '';
+  private wantedAutocompleteTimeout: any;
+
   get totalPages(): number { return Math.ceil(this.total / this.pageSize); }
   get pages(): number[] {
     const p = this.totalPages;
@@ -238,6 +247,84 @@ export class CatalogueComponent implements OnInit {
       });
       this.alertSent = true;
     } catch {}
+  }
+
+  requestBook() {
+    if (!this.auth.isLoggedIn) {
+      window.location.href = '/login';
+      return;
+    }
+    this.activeTab = 'demandes';
+    this.showWantedForm = true;
+    if (this.searchQuery && !this.wantedForm.title) {
+      this.wantedForm.title = this.searchQuery;
+      this.onWantedTitleInput();
+    }
+    setTimeout(() => {
+      document.getElementById('wanted-form-title')?.focus();
+    }, 100);
+  }
+
+  onWantedTitleInput() {
+    clearTimeout(this.wantedAutocompleteTimeout);
+    if (this.wantedForm.title.length < 2) { this.wantedSuggestions = []; this.wantedShowSuggestions = false; return; }
+    this.wantedAutocompleteLoading = true;
+    this.wantedAutocompleteTimeout = setTimeout(async () => {
+      try {
+        const res = await fetch(`${environment.apiUrl}/api/books/autocomplete?q=${encodeURIComponent(this.wantedForm.title)}`);
+        if (res.ok) { this.wantedSuggestions = await res.json(); this.wantedShowSuggestions = this.wantedSuggestions.length > 0; }
+      } catch {}
+      this.wantedAutocompleteLoading = false;
+    }, 300);
+  }
+
+  selectWantedSuggestion(s: any) {
+    this.wantedForm.title = s.title;
+    this.wantedForm.author = s.author ?? this.wantedForm.author;
+    if (s.thumbnail) this.wantedCoverPreview = s.thumbnail;
+    this.wantedShowSuggestions = false;
+    this.wantedSuggestions = [];
+    if (s.open_library_id) {
+      fetch(`${environment.apiUrl}/api/books/info?google_id=${s.open_library_id}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+          if (data?.kittab_category) {
+            const match = this.categories.find(c => c.name === data.kittab_category);
+            if (match) this.wantedForm.category_id = match.id;
+          }
+        }).catch(() => {});
+    }
+  }
+
+  hideWantedSuggestionsDelayed() {
+    setTimeout(() => { this.wantedShowSuggestions = false; }, 350);
+  }
+
+  async onWantedImageUpload(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    this.wantedScanLoading = true;
+    this.wantedScanError = '';
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch(`${environment.apiUrl}/api/books/scan-cover`, { method: 'POST', body: form });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.title && !this.wantedForm.title) this.wantedForm.title = data.title;
+        if (data.author && !this.wantedForm.author) this.wantedForm.author = data.author;
+        if (data.cover_url) this.wantedCoverPreview = data.cover_url;
+        if (data.category) {
+          const match = this.categories.find(c => c.name === data.category);
+          if (match) this.wantedForm.category_id = match.id;
+        }
+      } else {
+        this.wantedScanError = 'Impossible de lire l\'image, remplis manuellement.';
+      }
+    } catch { this.wantedScanError = 'Erreur lors de l\'analyse de l\'image.'; }
+    this.wantedScanLoading = false;
+    input.value = '';
   }
 
   async submitWanted() {

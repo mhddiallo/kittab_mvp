@@ -113,4 +113,39 @@
   <div class="text-center mt-10"><a routerLink="/catalogue" class="btn-outline inline-flex items-center gap-2">Voir tous les livres →</a></div>
 </section>
 
+<!-- LIVRES RECHERCHÉS PAR LA COMMUNAUTÉ -->
+<section *ngIf="wantedBooks.length > 0" class="max-w-7xl mx-auto px-6 py-14">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h2 class="font-bold text-2xl text-gray-900">🔍 Livres recherchés par la communauté</h2>
+      <p class="text-gray-500 text-sm mt-1">Tu as l'un de ces livres ? Tu peux aider quelqu'un !</p>
+    </div>
+    <a routerLink="/catalogue" class="text-primary text-sm font-medium hover:underline hidden md:block">Voir toutes les demandes →</a>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div *ngFor="let book of wantedBooks"
+      class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+      <div class="flex items-start gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-bold text-gray-900 truncate">{{ book.title }}</p>
+          <p *ngIf="book.author" class="text-xs text-gray-500 mt-0.5 truncate">{{ book.author }}</p>
+        </div>
+      </div>
+      <span *ngIf="book.category" class="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">{{ book.category.name }}</span>
+      <p *ngIf="book.description" class="text-xs text-gray-500 mb-3 line-clamp-2">{{ book.description }}</p>
+      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
+        <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs">📚</div>
+        <span class="text-xs text-gray-400 flex-1 truncate">{{ book.user?.username || 'Membre Kittab' }}</span>
+      </div>
+      <a routerLink="/catalogue" class="block w-full text-center mt-3 py-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-colors">
+        J'ai ce livre →
+      </a>
+    </div>
+  </div>
+  <div class="text-center mt-6 md:hidden">
+    <a routerLink="/catalogue" class="text-primary text-sm font-medium hover:underline">Voir toutes les demandes →</a>
+  </div>
+</section>
+
 <app-footer />

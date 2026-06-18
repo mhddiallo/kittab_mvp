@@ -16,6 +16,7 @@ import { environment } from '../../../environments/environment';
 export class HomeComponent implements OnInit, OnDestroy {
   trendingBooks: BookCard[] = [];
   popularBooks: BookCard[] = [];
+  wantedBooks: any[] = [];
   totalBooks = 0;
   loading = true;
   searchQuery = '';
@@ -110,11 +111,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   async loadBooks() {
     try {
-      // À la une : livres boostés uniquement
-      const [boostedRes, latestRes] = await Promise.all([
+      const [boostedRes, latestRes, wantedRes] = await Promise.all([
         fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6&page=1`),
         fetch(`${environment.apiUrl}/api/books?page_size=6&page=1`),
+        fetch(`${environment.apiUrl}/api/wanted-books?page_size=4`),
       ]);
+      if (wantedRes.ok) this.wantedBooks = await wantedRes.json();
       if (latestRes.ok) {
         const data = await latestRes.json();
         const books: BookCard[] = data.items ?? data;

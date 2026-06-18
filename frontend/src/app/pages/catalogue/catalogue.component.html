@@ -269,26 +269,13 @@
         <div class="text-5xl mb-4">📭</div>
         <h3 class="font-semibold text-gray-700 text-lg mb-2">Aucun livre trouvé</h3>
         <p class="text-gray-500 text-sm mb-6">Ce livre n'est pas encore disponible dans le catalogue.</p>
-
-        <!-- CTA livres demandés -->
-        <div class="max-w-sm mx-auto bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-4">
+        <div class="max-w-sm mx-auto bg-amber-50 border border-amber-200 rounded-2xl p-5">
           <p class="text-sm font-semibold text-amber-900 mb-1">📣 Publie une demande !</p>
           <p class="text-sm text-amber-700 mb-4">Signale ce livre à la communauté — quelqu'un l'a peut-être et pourra te le vendre.</p>
-          <button (click)="activeTab = 'demandes'; showWantedForm = true"
+          <button (click)="requestBook()"
             class="w-full bg-primary text-white font-semibold py-2.5 rounded-xl hover:bg-primary/90 transition-colors text-sm">
             Demander ce livre →
           </button>
-        </div>
-
-        <!-- Alerte SMS -->
-        <div *ngIf="searchQuery">
-          <p class="text-xs text-gray-400 mb-3">Ou reçois une alerte dès qu'il arrive sur Kittab :</p>
-          <div *ngIf="!alertSent" class="max-w-sm mx-auto flex gap-2">
-            <input [(ngModel)]="alertPhone" type="tel" placeholder="Ton numéro WhatsApp"
-              class="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-            <button (click)="sendAlert()" class="bg-gray-800 text-white font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-700 transition-colors text-sm shrink-0">M'alerter</button>
-          </div>
-          <p *ngIf="alertSent" class="text-sm text-green-600 font-semibold">✅ Tu seras notifié dès que ce livre arrive !</p>
         </div>
       </div>
 
@@ -341,10 +328,64 @@
 
       <!-- Formulaire nouvelle demande -->
       <div *ngIf="showWantedForm" class="bg-gray-50 border border-gray-200 rounded-2xl p-5 mb-5">
-        <h3 class="font-bold text-gray-800 mb-4">Nouveau livre recherché</h3>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-gray-800">Quel livre recherches-tu ?</h3>
+          <button (click)="showWantedForm = false; wantedFormError = ''; wantedCoverPreview = ''"
+            class="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+
+        <!-- Upload image pour auto-remplissage -->
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            📸 Tu as une image du livre ? (optionnel)
+          </label>
+          <label class="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-primary hover:bg-red-50 transition-colors group">
+            <div *ngIf="!wantedScanLoading" class="flex items-center gap-3 w-full">
+              <img *ngIf="wantedCoverPreview" [src]="wantedCoverPreview" class="w-10 h-14 object-cover rounded shadow-sm shrink-0" />
+              <div *ngIf="!wantedCoverPreview" class="w-10 h-14 bg-gray-100 rounded flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-gray-700 group-hover:text-primary">
+                  {{ wantedCoverPreview ? 'Changer l\'image' : 'Importer une photo du livre' }}
+                </p>
+                <p class="text-xs text-gray-400">Couverture trouvée sur Google, reçue par message...</p>
+              </div>
+            </div>
+            <div *ngIf="wantedScanLoading" class="flex items-center gap-3">
+              <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <span class="text-sm text-primary font-medium">Analyse de l'image en cours...</span>
+            </div>
+            <input type="file" accept="image/*" class="hidden" (change)="onWantedImageUpload($event)" />
+          </label>
+          <p *ngIf="wantedScanError" class="text-xs text-amber-600 mt-1.5">⚠️ {{ wantedScanError }}</p>
+          <p *ngIf="!wantedScanError && wantedCoverPreview && !wantedScanLoading" class="text-xs text-green-600 mt-1.5">✅ Infos récupérées automatiquement — vérifie et complète si besoin</p>
+        </div>
+
         <div class="space-y-3">
-          <input [(ngModel)]="wantedForm.title" type="text" placeholder="Titre du livre *"
-            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary" />
+          <!-- Titre avec autocomplete -->
+          <div class="relative">
+            <input id="wanted-form-title" [(ngModel)]="wantedForm.title" (ngModelChange)="onWantedTitleInput()" (blur)="hideWantedSuggestionsDelayed()"
+              type="text" placeholder="Titre du livre *"
+              class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary" />
+            <div *ngIf="wantedAutocompleteLoading" class="absolute right-3 top-1/2 -translate-y-1/2">
+              <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+            <div *ngIf="wantedShowSuggestions" class="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+              <button *ngFor="let s of wantedSuggestions" (mousedown)="selectWantedSuggestion(s)"
+                class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
+                <img *ngIf="s.thumbnail" [src]="s.thumbnail" class="w-8 h-10 object-cover rounded shrink-0" />
+                <div *ngIf="!s.thumbnail" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center shrink-0 text-xs">📚</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ s.title }}</p>
+                  <p class="text-xs text-gray-500 truncate">{{ s.author }}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <input [(ngModel)]="wantedForm.author" type="text" placeholder="Auteur (optionnel)"
             class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary" />
           <select [(ngModel)]="wantedForm.category_id"
@@ -352,17 +393,13 @@
             <option [ngValue]="null">Catégorie (optionnel)</option>
             <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
           </select>
-          <textarea [(ngModel)]="wantedForm.description" placeholder="Description, précisions... (optionnel)"
-            rows="3" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary resize-none"></textarea>
+          <textarea [(ngModel)]="wantedForm.description" placeholder="Précisions : édition, état souhaité, budget... (optionnel)"
+            rows="2" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary resize-none"></textarea>
           <p *ngIf="wantedFormError" class="text-xs text-red-500">{{ wantedFormError }}</p>
-          <div class="flex gap-3">
-            <button (click)="showWantedForm = false; wantedFormError = ''"
-              class="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-100 transition-colors">Annuler</button>
-            <button (click)="submitWanted()" [disabled]="submittingWanted"
-              class="flex-1 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
-              {{ submittingWanted ? 'Envoi...' : 'Publier ma demande' }}
-            </button>
-          </div>
+          <button (click)="submitWanted()" [disabled]="submittingWanted"
+            class="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-50">
+            {{ submittingWanted ? 'Publication...' : '📣 Publier ma demande' }}
+          </button>
         </div>
       </div>
 
