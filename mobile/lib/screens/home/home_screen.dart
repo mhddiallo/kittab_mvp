@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/api.dart';
 import '../../models/book.dart';
 import '../../widgets/book_card.dart';
+import '../../widgets/book_bottom_sheet.dart';
 import '../../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Book> topBooks = [];
   List<Book> newBooks = [];
   List<Map<String, dynamic>> categories = [];
+  List<Map<String, dynamic>> wantedBooks = [];
   bool loading = true;
 
   @override
@@ -32,12 +34,17 @@ class _HomeScreenState extends State<HomeScreen> {
         api.get('/api/books', queryParameters: {'sort': 'views', 'page_size': 10}),
         api.get('/api/books', queryParameters: {'sort': 'recent', 'page_size': 10}),
         api.get('/api/categories'),
+        api.get('/api/wanted-books', queryParameters: {'page_size': 4}),
       ]);
       setState(() {
         boostedBooks = _parseBooks(results[0].data);
         topBooks = _parseBooks(results[1].data);
         newBooks = _parseBooks(results[2].data);
         categories = List<Map<String, dynamic>>.from(results[3].data ?? []);
+        final wantedData = results[4].data;
+        wantedBooks = List<Map<String, dynamic>>.from(
+          wantedData is Map ? wantedData['items'] ?? [] : wantedData ?? [],
+        );
         loading = false;
       });
     } catch (_) {
@@ -68,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (topBooks.isNotEmpty) _buildSection('🔥 Top de la semaine', topBooks),
                 _buildCategoriesSection(),
                 if (newBooks.isNotEmpty) _buildSection('🆕 Nouveaux livres', newBooks),
+                if (wantedBooks.isNotEmpty) _buildWantedSection(),
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
               ],
             ],
@@ -131,8 +139,78 @@ class _HomeScreenState extends State<HomeScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (_, i) => BookCard(
                 book: books[i],
-                onTap: () => context.push('/books/${books[i].id}'),
+                onTap: () => showBookBottomSheet(context, books[i].id),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWantedSection() {
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('📢 Livres recherchés', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                GestureDetector(
+                  onTap: () => context.go('/explore'),
+                  child: const Text('Tout voir', style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 140,
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: wantedBooks.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (_, i) {
+                final w = wantedBooks[i];
+                final category = w['category'] as Map<String, dynamic>?;
+                return Container(
+                  width: 200,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(w['title'] ?? '', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary), maxLines: 2, overflow: TextOverflow.ellipsis),
+                      if (w['author'] != null && (w['author'] as String).isNotEmpty) ...[
+                        const SizedBox(height: 2),
+                        Text(w['author'], style: const TextStyle(fontSize: 12, color: AppColors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ],
+                      const SizedBox(height: 6),
+                      if (category != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryLight,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(category['name'] ?? '', style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                        ),
+                      const Spacer(),
+                      GestureDetector(
+                        onTap: () => context.push('/publish'),
+                        child: const Text("J'ai ce livre →", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         ],

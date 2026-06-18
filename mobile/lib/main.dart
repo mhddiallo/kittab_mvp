@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme/app_theme.dart';
+import 'core/api.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -57,7 +59,14 @@ final _router = GoRouter(
           ),
         ),
         GoRoute(path: '/community', builder: (_, __) => const CommunityScreen()),
-        GoRoute(path: '/messages', builder: (_, __) => const MessagesScreen()),
+        GoRoute(
+          path: '/messages',
+          builder: (_, state) => MessagesScreen(
+            otherUserId: state.uri.queryParameters['other_user_id'],
+            bookId: state.uri.queryParameters['book_id'],
+            wantedBookId: state.uri.queryParameters['wanted_book_id'],
+          ),
+        ),
         GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
       ],
     ),
@@ -78,35 +87,110 @@ class KittabApp extends StatelessWidget {
   }
 }
 
-class MainShell extends StatelessWidget {
+class MainShell extends StatefulWidget {
   final Widget child;
   final String location;
   const MainShell({super.key, required this.child, required this.location});
 
+  @override
+  State<MainShell> createState() => _MainShellState();
+}
+
+class _MainShellState extends State<MainShell> {
+  int _unreadCount = 0;
+  Timer? _timer;
+
   int get _index {
-    if (location.startsWith('/explore')) return 1;
-    if (location.startsWith('/community')) return 2;
-    if (location.startsWith('/messages')) return 3;
-    if (location.startsWith('/profile')) return 4;
+    if (widget.location.startsWith('/explore')) return 1;
+    if (widget.location.startsWith('/community')) return 2;
+    if (widget.location.startsWith('/messages')) return 3;
+    if (widget.location.startsWith('/profile')) return 4;
     return 0;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _pollUnread();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _pollUnread());
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _pollUnread() async {
+    try {
+      final res = await api.get('/api/conversations/unread-count');
+      final count = res.data is Map ? (res.data['count'] ?? 0) : 0;
+      if (mounted) setState(() => _unreadCount = count as int);
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
+      body: widget.child,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _index,
         onTap: (i) {
           const paths = ['/', '/explore', '/community', '/messages', '/profile'];
           context.go(paths[i]);
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Accueil'),
-          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), activeIcon: Icon(Icons.search), label: 'Explorer'),
-          BottomNavigationBarItem(icon: Icon(Icons.people_outline), activeIcon: Icon(Icons.people), label: 'Communauté'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_outline), activeIcon: Icon(Icons.chat_bubble), label: 'Messages'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profil'),
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Accueil'),
+          const BottomNavigationBarItem(icon: Icon(Icons.search_outlined), activeIcon: Icon(Icons.search), label: 'Explorer'),
+          const BottomNavigationBarItem(icon: Icon(Icons.people_outline), activeIcon: Icon(Icons.people), label: 'Communauté'),
+          BottomNavigationBarItem(
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.chat_bubble_outline),
+                if (_unreadCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _unreadCount > 99 ? '99+' : '$_unreadCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            activeIcon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                const Icon(Icons.chat_bubble),
+                if (_unreadCount > 0)
+                  Positioned(
+                    top: -4,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _unreadCount > 99 ? '99+' : '$_unreadCount',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            label: 'Messages',
+          ),
+          const BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
     );

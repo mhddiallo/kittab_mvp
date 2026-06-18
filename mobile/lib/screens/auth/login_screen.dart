@@ -68,6 +68,20 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.background,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (context.canPop()) context.pop();
+              else context.go('/');
+            },
+            child: const Text('Passer →', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),

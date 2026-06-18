@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api.dart';
 import '../../models/book.dart';
 import '../../widgets/book_card.dart';
+import '../../widgets/book_bottom_sheet.dart';
 import '../../theme/app_theme.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -13,13 +14,16 @@ class ExploreScreen extends StatefulWidget {
   State<ExploreScreen> createState() => _ExploreScreenState();
 }
 
-class _ExploreScreenState extends State<ExploreScreen> {
+class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final _searchCtrl = TextEditingController();
   final _scrollCtrl = ScrollController();
 
   List<Book> books = [];
   List<Map<String, dynamic>> categories = [];
+  List<Map<String, dynamic>> wantedBooks = [];
   bool loading = false;
+  bool wantedLoading = false;
   bool hasMore = true;
   int page = 1;
   static const int pageSize = 20;
@@ -31,14 +35,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     selectedCategory = widget.categoryId;
     _loadCategories();
     _loadBooks(reset: true);
+    _loadWantedBooks();
     _scrollCtrl.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _searchCtrl.dispose();
     _scrollCtrl.dispose();
     super.dispose();
@@ -87,7 +94,31 @@ class _ExploreScreenState extends State<ExploreScreen> {
     }
   }
 
-  void _applyFilters() => _loadBooks(reset: true);
+  Future<void> _loadWantedBooks() async {
+    setState(() => wantedLoading = true);
+    try {
+      final params = <String, dynamic>{
+        if (_searchCtrl.text.trim().isNotEmpty) 'search': _searchCtrl.text.trim(),
+        if (selectedCategory != null) 'category_id': selectedCategory,
+        'page_size': 50,
+      };
+      final res = await api.get('/api/wanted-books', queryParameters: params);
+      final data = res.data;
+      setState(() {
+        wantedBooks = List<Map<String, dynamic>>.from(
+          data is Map ? data['items'] ?? [] : data ?? [],
+        );
+        wantedLoading = false;
+      });
+    } catch (_) {
+      setState(() => wantedLoading = false);
+    }
+  }
+
+  void _applyFilters() {
+    _loadBooks(reset: true);
+    _loadWantedBooks();
+  }
 
   void _resetFilters() {
     setState(() {
@@ -95,7 +126,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       selectedCondition = '';
       _searchCtrl.clear();
     });
-    _loadBooks(reset: true);
+    _applyFilters();
   }
 
   @override
@@ -107,6 +138,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
         actions: [
           IconButton(icon: const Icon(Icons.tune), onPressed: _showFilters),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: AppColors.primary,
+          unselectedLabelColor: AppColors.textSecondary,
+          indicatorColor: AppColors.primary,
+          tabs: const [
+            Tab(text: 'Livres disponibles'),
+            Tab(text: 'Livres demandés'),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -153,49 +194,139 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
           const SizedBox(height: 8),
 
-          // Results count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                Text('${books.length} livre${books.length > 1 ? 's' : ''}',
-                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-                if (selectedCategory != null || selectedCondition.isNotEmpty)
-                  GestureDetector(
-                    onTap: _resetFilters,
-                    child: const Text('Réinitialiser', style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
-                  ),
+                _buildBooksTab(),
+                _buildWantedTab(),
               ],
             ),
           ),
-          const SizedBox(height: 8),
-
-          // Grid
-          Expanded(
-            child: books.isEmpty && !loading
-                ? const Center(child: Text('Aucun livre trouvé', style: TextStyle(color: AppColors.textSecondary)))
-                : GridView.builder(
-                    controller: _scrollCtrl,
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.62,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                    ),
-                    itemCount: books.length + (loading ? 2 : 0),
-                    itemBuilder: (_, i) {
-                      if (i >= books.length) return _shimmerCard();
-                      return BookGridCard(
-                        book: books[i],
-                        onTap: () => context.push('/books/${books[i].id}'),
-                      );
-                    },
-                  ),
-          ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBooksTab() {
+    return Column(
+      children: [
+        // Results count + reset
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('${books.length} livre${books.length > 1 ? 's' : ''}',
+                  style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+              if (selectedCategory != null || selectedCondition.isNotEmpty)
+                GestureDetector(
+                  onTap: _resetFilters,
+                  child: const Text('Réinitialiser', style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        Expanded(
+          child: books.isEmpty && !loading
+              ? const Center(child: Text('Aucun livre trouvé', style: TextStyle(color: AppColors.textSecondary)))
+              : GridView.builder(
+                  controller: _scrollCtrl,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.62,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                  ),
+                  itemCount: books.length + (loading ? 2 : 0),
+                  itemBuilder: (_, i) {
+                    if (i >= books.length) return _shimmerCard();
+                    return BookGridCard(
+                      book: books[i],
+                      onTap: () => showBookBottomSheet(context, books[i].id),
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWantedTab() {
+    if (wantedLoading) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+    }
+    if (wantedBooks.isEmpty) {
+      return const Center(child: Text('Aucune demande trouvée', style: TextStyle(color: AppColors.textSecondary)));
+    }
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+      itemCount: wantedBooks.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (_, i) {
+        final w = wantedBooks[i];
+        final category = w['category'] as Map<String, dynamic>?;
+        final requester = w['requester'] as Map<String, dynamic>?;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(w['title'] ?? '', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    if (w['author'] != null && (w['author'] as String).isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(w['author'], style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    ],
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        if (category != null) ...[
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.primaryLight,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(category['name'] ?? '', style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                        if (requester != null)
+                          Text('par ${requester['username'] ?? requester['first_name'] ?? 'Utilisateur'}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textHint)),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () => context.push('/publish'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Text("J'ai ce livre →", style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
