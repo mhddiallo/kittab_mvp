@@ -1,7 +1,11 @@
+import io
 import os
 import uuid
 from datetime import datetime
 from typing import Optional
+
+import cloudinary
+import cloudinary.uploader
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from pydantic import BaseModel
@@ -322,19 +326,30 @@ async def send_image_message(
     if not part:
         raise HTTPException(status_code=403, detail="Accès refusé")
 
-    # Save the uploaded image
-    upload_dir = os.path.join(settings.UPLOAD_DIR, "messages")
-    os.makedirs(upload_dir, exist_ok=True)
-
-    ext = os.path.splitext(file.filename or "image")[1] or ".jpg"
-    filename = f"{uuid.uuid4().hex}{ext}"
-    file_path = os.path.join(upload_dir, filename)
-
     contents = await file.read()
-    with open(file_path, "wb") as f:
-        f.write(contents)
 
-    image_url = f"/uploads/messages/{filename}"
+    if settings.CLOUDINARY_CLOUD_NAME:
+        cloudinary.config(
+            cloud_name=settings.CLOUDINARY_CLOUD_NAME,
+            api_key=settings.CLOUDINARY_API_KEY,
+            api_secret=settings.CLOUDINARY_API_SECRET,
+        )
+        result = cloudinary.uploader.upload(
+            io.BytesIO(contents),
+            folder="kittab/messages",
+            public_id=str(uuid.uuid4()),
+            overwrite=False,
+            resource_type="image",
+        )
+        image_url = result["secure_url"]
+    else:
+        upload_dir = os.path.join(settings.UPLOAD_DIR, "messages")
+        os.makedirs(upload_dir, exist_ok=True)
+        ext = os.path.splitext(file.filename or "image")[1] or ".jpg"
+        filename = f"{uuid.uuid4().hex}{ext}"
+        with open(os.path.join(upload_dir, filename), "wb") as f:
+            f.write(contents)
+        image_url = f"/uploads/messages/{filename}"
 
     msg = Message(
         conversation_id=conv.id,
