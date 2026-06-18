@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/auth.service';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -67,7 +67,17 @@ export class BookDetailComponent implements OnInit {
     fair: { label: 'Correct', cls: 'bg-orange-100 text-orange-700' },
   };
 
-  constructor(private route: ActivatedRoute, private auth: AuthService) {}
+  constructor(private route: ActivatedRoute, private auth: AuthService, private router: Router) {}
+
+  contactSeller() {
+    if (!this.auth.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/messages'], {
+      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id },
+    });
+  }
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
