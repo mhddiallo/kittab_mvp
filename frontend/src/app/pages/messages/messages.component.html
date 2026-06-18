@@ -125,7 +125,7 @@
                    [class.rounded-br-sm]="msg.is_mine"
                    [class.rounded-bl-sm]="!msg.is_mine"
                    (click)="openImage(msg.image_url!)">
-                <img [src]="msg.image_url"
+                <img [src]="getImageUrl(msg.image_url)"
                      alt="Image"
                      class="max-w-full block object-cover"
                      style="max-height: 300px;" />

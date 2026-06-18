@@ -278,6 +278,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
     return `${environment.apiUrl}${url}`;
   }
 
+  openImage(url: string) {
+    window.open(this.getImageUrl(url), '_blank');
+  }
+
   isMobile(): boolean {
     return window.innerWidth < 768;
   }
