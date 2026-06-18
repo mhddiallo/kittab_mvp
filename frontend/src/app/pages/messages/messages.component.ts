@@ -120,11 +120,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
       await this.loadConversationDetail(parseInt(id));
     }
 
-    // Poll every 5 seconds
+    // Poll every 5 seconds (silent — no spinner)
     this.pollInterval = setInterval(async () => {
       await this.loadConversations();
       if (this.activeConversation) {
-        await this.loadConversationDetail(this.activeConversation.id);
+        await this.loadConversationDetailSilent(this.activeConversation.id);
       }
     }, 5000);
   }
@@ -149,13 +149,21 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   async loadConversationDetail(id: number) {
     this.loadingConv = true;
+    await this._fetchConversationDetail(id);
+    this.loadingConv = false;
+  }
+
+  async loadConversationDetailSilent(id: number) {
+    await this._fetchConversationDetail(id);
+  }
+
+  private async _fetchConversationDetail(id: number) {
     try {
       const res = await fetch(`${environment.apiUrl}/api/conversations/${id}`, {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) {
         this.activeConversation = await res.json();
-        // Update unread count in list
         const conv = this.conversations.find(c => c.id === id);
         if (conv) conv.unread_count = 0;
         setTimeout(() => this.scrollToBottom(), 50);
@@ -163,7 +171,6 @@ export class MessagesComponent implements OnInit, OnDestroy {
         this.router.navigate(['/messages']);
       }
     } catch {}
-    this.loadingConv = false;
   }
 
   selectConversation(id: number) {
