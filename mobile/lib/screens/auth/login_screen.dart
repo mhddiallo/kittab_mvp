@@ -38,7 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
       _devCode = data['dev_code']?.toString();
       setState(() { _step = 'otp'; _loading = false; });
     } catch (e) {
-      setState(() { _error = 'Erreur lors de l\'envoi du code'; _loading = false; });
+      final msg = e.toString().contains('timeout') || e.toString().contains('SocketException')
+          ? 'Serveur lent à répondre, réessayez dans quelques secondes'
+          : 'Erreur lors de l\'envoi du code. Vérifiez votre connexion.';
+      setState(() { _error = msg; _loading = false; });
     }
   }
 
@@ -132,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onSubmitted: (_) => _requestOtp(),
         ),
         const SizedBox(height: 8),
-        const Text('Vous recevrez un code par WhatsApp ou SMS', style: TextStyle(fontSize: 11, color: AppColors.textHint)),
+        const Text('Vous recevrez un code par WhatsApp ou SMS\n⚠️ La première connexion peut prendre 30-60s (serveur en veille)', style: TextStyle(fontSize: 11, color: AppColors.textHint)),
         const SizedBox(height: 20),
 
         ElevatedButton(
