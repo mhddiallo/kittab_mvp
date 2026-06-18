@@ -5,9 +5,21 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
+import { AuthService } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
 
 interface Category { id: number; name: string; }
+
+interface WantedBook {
+  id: number;
+  title: string;
+  author: string | null;
+  description: string | null;
+  is_fulfilled: boolean;
+  created_at: string;
+  user: { id: number; username?: string };
+  category: { id: number; name: string } | null;
+}
 
 @Component({
   selector: 'app-catalogue',
@@ -16,20 +28,19 @@ interface Category { id: number; name: string; }
   templateUrl: './catalogue.component.html',
 })
 export class CatalogueComponent implements OnInit {
+  // Tab
+  activeTab: 'dispo' | 'demandes' = 'dispo';
+
+  // Books
   searchQuery = '';
   selectedCategoryId: number | null = null;
   selectedCondition = '';
-  minPrice: number | null = null;
-  maxPrice: number | null = null;
   onlyExchange = false;
-  showFilters = false;
-  showCategoryDropdown = false;
-  showLocationDropdown = false;
-  showPriceDropdown = false;
-  showAllFilters = false;
   cityFilter = '';
   cityLoading = false;
   cityError = '';
+  showLocationDropdown = false;
+  showPriceDropdown = false;
 
   books: BookCard[] = [];
   boostedBooks: BookCard[] = [];
@@ -42,6 +53,32 @@ export class CatalogueComponent implements OnInit {
   alertSent = false;
   searchTimeout: any;
 
+  selectedPriceRange = 0;
+
+  priceRanges = [
+    { label: 'Tous les prix', min: null as number | null, max: null as number | null },
+    { label: 'Moins de 2 000 FCFA', min: null, max: 2000 },
+    { label: '2 000 – 5 000 FCFA', min: 2000, max: 5000 },
+    { label: '5 000 – 10 000 FCFA', min: 5000, max: 10000 },
+    { label: 'Plus de 10 000 FCFA', min: 10000, max: null },
+  ];
+
+  conditions = [
+    { value: '', label: 'Tous les états' },
+    { value: 'new', label: '✨ Parfait état' },
+    { value: 'like_new', label: '👍 Très bon état' },
+    { value: 'good', label: '📖 État correct' },
+    { value: 'fair', label: '📝 Dégradé' },
+  ];
+
+  // Wanted books
+  wantedBooks: WantedBook[] = [];
+  wantedLoading = false;
+  showWantedForm = false;
+  submittingWanted = false;
+  wantedFormError = '';
+  wantedForm = { title: '', author: '', category_id: null as number | null, description: '' };
+
   get totalPages(): number { return Math.ceil(this.total / this.pageSize); }
   get pages(): number[] {
     const p = this.totalPages;
@@ -51,30 +88,22 @@ export class CatalogueComponent implements OnInit {
     return [1,0,this.currentPage-1,this.currentPage,this.currentPage+1,0,p];
   }
 
-  conditions = [
-    { value: '', label: 'Tous les états' },
-    { value: 'new', label: 'Parfait état' },
-    { value: 'like_new', label: 'Très bon état' },
-    { value: 'good', label: 'État correct' },
-    { value: 'fair', label: 'Dégradé' },
-  ];
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.selectedCondition) count++;
+    if (this.selectedPriceRange > 0) count++;
+    if (this.onlyExchange) count++;
+    if (this.cityFilter.trim()) count++;
+    return count;
+  }
 
-  priceRanges = [
-    { label: 'Tous les prix', min: null, max: null },
-    { label: 'Moins de 2 000 FCFA', min: null, max: 2000 },
-    { label: '2 000 – 5 000 FCFA', min: 2000, max: 5000 },
-    { label: '5 000 – 10 000 FCFA', min: 5000, max: 10000 },
-    { label: 'Plus de 10 000 FCFA', min: 10000, max: null },
-  ];
-
-  selectedPriceRange = 0;
-
-  constructor(private route: ActivatedRoute) {}
+  constructor(public auth: AuthService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
     const q = this.route.snapshot.queryParamMap.get('q');
     if (q) this.searchQuery = q;
     await Promise.all([this.loadCategories(), this.loadBooks(), this.loadBoostedBooks()]);
+    this.loadWantedBooks();
   }
 
   async loadCategories() {
@@ -117,6 +146,18 @@ export class CatalogueComponent implements OnInit {
     this.loading = false;
   }
 
+  async loadWantedBooks() {
+    this.wantedLoading = true;
+    try {
+      const params = new URLSearchParams();
+      if (this.searchQuery.trim()) params.set('search', this.searchQuery.trim());
+      if (this.selectedCategoryId) params.set('category_id', String(this.selectedCategoryId));
+      const res = await fetch(`${environment.apiUrl}/api/wanted-books?${params}`);
+      if (res.ok) this.wantedBooks = await res.json();
+    } catch {}
+    this.wantedLoading = false;
+  }
+
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages || page === this.currentPage) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -125,12 +166,16 @@ export class CatalogueComponent implements OnInit {
 
   onSearch() {
     clearTimeout(this.searchTimeout);
-    this.searchTimeout = setTimeout(() => this.loadBooks(), 400);
+    this.searchTimeout = setTimeout(() => {
+      this.loadBooks(1);
+      this.loadWantedBooks();
+    }, 400);
   }
 
   selectCategory(id: number | null) {
     this.selectedCategoryId = id;
     this.loadBooks(1);
+    this.loadWantedBooks();
   }
 
   applyFilters() {
@@ -170,16 +215,7 @@ export class CatalogueComponent implements OnInit {
   }
 
   getCategoryName(id: number): string {
-    return this.categories.find(c => c.id === id)?.name ?? 'Catégories';
-  }
-
-  get activeFilterCount(): number {
-    let count = 0;
-    if (this.selectedCondition) count++;
-    if (this.selectedPriceRange > 0) count++;
-    if (this.onlyExchange) count++;
-    if (this.cityFilter.trim()) count++;
-    return count;
+    return this.categories.find(c => c.id === id)?.name ?? 'Catégorie';
   }
 
   getImageUrl(url: string | undefined): string {
@@ -197,5 +233,64 @@ export class CatalogueComponent implements OnInit {
       });
       this.alertSent = true;
     } catch {}
+  }
+
+  async submitWanted() {
+    if (!this.wantedForm.title.trim()) { this.wantedFormError = 'Le titre est obligatoire'; return; }
+    this.submittingWanted = true; this.wantedFormError = '';
+    try {
+      const body: any = { title: this.wantedForm.title.trim() };
+      if (this.wantedForm.author.trim()) body.author = this.wantedForm.author.trim();
+      if (this.wantedForm.category_id) body.category_id = this.wantedForm.category_id;
+      if (this.wantedForm.description.trim()) body.description = this.wantedForm.description.trim();
+      const res = await fetch(`${environment.apiUrl}/api/wanted-books`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${this.auth.token}` },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        this.wantedBooks = [created, ...this.wantedBooks];
+        this.showWantedForm = false;
+        this.wantedForm = { title: '', author: '', category_id: null, description: '' };
+      } else {
+        const d = await res.json();
+        this.wantedFormError = d.detail || 'Erreur lors de l\'envoi';
+      }
+    } catch { this.wantedFormError = 'Impossible de contacter le serveur'; }
+    this.submittingWanted = false;
+  }
+
+  async fulfillWanted(book: WantedBook) {
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/wanted-books/${book.id}/fulfill`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      if (res.ok) this.wantedBooks = this.wantedBooks.filter(b => b.id !== book.id);
+    } catch {}
+  }
+
+  async deleteWanted(book: WantedBook) {
+    try {
+      await fetch(`${environment.apiUrl}/api/wanted-books/${book.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${this.auth.token}` },
+      });
+      this.wantedBooks = this.wantedBooks.filter(b => b.id !== book.id);
+    } catch {}
+  }
+
+  isOwnerWanted(book: WantedBook): boolean {
+    return !!this.auth.user && this.auth.user.id === book.user.id;
+  }
+
+  timeAgo(dateStr: string): string {
+    const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+    if (diff < 60) return 'À l\'instant';
+    if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`;
+    if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`;
+    if (diff < 2592000) return `Il y a ${Math.floor(diff / 86400)} j`;
+    return new Date(dateStr).toLocaleDateString('fr-FR');
   }
 }
