@@ -41,6 +41,7 @@ export class CatalogueComponent implements OnInit {
   cityError = '';
   showLocationDropdown = false;
   showPriceDropdown = false;
+  showConditionDropdown = false;
 
   books: BookCard[] = [];
   boostedBooks: BookCard[] = [];
