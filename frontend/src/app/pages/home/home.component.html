@@ -58,41 +58,43 @@
   </div>
 
   <!-- Right: illustration + badges flottants -->
-  <div class="flex-1 hidden md:flex flex-col items-center">
-    <div class="relative w-full max-w-lg px-10 py-6">
-      <!-- Illustration principale -->
-      <img src="assets/login-illustration.png" alt="Kittab" class="w-full object-contain relative z-10" />
+  <div class="flex-1 hidden md:flex flex-col items-center animate-float">
+    <div class="relative w-full max-w-md mx-auto">
+      <!-- Illustration principale — sans fond blanc -->
+      <img src="assets/login-illustration.png" alt="Kittab" class="w-full object-contain" />
 
-      <!-- Badge haut gauche -->
-      <div class="absolute top-2 left-0 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5 z-20">
-        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-base shrink-0">📦</div>
+      <!-- Badge haut gauche — dépasse légèrement à gauche -->
+      <div class="absolute -top-6 -left-8 bg-white rounded-2xl px-3 py-2.5 shadow-xl flex items-center gap-2.5 z-20">
+        <div class="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center text-lg shrink-0">📦</div>
         <div>
-          <p class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">Sagesse partagée</p>
-          <p class="text-xs font-bold text-gray-800 leading-tight">Comme les racines du baobab</p>
+          <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Sagesse partagée</p>
+          <p class="text-xs font-bold text-gray-900 leading-tight">Comme les racines du baobab</p>
         </div>
       </div>
 
-      <!-- Badge milieu gauche -->
-      <div class="absolute top-1/2 -translate-y-1/2 left-0 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5 z-20">
-        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-base shrink-0">⭐</div>
+      <!-- Badge milieu gauche — dépasse à gauche -->
+      <div class="absolute top-1/2 -translate-y-1/2 -left-10 bg-white rounded-2xl px-3 py-2.5 shadow-xl flex items-center gap-2.5 z-20">
+        <div class="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center text-lg shrink-0">⭐</div>
         <div>
-          <p class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">Excellence</p>
-          <p class="text-xs font-bold text-gray-800">Qualité africaine</p>
+          <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Excellence</p>
+          <p class="text-xs font-bold text-gray-900">Qualité africaine</p>
         </div>
       </div>
 
-      <!-- Badge bas droite -->
-      <div class="absolute bottom-2 right-0 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5 z-20">
-        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-base shrink-0">👥</div>
+      <!-- Badge bas droite — dépasse à droite -->
+      <div class="absolute -bottom-4 -right-8 bg-white rounded-2xl px-3 py-2.5 shadow-xl flex items-center gap-2.5 z-20">
+        <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-lg shrink-0">👥</div>
         <div>
-          <p class="text-[9px] text-gray-400 font-semibold uppercase tracking-wide">Communauté</p>
-          <p class="text-xs font-bold text-gray-800">Lire et partager</p>
+          <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Communauté</p>
+          <p class="text-xs font-bold text-gray-900">Lire et partager</p>
         </div>
       </div>
     </div>
-    <div class="text-center mt-1">
-      <p class="text-primary font-black text-base tracking-[0.2em]">KITTAB</p>
-      <p class="text-amber-600 text-sm italic">Lire, c'est grandir. Partager, c'est multiplier.</p>
+
+    <!-- Texte flottant sous l'illustration -->
+    <div class="text-center mt-6">
+      <p class="text-primary font-black text-sm tracking-[0.25em]">KITTAB</p>
+      <p class="text-amber-600 text-sm italic mt-0.5">Lire, c'est grandir. Partager, c'est multiplier.</p>
     </div>
   </div>
 </section>
