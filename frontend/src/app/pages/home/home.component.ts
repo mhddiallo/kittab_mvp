@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,125 +13,63 @@ import { environment } from '../../../environments/environment';
   imports: [RouterLink, CommonModule, FormsModule, NavbarComponent, FooterComponent, BookCardComponent],
   templateUrl: './home.component.html',
 })
-export class HomeComponent implements OnInit, OnDestroy {
+export class HomeComponent implements OnInit {
   trendingBooks: BookCard[] = [];
-  popularBooks: BookCard[] = [];
   wantedBooks: any[] = [];
-  totalBooks = 0;
   loading = true;
   searchQuery = '';
   activeTab = 'acheter';
   suggestions: any[] = [];
   private searchTimeout: any;
 
-  // Hero typewriter
-  heroPhrases = [
-    'Vends, achète et échange tes livres facilement',
-    'Donne une seconde vie à tes livres',
-    'Débarrasse-toi de tes livres dont tu n\'as plus besoin',
+  categories = [
+    { name: 'Romans', emoji: '📖', slug: 'romans' },
+    { name: 'Scolaire', emoji: '🎓', slug: 'scolaire' },
+    { name: 'Essais', emoji: '💡', slug: 'essais' },
+    { name: 'Bandes dessinées', emoji: '🎨', slug: 'bd' },
+    { name: 'Jeunesse', emoji: '🌟', slug: 'jeunesse' },
+    { name: 'Poésie', emoji: '📝', slug: 'poesie' },
   ];
-  currentHeroIndex = 0;
-  displayedText = '';
-  showCursor = true;
-  private typewriterTimeout: any;
+
+  private bookGradients = [
+    'linear-gradient(160deg, #8B1A1A 0%, #C0392B 100%)',
+    'linear-gradient(160deg, #1A3A8B 0%, #2563EB 100%)',
+    'linear-gradient(160deg, #7C4A00 0%, #D97706 100%)',
+    'linear-gradient(160deg, #3D1A0A 0%, #7C3A0A 100%)',
+    'linear-gradient(160deg, #1A5C1A 0%, #16A34A 100%)',
+    'linear-gradient(160deg, #4A0A6B 0%, #9333EA 100%)',
+  ];
 
   constructor(private router: Router) {}
 
-  startTypewriter() {
-    this.typePhrase();
-  }
-
-  private typePhrase() {
-    const full = this.heroPhrases[this.currentHeroIndex];
-    let i = 0;
-    this.displayedText = '';
-
-    const type = () => {
-      if (i < full.length) {
-        this.displayedText += full[i++];
-        this.typewriterTimeout = setTimeout(type, 45);
-      } else {
-        // Pause avant d'effacer
-        this.typewriterTimeout = setTimeout(() => this.erasePhrase(), 2000);
-      }
-    };
-    type();
-  }
-
-  private erasePhrase() {
-    const erase = () => {
-      if (this.displayedText.length > 0) {
-        this.displayedText = this.displayedText.slice(0, -1);
-        this.typewriterTimeout = setTimeout(erase, 25);
-      } else {
-        this.currentHeroIndex = (this.currentHeroIndex + 1) % this.heroPhrases.length;
-        this.typewriterTimeout = setTimeout(() => this.typePhrase(), 400);
-      }
-    };
-    erase();
-  }
-
-  get beforeRed(): string {
-    const full = this.heroPhrases[this.currentHeroIndex];
-    const redStart = full.indexOf('livres');
-    const typed = this.displayedText;
-    if (redStart < 0 || typed.length <= redStart) return typed;
-    return typed.slice(0, redStart);
-  }
-
-  get redPart(): string {
-    const full = this.heroPhrases[this.currentHeroIndex];
-    const redStart = full.indexOf('livres');
-    const typed = this.displayedText;
-    if (redStart < 0 || typed.length <= redStart) return '';
-    return typed.slice(redStart, Math.min(typed.length, redStart + 6));
-  }
-
-  get afterRed(): string {
-    const full = this.heroPhrases[this.currentHeroIndex];
-    const redEnd = full.indexOf('livres') + 6;
-    const typed = this.displayedText;
-    if (typed.length <= redEnd) return '';
-    return typed.slice(redEnd);
-  }
-
-  ngOnDestroy() {
-    clearTimeout(this.typewriterTimeout);
-  }
-
-  getImageUrl(book: BookCard): string {
-    const url = book.images?.find(i => i.is_primary)?.url || book.images?.[0]?.url;
-    if (!url) return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=📚';
-    return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
+  getBookGradient(index: number): string {
+    return this.bookGradients[index % this.bookGradients.length];
   }
 
   async ngOnInit() {
-    await this.loadBooks();
-    this.startTypewriter();
+    await this.loadData();
   }
 
-  async loadBooks() {
+  async loadData() {
     try {
-      const [boostedRes, latestRes, wantedRes] = await Promise.all([
+      const [boostedRes, wantedRes] = await Promise.all([
         fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6&page=1`),
-        fetch(`${environment.apiUrl}/api/books?page_size=6&page=1`),
         fetch(`${environment.apiUrl}/api/wanted-books?page_size=4`),
       ]);
-      if (wantedRes.ok) this.wantedBooks = await wantedRes.json();
-      if (latestRes.ok) {
-        const data = await latestRes.json();
-        const books: BookCard[] = data.items ?? data;
-        this.totalBooks = data.total ?? books.length;
-        this.popularBooks = books;
-      }
       if (boostedRes.ok) {
         const data = await boostedRes.json();
         this.trendingBooks = data.items ?? data;
       }
+      if (wantedRes.ok) {
+        const data = await wantedRes.json();
+        this.wantedBooks = data.items ?? data;
+      }
     } catch {}
-    if (!this.popularBooks.length) {
-      this.trendingBooks = this.mock(4);
-      this.popularBooks = this.mock(6, 4);
+    if (!this.trendingBooks.length) {
+      this.trendingBooks = this.mockTrending();
+    }
+    if (!this.wantedBooks.length) {
+      this.wantedBooks = this.mockWanted();
     }
     this.loading = false;
   }
@@ -158,25 +96,27 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/catalogue'], { queryParams: { q: this.searchQuery } });
   }
 
-  mock(count: number, offset = 0): BookCard[] {
+  private mockTrending(): BookCard[] {
     const data = [
-      { t: 'Les Contes de Leuk-le-Lièvre', a: 'L. S. Senghor', p: 8000, c: 'good' },
-      { t: 'Le Ventre de l\'Atlantique', a: 'Fatou Diome', p: 12000, c: 'like_new' },
-      { t: 'Une si longue lettre', a: 'Mariama Bâ', p: 6000, c: 'new' },
-      { t: 'Soundjata ou l\'épopée', a: 'D. T. Niane', p: 9500, c: 'fair' },
-      { t: 'Mathématiques Terminale S', a: 'Seydou Traoré', p: 8500, c: 'like_new' },
-      { t: 'L\'enfant noir', a: 'Camara Laye', p: 7500, c: 'good' },
-      { t: 'Introduction à la Physique', a: 'Aminata Diallo', p: 15000, c: 'new' },
-      { t: 'Histoire de l\'Afrique', a: 'Ousmane Tall', p: 18000, c: 'good' },
+      { t: 'Une si longue lettre', a: 'Mariama Bâ', addr: 'Dakar', boosted: true },
+      { t: 'Physique Terminale S', a: 'Durandeau', addr: 'Dakar', boosted: false },
+      { t: 'Les Soleils des indépendances', a: 'A. Kourouma', addr: 'Abidjan', boosted: true },
+      { t: 'Sapiens', a: 'Y. N. Harari', addr: 'Abidjan', boosted: true },
     ];
-    return Array.from({ length: count }, (_, i) => {
-      const d = data[(i + offset) % data.length];
-      return {
-        id: i + offset + 1, title: d.t, author: d.a, price: d.p, condition: d.c, book_type: 'novel',
-        images: [{ url: `https://picsum.photos/seed/b${i + offset}/300/400`, is_primary: true }],
-        seller: { first_name: 'Vendeur', last_name: '', phone: '', address: ['Conakry', 'Dakar', 'Bamako'][i % 3] },
-        is_available: true,
-      };
-    });
+    return data.map((d, i) => ({
+      id: i + 1, title: d.t, author: d.a, price: 5000, condition: 'good', book_type: 'novel',
+      images: [], is_boosted: d.boosted,
+      seller: { first_name: '', last_name: '', phone: '', address: d.addr },
+      is_available: true,
+    } as any));
+  }
+
+  private mockWanted(): any[] {
+    return [
+      { title: 'Une si longue lettre', author: 'par Mariama Bâ', description: 'Pour mes cours de littérature à l\'université. Édition récente de préférence.', category: { name: 'Roman' }, user: { username: 'Aminata D.' } },
+      { title: 'Maths 1ère C — CIAM', author: 'manuel scolaire', description: 'Pour mon fils qui entre en 1ère. État indifférent tant que c\'est complet et lisible.', category: { name: 'Scolaire' }, user: { username: 'Cheikh B.' } },
+      { title: 'Petit Pays', author: 'par Gaël Faye', description: 'Disponible en bon état ? Je peux échanger contre deux de mes romans.', category: { name: 'Roman' }, user: { username: 'Moussa K.' } },
+      { title: 'Sapiens', author: 'par Y. N. Harari', description: 'Version française recherchée. J\'habite Abidjan, remise en main propre possible.', category: { name: 'Essai' }, user: { username: 'Ibrahim T.' } },
+    ];
   }
 }

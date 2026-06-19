@@ -11,6 +11,7 @@ export interface BookCard {
   is_available: boolean;
   views?: number;
   is_pack?: boolean;
+  is_boosted?: boolean;
   pack_items?: string[];
   cover_url?: string | null;
 }

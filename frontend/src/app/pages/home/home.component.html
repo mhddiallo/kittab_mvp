@@ -1,217 +1,322 @@
 <app-navbar />
 
-<!-- HERO -->
-<section class="max-w-7xl mx-auto px-6 pt-14 pb-10 flex flex-col md:flex-row items-center gap-12">
-  <div class="flex-1">
-    <div class="inline-flex items-center gap-2 bg-red-50 text-red-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-5">
-      📚 La marketplace du livre en Afrique
+<div class="bg-[#FBF5EC] min-h-screen">
+
+<!-- ① HERO -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 pt-10 pb-8 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+
+  <!-- Left -->
+  <div class="flex-1 w-full">
+    <div class="inline-flex items-center gap-2 border border-gray-300 bg-white text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full mb-5">
+      🌍 La marketplace du livre en Afrique
     </div>
-    <h1 class="text-5xl font-black text-gray-900 leading-tight mb-5">
-      {{ beforeRed }}<span class="text-primary">{{ redPart }}</span>{{ afterRed }}<span class="inline-block w-0.5 h-10 bg-primary align-middle ml-0.5 animate-pulse"></span>
+    <h1 class="text-4xl md:text-6xl font-black text-gray-900 leading-[1.1] mb-4">
+      Chaque livre mérite<br>une <span class="text-primary" style="text-decoration: underline; text-decoration-color: #D97706; text-decoration-thickness: 3px; text-underline-offset: 6px;">seconde vie</span>
     </h1>
-    <p class="text-gray-500 text-base mb-7 max-w-md leading-relaxed">Rejoins des milliers de lecteurs qui achètent et vendent des livres dans leur communauté locale.</p>
-    <div class="relative max-w-md">
-      <div class="flex items-center bg-white border border-gray-200 rounded-full px-4 py-3 shadow-md">
-        <svg class="w-4 h-4 text-gray-400 mr-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+    <p class="text-gray-500 text-base leading-relaxed mb-7 max-w-lg">
+      Achète, vends et échange tes livres avec des lecteurs près de chez toi. Sans intermédiaire, sans commission — juste le plaisir de faire circuler les histoires.
+    </p>
+
+    <!-- Search -->
+    <div class="relative mb-6 max-w-lg">
+      <div class="flex items-center bg-white border-2 border-gray-200 rounded-full px-5 py-3 shadow-sm focus-within:border-primary transition-colors">
+        <span class="text-gray-400 mr-3 shrink-0">🔍</span>
         <input [(ngModel)]="searchQuery" (input)="onSearch()" (keyup.enter)="goToCatalogue()"
-               type="text" placeholder="Quel livre recherchez-vous ?"
-               class="flex-1 bg-transparent text-sm outline-none text-gray-700" />
-        <button (click)="goToCatalogue()" class="bg-primary text-white rounded-full px-4 py-1.5 text-sm font-semibold ml-2 hover:bg-red-700">Rechercher</button>
+               type="text" placeholder="Quel livre cherches-tu ?"
+               class="flex-1 bg-transparent text-sm outline-none text-gray-700 min-w-0" />
+        <button (click)="goToCatalogue()"
+                class="bg-primary text-white rounded-full px-5 py-2 text-sm font-bold ml-2 hover:bg-red-800 transition-colors shrink-0 md:px-6">
+          <span class="hidden md:inline">Chercher</span>
+          <span class="md:hidden">Go</span>
+        </button>
       </div>
-      <!-- Autocomplete dropdown -->
+      <!-- Autocomplete -->
       <div *ngIf="suggestions.length > 0"
            class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-2xl shadow-xl mt-2 z-20 overflow-hidden">
         <button *ngFor="let s of suggestions" (mousedown)="selectSuggestion(s)"
                 class="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 text-left border-b border-gray-50 last:border-0">
-          <img *ngIf="s.cover_url" [src]="s.cover_url" class="w-8 h-10 object-cover rounded" />
-          <div *ngIf="!s.cover_url" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-lg shrink-0">📚</div>
-          <div>
-            <p class="text-sm font-semibold text-gray-800">{{ s.title }}</p>
-            <p class="text-xs text-gray-500">{{ s.author }}</p>
+          <img *ngIf="s.cover_url" [src]="s.cover_url" class="w-8 h-10 object-cover rounded shrink-0" />
+          <div *ngIf="!s.cover_url" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center shrink-0 text-base">📚</div>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-gray-800 truncate">{{ s.title }}</p>
+            <p class="text-xs text-gray-500 truncate">{{ s.author }}</p>
           </div>
         </button>
       </div>
     </div>
-    <div class="flex gap-8 mt-8">
-      <div><p class="text-2xl font-black text-gray-900">1 000+</p><p class="text-xs text-gray-400 mt-0.5">Livres disponibles</p></div>
-      <div class="w-px bg-gray-100"></div>
-      <div><p class="text-2xl font-black text-gray-900">500+</p><p class="text-xs text-gray-400 mt-0.5">Lecteurs actifs</p></div>
-      <div class="w-px bg-gray-100"></div>
-      <div><p class="text-2xl font-black text-gray-900">15</p><p class="text-xs text-gray-400 mt-0.5">Villes couvertes</p></div>
-    </div>
-  </div>
-  <div class="flex-1 hidden md:flex justify-center">
-    <div class="relative w-80 h-80">
-      <div class="absolute inset-0 bg-red-50 rounded-full"></div>
-      <div class="absolute inset-0 flex items-center justify-center text-9xl">📚</div>
-      <div class="absolute -top-2 right-4 bg-white shadow-lg rounded-2xl px-3 py-2 flex items-center gap-2">
-        <span class="text-lg">⭐</span>
-        <div><p class="text-xs font-bold text-gray-800">À la une</p><p class="text-[10px] text-gray-400">Livres boostés</p></div>
-      </div>
-      <div class="absolute -bottom-2 left-4 bg-white shadow-lg rounded-2xl px-3 py-2 flex items-center gap-2">
-        <span class="text-lg">🔍</span>
-        <div><p class="text-xs font-bold text-gray-800">Recherché</p><p class="text-[10px] text-gray-400">Par la communauté</p></div>
-      </div>
-    </div>
-  </div>
-</section>
 
-<!-- À LA UNE -->
-<section *ngIf="trendingBooks.length > 0" class="bg-gradient-to-br from-red-600 to-red-800 py-12">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="flex items-center justify-between mb-7">
-      <div>
-        <h2 class="text-white font-bold text-2xl flex items-center gap-2">
-          ⭐ À la une
-          <span class="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full font-semibold">Boostés</span>
-        </h2>
-        <p class="text-red-200 text-sm mt-1">Les annonces mises en avant cette semaine</p>
+    <!-- Social proof -->
+    <div class="flex items-center gap-3">
+      <div class="flex -space-x-2">
+        <div class="w-8 h-8 rounded-full bg-red-700 border-2 border-[#FBF5EC]"></div>
+        <div class="w-8 h-8 rounded-full bg-blue-600 border-2 border-[#FBF5EC]"></div>
+        <div class="w-8 h-8 rounded-full bg-green-600 border-2 border-[#FBF5EC]"></div>
+        <div class="w-8 h-8 rounded-full bg-amber-700 border-2 border-[#FBF5EC]"></div>
       </div>
-      <a routerLink="/catalogue" class="text-white/80 text-sm font-medium hover:text-white">Voir tout →</a>
+      <p class="text-sm text-gray-600"><strong>+500 lecteurs</strong> échangent déjà sur Kittab</p>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      @for (book of trendingBooks; track book.id) {
-        <div class="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all cursor-pointer hover:-translate-y-1" [routerLink]="['/books', book.id]">
-          <div class="relative">
-            <img [src]="getImageUrl(book)" [alt]="book.title" class="w-full h-44 object-cover" />
-            <span class="absolute top-2 left-2 bg-amber-400 text-white text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1">⭐ Boosté</span>
-            <span class="absolute top-2 right-2 bg-white text-gray-800 text-[10px] font-bold px-2 py-0.5 rounded-lg shadow">{{ book.price | number }} FCFA</span>
-          </div>
-          <div class="p-3">
-            <p class="font-semibold text-sm truncate text-gray-900">{{ book.title }}</p>
-            <p class="text-xs text-gray-500">par {{ book.author }}</p>
-          </div>
+  </div>
+
+  <!-- Right: illustration + badges -->
+  <div class="flex-1 hidden md:flex flex-col items-center">
+    <div class="relative w-full max-w-md">
+      <img src="assets/reading-books.png" alt="Kittab" class="w-full object-contain" />
+      <div class="absolute top-4 left-0 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-base shrink-0">📦</div>
+        <div>
+          <p class="text-[9px] text-gray-400 font-semibold uppercase">Sagesse partagée</p>
+          <p class="text-xs font-bold text-gray-800 leading-tight">Comme les racines du baobab</p>
         </div>
-      }
+      </div>
+      <div class="absolute top-1/2 -translate-y-1/2 -left-4 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center text-base shrink-0">⭐</div>
+        <div>
+          <p class="text-[9px] text-gray-400 font-semibold uppercase">Excellence</p>
+          <p class="text-xs font-bold text-gray-800">Qualité africaine</p>
+        </div>
+      </div>
+      <div class="absolute bottom-8 right-0 bg-white rounded-2xl px-3 py-2 shadow-lg flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-base shrink-0">👥</div>
+        <div>
+          <p class="text-[9px] text-gray-400 font-semibold uppercase">Communauté</p>
+          <p class="text-xs font-bold text-gray-800">Lire et partager</p>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <p class="text-primary font-black text-base tracking-[0.2em]">KITTAB</p>
+      <p class="text-amber-600 text-sm italic">Lire, c'est grandir. Partager, c'est multiplier.</p>
     </div>
   </div>
 </section>
 
-<!-- DERNIÈRES ANNONCES -->
-<section class="max-w-7xl mx-auto px-6 py-14">
-  <div class="flex items-end justify-between mb-6">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900">Dernières annonces</h2>
-      <p class="text-sm text-gray-400 mt-1">Les livres récemment mis en vente</p>
-    </div>
-    <a routerLink="/catalogue" class="text-sm text-primary font-medium hover:underline">Voir tout le catalogue →</a>
+<!-- ② CATÉGORIES -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 pb-6">
+  <div class="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
+    <a *ngFor="let cat of categories" routerLink="/catalogue" [queryParams]="{category: cat.slug}"
+       class="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2 rounded-full hover:border-primary hover:text-primary transition-colors whitespace-nowrap shrink-0 cursor-pointer">
+      {{ cat.emoji }} {{ cat.name }}
+    </a>
   </div>
-  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-    @for (book of popularBooks; track book.id) {
-      <app-book-card [book]="book" />
+</section>
+
+<!-- ③ À LA UNE -->
+<section *ngIf="trendingBooks.length > 0" class="max-w-7xl mx-auto px-5 md:px-8 py-6">
+  <div class="flex items-center justify-between mb-2">
+    <div class="flex items-center gap-3">
+      <h2 class="text-xl md:text-2xl font-black text-gray-900">⭐ À la une</h2>
+      <span class="bg-amber-400 text-white text-xs font-bold px-3 py-1 rounded-full">Boostés</span>
+    </div>
+    <a routerLink="/catalogue" class="text-primary text-sm font-semibold hover:underline">Voir tout →</a>
+  </div>
+  <p class="text-gray-400 text-sm mb-5">Les annonces mises en avant — romans, essais et manuels scolaires de la semaine.</p>
+
+  <!-- Mobile: scroll horizontal / Desktop: grille 4 colonnes -->
+  <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide md:grid md:grid-cols-4 md:overflow-visible">
+    @for (book of trendingBooks; track book.id) {
+      <div class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer shrink-0 w-44 md:w-auto" [routerLink]="['/books', book.id]">
+        <div class="relative h-48 flex items-end p-3" [style.background]="getBookGradient($index)">
+          <span class="absolute top-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full"
+                [class]="book.is_boosted ? 'bg-amber-400 text-white' : 'bg-blue-500 text-white'">
+            {{ book.is_boosted ? '⭐ Boosté' : '📘 Manuel' }}
+          </span>
+          <h3 class="text-white font-black text-sm leading-snug">{{ book.title }}</h3>
+        </div>
+        <div class="p-3">
+          <p class="font-bold text-sm text-gray-900 truncate">{{ book.title }}</p>
+          <p class="text-xs text-gray-400 flex items-center gap-1 mt-0.5 truncate">
+            {{ book.author }}
+            <ng-container *ngIf="book.seller?.address"> · <span class="text-primary">📍</span> {{ book.seller.address }}</ng-container>
+          </p>
+        </div>
+      </div>
     }
   </div>
-  <div class="text-center mt-8">
-    <a routerLink="/catalogue" class="border border-primary text-primary font-semibold px-8 py-3 rounded-full text-sm hover:bg-red-50 transition-colors inline-block">Voir tous les livres →</a>
+</section>
+
+<!-- ④ SPÉCIAL RENTRÉE -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 py-3">
+  <div class="bg-blue-50 rounded-2xl p-5 md:p-6 flex items-center gap-4 md:gap-6">
+    <div class="w-12 h-12 md:w-14 md:h-14 bg-blue-600 rounded-2xl flex items-center justify-center text-xl md:text-2xl shrink-0">🎓</div>
+    <div class="flex-1 min-w-0">
+      <p class="text-blue-600 text-[10px] font-bold uppercase tracking-wider mb-1">Spécial rentrée</p>
+      <h3 class="font-black text-gray-900 text-base md:text-lg leading-snug mb-1">C'est bientôt la rentrée — manuels à petits prix</h3>
+      <p class="text-gray-500 text-xs md:text-sm hidden md:block leading-relaxed">Du primaire à l'université : maths, physique, SVT, droit, médecine... Trouve les manuels de tes enfants ou les tiens d'occasion, ou revends ceux de l'an dernier.</p>
+    </div>
+    <a routerLink="/catalogue" [queryParams]="{category: 'scolaire'}"
+       class="bg-blue-600 text-white font-bold px-4 py-2.5 rounded-full text-sm hover:bg-blue-700 transition-colors shrink-0 whitespace-nowrap">
+      Voir les manuels →
+    </a>
   </div>
 </section>
 
-<!-- COMMENT ÇA MARCHE -->
-<section class="bg-gray-50 py-16">
-  <div class="max-w-7xl mx-auto px-6">
-    <div class="text-center mb-10">
-      <h2 class="text-2xl font-bold text-gray-900">Comment ça marche ?</h2>
-      <p class="text-gray-500 text-sm mt-2">Simple, rapide et local</p>
+<!-- ⑤ PROMO CARDS -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 py-3 grid md:grid-cols-2 gap-4">
+  <!-- Boost -->
+  <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 md:p-6">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-xl">⭐</div>
+      <p class="text-amber-700 text-[10px] font-bold uppercase tracking-wider">Mise en avant</p>
     </div>
-
-    <!-- Tabs -->
-    <div class="flex justify-center mb-10">
-      <div class="bg-white rounded-full p-1 flex gap-1 shadow-sm border border-gray-100">
-        <button (click)="activeTab='acheter'"
-                [class]="activeTab==='acheter' ? 'bg-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all' : 'bg-transparent text-gray-500 hover:bg-red-50 hover:text-primary px-6 py-2.5 rounded-full text-sm font-semibold transition-all'">
-          🛒 J'achète un livre
-        </button>
-        <button (click)="activeTab='vendre'"
-                [class]="activeTab==='vendre' ? 'bg-primary text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all' : 'bg-transparent text-gray-500 hover:bg-red-50 hover:text-primary px-6 py-2.5 rounded-full text-sm font-semibold transition-all'">
-          💰 Je vends un livre
-        </button>
-      </div>
+    <h3 class="font-black text-gray-900 text-lg md:text-xl mb-2">Boost ton annonce, vends plus vite</h3>
+    <p class="text-gray-500 text-sm mb-5 leading-relaxed">Un livre boosté s'affiche en tête du catalogue et dans la section « À la une » de l'accueil. Plus de visibilité, plus de contacts — tu choisis la durée.</p>
+    <a routerLink="/publish" class="inline-block bg-gray-900 text-white font-bold px-6 py-3 rounded-full text-sm hover:bg-gray-800 transition-colors">Booster un livre →</a>
+  </div>
+  <!-- Points de collecte -->
+  <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center text-xl">📍</div>
+      <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Bientôt</span>
     </div>
+    <h3 class="font-black text-gray-900 text-lg md:text-xl mb-2">Points de collecte & retrait</h3>
+    <p class="text-gray-500 text-sm mb-5 leading-relaxed">Bientôt, plus besoin de se croiser en personne : choisissez un point de dépôt-retrait proche de vous pour déposer et récupérer l'ouvrage en toute simplicité.</p>
+    <p class="text-gray-400 text-sm font-medium">Disponible prochainement</p>
+  </div>
+</section>
 
-    <!-- Acheter -->
-    <div *ngIf="activeTab==='acheter'" class="grid md:grid-cols-3 gap-6">
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">1</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">🔍</div>
-        <h3 class="font-bold text-gray-900 mb-2">Cherchez votre livre</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Parcourez le catalogue ou utilisez la recherche pour trouver le livre que vous voulez, filtrez par ville, état, prix.</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">2</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">💬</div>
-        <h3 class="font-bold text-gray-900 mb-2">Contactez le vendeur</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Envoyez un message via la messagerie intégrée ou directement sur WhatsApp pour convenir des détails.</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">3</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">🤝</div>
-        <h3 class="font-bold text-gray-900 mb-2">Récupérez votre livre</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Convenez d'un lieu de rencontre près de chez vous et récupérez votre livre en main propre.</p>
-      </div>
+<!-- ⑥ ACHETER -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 py-12 md:py-16 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+  <div class="flex-1 hidden md:flex justify-center">
+    <img src="assets/reading-chair.png" alt="" class="w-80 object-contain" />
+  </div>
+  <div class="flex-1">
+    <p class="text-primary text-xs font-bold uppercase tracking-wider mb-3">Acheter</p>
+    <h2 class="font-black text-3xl md:text-4xl text-gray-900 mb-4 leading-tight">Des milliers de livres, à deux pas de chez toi</h2>
+    <p class="text-gray-500 text-base mb-6 leading-relaxed">Parcours le catalogue, filtre par ville, prix et état. Contacte le vendeur, conviens d'un point de rencontre, et repars avec ton livre. Aussi simple que ça.</p>
+    <ul class="space-y-3">
+      <li class="flex items-center gap-3 text-sm text-gray-700">
+        <span class="text-primary font-black text-base">✓</span> Des milliers de livres d'occasion à petits prix
+      </li>
+      <li class="flex items-center gap-3 text-sm text-gray-700">
+        <span class="text-primary font-black text-base">✓</span> Remise en main propre ou livraison
+      </li>
+      <li class="flex items-center gap-3 text-sm text-gray-700">
+        <span class="text-primary font-black text-base">✓</span> Vendeurs notés par la communauté
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- ⑦ VENDRE & ÉCHANGER -->
+<section class="bg-amber-400 py-12 md:py-16">
+  <div class="max-w-7xl mx-auto px-5 md:px-8 flex flex-col md:flex-row items-center gap-10 md:gap-16">
+    <div class="flex-1">
+      <p class="text-amber-900 text-xs font-bold uppercase tracking-wider mb-3">Vendre & échanger</p>
+      <h2 class="font-black text-3xl md:text-4xl text-gray-900 mb-4 leading-tight">Tes étagères débordent ?<br>Fais-en profiter les autres</h2>
+      <p class="text-amber-900/80 text-base mb-8 leading-relaxed">Photographie ton livre, scanne l'ISBN, fixe ton prix — ton annonce est en ligne en quelques secondes. Pas de commission : ce que tu fixes, c'est ce que tu gagnes.</p>
+      <a routerLink="/publish" class="inline-block bg-gray-900 text-white font-bold px-7 py-3.5 rounded-full text-sm hover:bg-gray-800 transition-colors">Publier une annonce →</a>
     </div>
-
-    <!-- Vendre -->
-    <div *ngIf="activeTab==='vendre'" class="grid md:grid-cols-3 gap-6">
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">1</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">📸</div>
-        <h3 class="font-bold text-gray-900 mb-2">Publiez votre annonce</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Ajoutez des photos, renseignez le titre, l'auteur, l'état et votre prix. Ça prend moins de 2 minutes.</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">2</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">📩</div>
-        <h3 class="font-bold text-gray-900 mb-2">Recevez des messages</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Les acheteurs intéressés vous contactent directement. Répondez quand vous êtes disponible.</p>
-      </div>
-      <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center relative">
-        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-7 h-7 bg-primary text-white rounded-full flex items-center justify-center text-xs font-black">3</div>
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 mt-2">💵</div>
-        <h3 class="font-bold text-gray-900 mb-2">Vendez et encaissez</h3>
-        <p class="text-sm text-gray-500 leading-relaxed">Donnez rendez-vous à l'acheteur, remettez le livre et recevez votre paiement en main propre.</p>
-      </div>
-    </div>
-
-    <div class="text-center mt-10 flex items-center justify-center gap-4 flex-wrap">
-      <a routerLink="/catalogue" class="bg-primary text-white font-semibold px-7 py-3 rounded-full text-sm hover:bg-red-700 transition-colors">Explorer le catalogue →</a>
-      <a routerLink="/publish" class="border border-primary text-primary font-semibold px-7 py-3 rounded-full text-sm hover:bg-red-50 transition-colors">+ Vendre un livre</a>
+    <div class="flex-1 hidden md:flex justify-center">
+      <img src="assets/reading-books.png" alt="" class="w-72 object-contain" />
     </div>
   </div>
 </section>
 
-<!-- LIVRES RECHERCHÉS PAR LA COMMUNAUTÉ -->
-<section *ngIf="wantedBooks.length > 0" class="max-w-7xl mx-auto px-6 py-16">
-  <div class="flex items-end justify-between mb-6">
-    <div>
-      <h2 class="font-bold text-2xl text-gray-900">🔍 Livres recherchés par la communauté</h2>
-      <p class="text-gray-500 text-sm mt-1">Tu as l'un de ces livres ? Tu peux aider quelqu'un !</p>
-    </div>
-    <a routerLink="/catalogue" class="text-primary text-sm font-medium hover:underline hidden md:block">Voir toutes les demandes →</a>
+<!-- ⑧ COMMENT ÇA MARCHE -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 py-14 md:py-16">
+  <div class="text-center mb-10">
+    <p class="text-primary text-xs font-bold uppercase tracking-wider mb-2">En 3 étapes</p>
+    <h2 class="font-black text-2xl md:text-3xl text-gray-900">Comment ça marche ?</h2>
   </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    <div *ngFor="let book of wantedBooks"
-      class="bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
-      <div class="flex items-start gap-3 mb-3">
-        <div class="w-10 h-10 rounded-full bg-red-50 border border-red-100 flex items-center justify-center text-lg shrink-0">🔍</div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-bold text-gray-900 truncate">{{ book.title }}</p>
-          <p *ngIf="book.author" class="text-xs text-gray-500 mt-0.5 truncate">{{ book.author }}</p>
+  <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5">
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <div class="flex justify-between items-start mb-5">
+        <span class="text-3xl">🔍</span>
+        <span class="text-5xl font-black text-gray-100 leading-none">1</span>
+      </div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Trouve la perle rare</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Recherche par titre, auteur ou ville. Le catalogue grandit chaque jour.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <div class="flex justify-between items-start mb-5">
+        <span class="text-3xl">💬</span>
+        <span class="text-5xl font-black text-gray-100 leading-none">2</span>
+      </div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Discute & conviens</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Échange par message, fixe un prix juste et un point de rendez-vous.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm">
+      <div class="flex justify-between items-start mb-5">
+        <span class="text-3xl">📚</span>
+        <span class="text-5xl font-black text-gray-100 leading-none">3</span>
+      </div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Lis & recommence</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Récupère ton livre, plonge dedans — puis remets-le en circulation.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑨ STATS -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 pb-14">
+  <div class="bg-primary rounded-3xl px-8 py-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div class="text-center">
+      <p class="text-3xl md:text-4xl font-black text-white">1000+</p>
+      <p class="text-red-200 text-xs md:text-sm mt-1">livres en circulation</p>
+    </div>
+    <div class="text-center md:border-l md:border-red-400">
+      <p class="text-3xl md:text-4xl font-black text-white">500+</p>
+      <p class="text-red-200 text-xs md:text-sm mt-1">lecteurs actifs</p>
+    </div>
+    <div class="text-center md:border-l md:border-red-400">
+      <p class="text-3xl md:text-4xl font-black text-white">15</p>
+      <p class="text-red-200 text-xs md:text-sm mt-1">villes couvertes</p>
+    </div>
+    <div class="text-center md:border-l md:border-red-400">
+      <p class="text-3xl md:text-4xl font-black text-white">0</p>
+      <p class="text-red-200 text-xs md:text-sm mt-1">commission prélevée</p>
+    </div>
+  </div>
+</section>
+
+<!-- ⑩ LIVRES RECHERCHÉS -->
+<section *ngIf="wantedBooks.length > 0" class="max-w-7xl mx-auto px-5 md:px-8 pb-14">
+  <div class="text-center mb-8">
+    <p class="text-primary text-xs font-bold uppercase tracking-wider mb-2">Entraide entre lecteurs</p>
+    <h2 class="font-black text-2xl md:text-3xl text-gray-900 mb-2">Livres recherchés par la communauté</h2>
+    <p class="text-gray-500 text-sm">Quelqu'un cherche un livre que tu possèdes ? Aide-le à le trouver.</p>
+  </div>
+
+  <!-- Mobile: liste verticale / Desktop: grille 4 col -->
+  <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-4 md:gap-5">
+    <div *ngFor="let book of wantedBooks" class="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-lg shrink-0">🔍</div>
+        <span *ngIf="book.category" class="text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-700">{{ book.category.name }}</span>
+      </div>
+      <h3 class="font-black text-gray-900 text-base mb-0.5 truncate">{{ book.title }}</h3>
+      <p *ngIf="book.author" class="text-gray-400 text-xs mb-3 truncate">par {{ book.author }}</p>
+      <p *ngIf="book.description" class="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed">{{ book.description }}</p>
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-xs font-black text-white shrink-0">
+          {{ (book.user?.username || 'K')[0].toUpperCase() }}
         </div>
+        <span class="text-xs text-gray-500 font-medium truncate">{{ book.user?.username || 'Membre Kittab' }}</span>
       </div>
-      <span *ngIf="book.category" class="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full mb-3">{{ book.category.name }}</span>
-      <p *ngIf="book.description" class="text-xs text-gray-500 mb-3 line-clamp-2">{{ book.description }}</p>
-      <div class="flex items-center gap-2 pt-2 border-t border-gray-50">
-        <div class="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs">📚</div>
-        <span class="text-xs text-gray-400 flex-1 truncate">{{ book.user?.username || 'Membre Kittab' }}</span>
-      </div>
-      <a routerLink="/catalogue" class="block w-full text-center mt-3 py-2 rounded-xl bg-primary/10 text-primary text-sm font-semibold hover:bg-primary hover:text-white transition-colors">
+      <a routerLink="/publish"
+         class="block w-full text-center py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-red-800 transition-colors">
         J'ai ce livre →
       </a>
     </div>
   </div>
-  <div class="text-center mt-6 md:hidden">
-    <a routerLink="/catalogue" class="text-primary text-sm font-medium hover:underline">Voir toutes les demandes →</a>
+</section>
+
+<!-- ⑪ CTA FINAL -->
+<section class="max-w-7xl mx-auto px-5 md:px-8 pb-16">
+  <div class="bg-white rounded-3xl p-8 md:p-14 flex flex-col md:flex-row items-center gap-10">
+    <div class="flex-1">
+      <h2 class="font-black text-2xl md:text-3xl text-gray-900 mb-3">Prêt à faire voyager tes livres ?</h2>
+      <p class="text-gray-500 text-base mb-7 leading-relaxed">Rejoins la communauté Kittab et donne une seconde vie à ta bibliothèque. C'est gratuit, et ça fait du bien.</p>
+      <a routerLink="/login"
+         class="inline-block bg-primary text-white font-bold px-8 py-4 rounded-full text-base hover:bg-red-800 transition-colors">
+        Créer mon compte →
+      </a>
+    </div>
+    <div class="flex-1 hidden md:flex justify-center">
+      <img src="assets/login-illustration.png" alt="" class="w-72 object-contain" />
+    </div>
   </div>
 </section>
+
+</div>
 
 <app-footer />
