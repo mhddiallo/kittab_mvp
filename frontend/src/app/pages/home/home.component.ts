@@ -20,6 +20,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   totalBooks = 0;
   loading = true;
   searchQuery = '';
+  activeTab = 'acheter';
   suggestions: any[] = [];
   private searchTimeout: any;
 
