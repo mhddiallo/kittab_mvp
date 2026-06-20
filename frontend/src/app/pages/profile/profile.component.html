@@ -38,12 +38,12 @@
     </div>
 
     <div class="space-y-4">
-      <!-- Pseudo -->
+      <!-- Pseudo (lecture seule) -->
       <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pseudo</label>
-        <input [(ngModel)]="username" type="text" placeholder="MonPseudo"
-               class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
-        <p class="text-xs text-gray-400 mt-1">Visible par les autres utilisateurs</p>
+        <input [value]="username" type="text" disabled
+               class="w-full border border-gray-100 rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-400 cursor-not-allowed" />
+        <p class="text-xs text-gray-400 mt-1">Le pseudo est généré automatiquement et ne peut pas être modifié</p>
       </div>
 
       <div class="grid grid-cols-2 gap-4">
@@ -84,10 +84,20 @@
         <p class="text-xs text-gray-400 mt-1">Pour recevoir des notifications par email</p>
       </div>
 
-      <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Pays / Ville</label>
-        <input [(ngModel)]="address" type="text" placeholder="Ex: Sénégal, Dakar"
+      <div class="relative">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Ville</label>
+        <input [(ngModel)]="address" type="text" placeholder="Ex: Médina, Dakar"
+               (input)="onAddressInput()"
+               (blur)="showAddressSuggestions = false"
                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary" />
+        <ul *ngIf="showAddressSuggestions && addressSuggestions.length > 0"
+            class="absolute z-20 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          <li *ngFor="let s of addressSuggestions"
+              (mousedown)="selectAddress(s)"
+              class="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+            {{ s.label }}
+          </li>
+        </ul>
       </div>
     </div>
 
