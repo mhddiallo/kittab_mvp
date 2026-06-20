@@ -306,11 +306,11 @@ export class PublishComponent implements OnInit, OnDestroy {
     this.locationLoading = true;
     this.locationTimeout = setTimeout(async () => {
       try {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.locationLabel)}&format=json&limit=5&countrycodes=sn,gn,ci,ml,fr&accept-language=fr`;
+        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.locationLabel)}&format=json&addressdetails=1&limit=5&countrycodes=sn,gn,ci,ml,fr&accept-language=fr`;
         const res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
         const data = await res.json();
         this.locationSuggestions = data.map((item: any) => ({
-          label: item.display_name,
+          label: this.shortenAddress(item),
           lat: parseFloat(item.lat),
           lng: parseFloat(item.lon),
         }));
@@ -318,6 +318,18 @@ export class PublishComponent implements OnInit, OnDestroy {
       } catch {}
       this.locationLoading = false;
     }, 400);
+  }
+
+  private shortenAddress(item: any): string {
+    const a = item.address ?? {};
+    const parts: string[] = [];
+    const neighbourhood = a.neighbourhood || a.suburb || a.quarter || a.hamlet || a.village;
+    const city = a.city || a.town || a.municipality || a.county;
+    const country = a.country;
+    if (neighbourhood) parts.push(neighbourhood);
+    if (city && city !== neighbourhood) parts.push(city);
+    if (country) parts.push(country);
+    return parts.length > 0 ? parts.join(', ') : item.display_name;
   }
 
   selectLocation(s: { label: string; lat: number; lng: number }) {
