@@ -114,8 +114,11 @@ export class CatalogueComponent implements OnInit {
   constructor(public auth: AuthService, private route: ActivatedRoute, private router: Router) {}
 
   async ngOnInit() {
-    const q = this.route.snapshot.queryParamMap.get('q');
+    const params = this.route.snapshot.queryParamMap;
+    const q = params.get('q');
     if (q) this.searchQuery = q;
+    const categoryId = params.get('category_id');
+    if (categoryId) this.selectedCategoryId = Number(categoryId);
     await Promise.all([this.loadCategories(), this.loadBooks(), this.loadBoostedBooks()]);
     this.loadWantedBooks();
   }
@@ -167,7 +170,10 @@ export class CatalogueComponent implements OnInit {
       if (this.searchQuery.trim()) params.set('search', this.searchQuery.trim());
       if (this.selectedCategoryId) params.set('category_id', String(this.selectedCategoryId));
       const res = await fetch(`${environment.apiUrl}/api/wanted-books?${params}`);
-      if (res.ok) this.wantedBooks = await res.json();
+      if (res.ok) {
+        const data = await res.json();
+        this.wantedBooks = Array.isArray(data) ? data : (data.items ?? []);
+      }
     } catch {}
     this.wantedLoading = false;
   }
@@ -202,6 +208,7 @@ export class CatalogueComponent implements OnInit {
     this.onlyExchange = false;
     this.cityFilter = '';
     this.cityError = '';
+    this.selectedCategoryId = null;
     this.loadBooks(1);
   }
 
