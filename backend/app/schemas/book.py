@@ -177,13 +177,23 @@ class CatalogSuggestion(BaseModel):
 
 class AlertCreate(BaseModel):
     query: str
-    notification_phone: str
+    author: str | None = None
+    email: str | None = None
+    notification_phone: str | None = None
+
+    @classmethod
+    def model_validator_contact(cls, v: dict) -> dict:
+        if not v.get("email") and not v.get("notification_phone"):
+            raise ValueError("email ou notification_phone requis")
+        return v
 
 
 class AlertOut(BaseModel):
     id: int
     query: str
-    notification_phone: str
+    author: str | None
+    email: str | None
+    notification_phone: str | None
     is_notified: bool
     created_at: datetime
 

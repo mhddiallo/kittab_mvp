@@ -52,6 +52,9 @@ export class CatalogueComponent implements OnInit {
   loading = true;
   alertPhone = '';
   alertSent = false;
+  alertLoading = false;
+  alertError = '';
+  alertForm = { title: '', author: '', email: '' };
   searchTimeout: any;
 
   selectedPriceRange = 0;
@@ -169,6 +172,32 @@ export class CatalogueComponent implements OnInit {
       }
     } catch {}
     this.loading = false;
+    // Pré-remplir le formulaire d'alerte avec la recherche en cours
+    if (this.searchQuery) this.alertForm.title = this.searchQuery;
+  }
+
+  async submitAlert() {
+    if (!this.alertForm.title.trim()) { this.alertError = 'Le titre est requis'; return; }
+    if (!this.alertForm.email.trim()) { this.alertError = 'L\'email est requis'; return; }
+    this.alertLoading = true; this.alertError = '';
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/books/alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query: this.alertForm.title.trim(),
+          author: this.alertForm.author.trim() || null,
+          email: this.alertForm.email.trim(),
+        }),
+      });
+      if (res.ok) {
+        this.alertSent = true;
+      } else {
+        const d = await res.json();
+        this.alertError = d.detail || 'Erreur lors de l\'enregistrement';
+      }
+    } catch { this.alertError = 'Impossible de contacter le serveur'; }
+    this.alertLoading = false;
   }
 
   async loadWantedBooks() {
@@ -194,6 +223,8 @@ export class CatalogueComponent implements OnInit {
 
   onSearch() {
     clearTimeout(this.searchTimeout);
+    this.alertSent = false;
+    this.alertError = '';
     this.searchTimeout = setTimeout(() => {
       this.loadBooks(1);
       this.loadWantedBooks();

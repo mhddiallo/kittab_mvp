@@ -454,7 +454,14 @@ def request_boost(
 
 @router.post("/alerts", response_model=AlertOut, status_code=status.HTTP_201_CREATED)
 def create_alert(payload: AlertCreate, db: Session = Depends(get_db)):
-    alert = BookAlert(query=payload.query, notification_phone=payload.notification_phone)
+    if not payload.email and not payload.notification_phone:
+        raise HTTPException(status_code=400, detail="email ou notification_phone requis")
+    alert = BookAlert(
+        query=payload.query,
+        author=payload.author,
+        email=payload.email,
+        notification_phone=payload.notification_phone,
+    )
     db.add(alert)
     db.commit()
     db.refresh(alert)

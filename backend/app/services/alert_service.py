@@ -8,17 +8,35 @@ def check_and_notify_alerts(db: Session, book: Book) -> None:
     """Called after a new book is published — notify matching pending alerts."""
     alerts = db.query(BookAlert).filter(BookAlert.is_notified == False).all()
     for alert in alerts:
-        if alert.query.lower() in book.title.lower() or alert.query.lower() in book.author.lower():
-            _send_alert_notification(alert.notification_phone, book, alert.query)
+        if _matches(alert, book):
+            if alert.email:
+                _send_email_notification(alert.email, book, alert.query)
+            elif alert.notification_phone:
+                _send_sms_notification(alert.notification_phone, book, alert.query)
             alert.is_notified = True
     db.commit()
 
 
-def _send_alert_notification(phone: str, book: Book, query: str) -> None:
-    message = (
-        f"[Kittab] Le livre que vous cherchiez est disponible : "
-        f'"{ book.title}" par {book.author} à {book.price} GNF. '
-        f"Connectez-vous sur Kittab pour contacter le vendeur."
+def _matches(alert: BookAlert, book: Book) -> bool:
+    title_match = alert.query.lower() in book.title.lower()
+    author_match = bool(alert.author and alert.author.lower() in book.author.lower())
+    # Si auteur précisé : les deux doivent matcher. Sinon titre suffit.
+    if alert.author:
+        return title_match and author_match
+    return title_match
+
+
+def _send_email_notification(email: str, book: Book, query: str) -> None:
+    # TODO: intégrer Resend
+    print(
+        f"[EMAIL SIMULATION] To: {email} | "
+        f'Livre disponible : "{book.title}" par {book.author} à {book.price} FCFA'
     )
-    # TODO: replace with Twilio WhatsApp + SMS
-    print(f"[ALERT SIMULATION] SMS to {phone}: {message}")
+
+
+def _send_sms_notification(phone: str, book: Book, query: str) -> None:
+    # TODO: intégrer Twilio/WhatsApp
+    print(
+        f"[SMS SIMULATION] To: {phone} | "
+        f'Livre disponible : "{book.title}" par {book.author} à {book.price} FCFA'
+    )
