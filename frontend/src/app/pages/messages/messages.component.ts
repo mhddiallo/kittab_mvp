@@ -54,16 +54,12 @@ export class MessagesComponent implements OnInit, OnDestroy {
   imagePreviews: string[] = [];
 
   private pollInterval: any;
-  private pendingPrefill = '';
 
   constructor(
     public auth: AuthService,
     private route: ActivatedRoute,
     public router: Router,
-  ) {
-    const nav = this.router.getCurrentNavigation();
-    this.pendingPrefill = nav?.extras?.state?.['prefill'] ?? '';
-  }
+  ) {}
 
   async ngOnInit() {
     if (!this.auth.isLoggedIn) {
@@ -105,7 +101,8 @@ export class MessagesComponent implements OnInit, OnDestroy {
           });
           if (res.ok) {
             const conv = await res.json();
-            this.router.navigate(['/messages', conv.id], { replaceUrl: true, state: { prefill: prefillMsg } });
+            this.newMessage = prefillMsg;
+            this.router.navigate(['/messages', conv.id], { replaceUrl: true });
             return;
           }
         } catch {}
@@ -128,10 +125,6 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.params['id'];
     if (id) {
       await this.loadConversationDetail(parseInt(id));
-      if (this.pendingPrefill) {
-        this.newMessage = this.pendingPrefill;
-        this.pendingPrefill = '';
-      }
     }
 
     // Poll every 5 seconds (silent — no spinner)
