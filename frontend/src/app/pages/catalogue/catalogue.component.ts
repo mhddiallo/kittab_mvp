@@ -119,6 +119,14 @@ export class CatalogueComponent implements OnInit {
     if (q) this.searchQuery = q;
     const categoryId = params.get('category_id');
     if (categoryId) this.selectedCategoryId = Number(categoryId);
+    const tab = params.get('tab');
+    if (tab === 'demandes') {
+      this.activeTab = 'demandes';
+      if (this.searchQuery) {
+        this.showWantedForm = true;
+        this.wantedForm.title = this.searchQuery;
+      }
+    }
     await Promise.all([this.loadCategories(), this.loadBooks(), this.loadBoostedBooks()]);
     this.loadWantedBooks();
   }
@@ -258,7 +266,8 @@ export class CatalogueComponent implements OnInit {
 
   requestBook() {
     if (!this.auth.isLoggedIn) {
-      window.location.href = '/login';
+      const returnUrl = '/catalogue?tab=demandes' + (this.searchQuery ? `&q=${encodeURIComponent(this.searchQuery)}` : '');
+      this.router.navigate(['/login'], { state: { redirectUrl: returnUrl } });
       return;
     }
     this.activeTab = 'demandes';
