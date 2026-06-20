@@ -1,7 +1,12 @@
+from difflib import SequenceMatcher
 from sqlalchemy.orm import Session
 
 from app.models.alert import BookAlert
 from app.models.book import Book
+
+
+def _similar(a: str, b: str) -> float:
+    return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 
 def check_and_notify_alerts(db: Session, book: Book) -> None:
@@ -18,12 +23,13 @@ def check_and_notify_alerts(db: Session, book: Book) -> None:
 
 
 def _matches(alert: BookAlert, book: Book) -> bool:
-    title_match = alert.query.lower() in book.title.lower()
-    author_match = bool(alert.author and alert.author.lower() in book.author.lower())
-    # Si auteur précisé : les deux doivent matcher. Sinon titre suffit.
+    # Tolérant aux fautes de frappe : "Vol de Nouit" matche "Vol de nuit"
+    title_match = _similar(alert.query, book.title) > 0.75
+    if not title_match:
+        return False
     if alert.author:
-        return title_match and author_match
-    return title_match
+        return _similar(alert.author, book.author) > 0.75
+    return True
 
 
 def _send_email_notification(email: str, book: Book, query: str) -> None:
