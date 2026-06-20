@@ -57,6 +57,7 @@ class Book(Base):
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
     is_sold: Mapped[bool] = mapped_column(Boolean, default=False)
     accepts_exchange: Mapped[bool] = mapped_column(Boolean, default=False)
+    accepts_whatsapp_contact: Mapped[bool] = mapped_column(Boolean, default=False)
     views: Mapped[int] = mapped_column(Integer, default=0)
     is_boosted: Mapped[bool] = mapped_column(Boolean, default=False)
     boost_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

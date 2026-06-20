@@ -24,6 +24,7 @@ interface BookDetail {
   is_available: boolean;
   is_sold: boolean;
   accepts_exchange: boolean;
+  accepts_whatsapp_contact: boolean;
   views: number;
   is_pack: boolean;
   pack_items: string[] | null;
@@ -178,6 +179,13 @@ export class BookDetailComponent implements OnInit {
     if (!this.book) return '#';
     const phone = this.book.seller.phone.replace('+', '');
     const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`);
+    return `https://wa.me/${phone}?text=${msg}`;
+  }
+
+  get whatsappUrl(): string {
+    if (!this.book) return '#';
+    const phone = this.book.seller.phone.replace(/\D/g, '');
+    const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB. Est-il toujours disponible ?`);
     return `https://wa.me/${phone}?text=${msg}`;
   }
 

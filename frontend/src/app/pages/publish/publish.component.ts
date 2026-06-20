@@ -43,6 +43,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   language = '';
   pageCount: number | null = null;
   acceptsExchange = false;
+  acceptsWhatsappContact = false;
   educationLevel = '';
   locationLabel = '';
   locationLat: number | null = null;
@@ -515,6 +516,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         price: this.price,
         book_type: this.bookType,
         accepts_exchange: this.acceptsExchange,
+        accepts_whatsapp_contact: this.acceptsWhatsappContact,
         is_pack: this.isPack,
       };
       if (this.categoryId) payload.category_id = this.categoryId;

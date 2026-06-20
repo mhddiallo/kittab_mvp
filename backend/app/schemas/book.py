@@ -45,6 +45,7 @@ class BookCreate(BaseModel):
     subject: Optional[str] = None
     category_id: Optional[int] = None
     accepts_exchange: bool = False
+    accepts_whatsapp_contact: bool = False
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
     cover_url: Optional[str] = None
@@ -75,6 +76,7 @@ class BookUpdate(BaseModel):
     category_id: Optional[int] = None
     is_available: Optional[bool] = None
     accepts_exchange: Optional[bool] = None
+    accepts_whatsapp_contact: Optional[bool] = None
     is_pack: Optional[bool] = None
     pack_items: Optional[List[str]] = None
 
@@ -93,6 +95,7 @@ class BookOut(BaseModel):
     is_available: bool
     is_sold: bool = False
     accepts_exchange: bool = False
+    accepts_whatsapp_contact: bool = False
     views: int = 0
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
@@ -131,6 +134,7 @@ class BookListOut(BaseModel):
     is_available: bool
     is_sold: bool = False
     accepts_exchange: bool = False
+    accepts_whatsapp_contact: bool = False
     views: int = 0
     is_pack: bool = False
     pack_items: Optional[List[str]] = None

@@ -62,6 +62,10 @@
           <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Échange</p>
           <p class="font-medium text-green-600 text-sm">✅ Accepté</p>
         </div>
+        <div *ngIf="acceptsWhatsappContact">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">WhatsApp</p>
+          <p class="font-medium text-green-600 text-sm">💬 Activé</p>
+        </div>
       </div>
 
       <!-- Photos -->
@@ -453,6 +457,21 @@
             <div>
               <p class="text-sm font-semibold text-gray-700">🔄 J'accepte les échanges</p>
               <p class="text-xs text-gray-400">Les acheteurs pourront proposer un de leurs livres en échange</p>
+            </div>
+          </label>
+        </div>
+
+        <!-- Contact WhatsApp -->
+        <div class="border-t border-gray-100 pt-5">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <div class="relative">
+              <input type="checkbox" [(ngModel)]="acceptsWhatsappContact" name="acceptsWhatsappContact" class="sr-only peer" />
+              <div class="w-11 h-6 bg-gray-200 peer-checked:bg-green-500 rounded-full transition-colors"></div>
+              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-gray-700">💬 Accepter le contact WhatsApp</p>
+              <p class="text-xs text-gray-400">Les acheteurs pourront vous contacter directement sur WhatsApp</p>
             </div>
           </label>
         </div>

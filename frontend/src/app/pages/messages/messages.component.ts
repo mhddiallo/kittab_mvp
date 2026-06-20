@@ -54,12 +54,16 @@ export class MessagesComponent implements OnInit, OnDestroy {
   imagePreviews: string[] = [];
 
   private pollInterval: any;
+  private pendingPrefill = '';
 
   constructor(
     public auth: AuthService,
     private route: ActivatedRoute,
     public router: Router,
-  ) {}
+  ) {
+    const nav = this.router.getCurrentNavigation();
+    this.pendingPrefill = nav?.extras?.state?.['prefill'] ?? '';
+  }
 
   async ngOnInit() {
     if (!this.auth.isLoggedIn) {
@@ -82,7 +86,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
       const isExchange = qp.get('exchange') === '1';
 
       if (userId) {
-        const initialMsg = isExchange
+        const prefillMsg = isExchange
           ? `Bonjour, je suis intéressé(e) par votre livre "${bookTitle}" et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`
           : bookId
           ? `Bonjour, je suis intéressé(e) par votre livre "${bookTitle}". Est-il toujours disponible ?`
@@ -97,12 +101,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
               other_user_id: userId,
               book_id: bookId,
               wanted_book_id: wantedBookId,
-              initial_message: initialMsg,
             }),
           });
           if (res.ok) {
             const conv = await res.json();
-            this.router.navigate(['/messages', conv.id], { replaceUrl: true });
+            this.router.navigate(['/messages', conv.id], { replaceUrl: true, state: { prefill: prefillMsg } });
             return;
           }
         } catch {}
@@ -125,6 +128,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.params['id'];
     if (id) {
       await this.loadConversationDetail(parseInt(id));
+      if (this.pendingPrefill) {
+        this.newMessage = this.pendingPrefill;
+        this.pendingPrefill = '';
+      }
     }
 
     // Poll every 5 seconds (silent — no spinner)
