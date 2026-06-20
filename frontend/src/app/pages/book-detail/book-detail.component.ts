@@ -77,7 +77,7 @@ export class BookDetailComponent implements OnInit {
       return;
     }
     this.router.navigate(['/messages'], {
-      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id },
+      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id, book_title: this.book!.title },
     });
   }
 
@@ -88,7 +88,7 @@ export class BookDetailComponent implements OnInit {
       return;
     }
     this.router.navigate(['/messages'], {
-      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id, exchange: '1' },
+      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id, exchange: '1', book_title: this.book!.title },
     });
   }
 

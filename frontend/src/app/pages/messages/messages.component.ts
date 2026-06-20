@@ -78,10 +78,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
       const userId = qp.get('user_id') ? parseInt(qp.get('user_id')!) : otherUserId;
       const bookId = qp.get('book_id') ? parseInt(qp.get('book_id')!) : null;
       const wantedBookId = qp.get('wanted_book_id') ? parseInt(qp.get('wanted_book_id')!) : null;
+      const bookTitle = qp.get('book_title') || '';
+      const isExchange = qp.get('exchange') === '1';
 
       if (userId) {
-        const initialMsg = bookId
-          ? 'Bonjour, je suis intéressé par votre livre.'
+        const initialMsg = isExchange
+          ? `Bonjour, je suis intéressé(e) par votre livre "${bookTitle}" et je souhaite proposer un échange. Quel livre accepteriez-vous en échange ?`
+          : bookId
+          ? `Bonjour, je suis intéressé(e) par votre livre "${bookTitle}". Est-il toujours disponible ?`
           : wantedBookId
           ? 'Bonjour, j\'ai le livre que vous recherchez !'
           : 'Bonjour !';
