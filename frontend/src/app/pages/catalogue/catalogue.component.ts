@@ -296,7 +296,7 @@ export class CatalogueComponent implements OnInit {
 
   selectWantedSuggestion(s: any) {
     this.wantedForm.title = s.title;
-    this.wantedForm.author = s.author ?? this.wantedForm.author;
+    if (s.author) this.wantedForm.author = s.author;
     if (s.thumbnail) this.wantedCoverPreview = s.thumbnail;
     this.wantedShowSuggestions = false;
     this.wantedSuggestions = [];
@@ -328,8 +328,8 @@ export class CatalogueComponent implements OnInit {
       const res = await fetch(`${environment.apiUrl}/api/books/scan-cover`, { method: 'POST', body: form });
       if (res.ok) {
         const data = await res.json();
-        if (data.title && !this.wantedForm.title) this.wantedForm.title = data.title;
-        if (data.author && !this.wantedForm.author) this.wantedForm.author = data.author;
+        if (data.title) this.wantedForm.title = data.title;
+        if (data.author) this.wantedForm.author = data.author;
         if (data.cover_url) this.wantedCoverPreview = data.cover_url;
         if (data.category) {
           const match = this.categories.find(c => c.name === data.category);
