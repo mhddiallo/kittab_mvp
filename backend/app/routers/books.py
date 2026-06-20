@@ -10,7 +10,7 @@ import cloudinary.uploader
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -243,7 +243,13 @@ def my_listings(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return db.query(Book).filter(Book.seller_id == current_user.id).order_by(Book.created_at.desc()).all()
+    return (
+        db.query(Book)
+        .options(joinedload(Book.images))
+        .filter(Book.seller_id == current_user.id)
+        .order_by(Book.created_at.desc())
+        .all()
+    )
 
 
 @router.get("/{book_id}", response_model=BookOut)

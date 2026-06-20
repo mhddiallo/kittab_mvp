@@ -11,7 +11,7 @@ interface MyBook {
   id: number; title: string; author: string; price: number;
   condition: string; is_available: boolean; is_sold: boolean; views: number;
   is_boosted: boolean; images: { url: string; is_primary: boolean }[];
-  created_at: string;
+  cover_url: string | null; created_at: string;
 }
 
 interface BoostOption {
@@ -150,7 +150,8 @@ export class MyListingsComponent implements OnInit {
 
   getImageUrl(book: MyBook): string {
     const url = book.images?.[0]?.url;
-    if (!url) return 'https://placehold.co/80x80/f3f4f6/9ca3af?text=📚';
-    return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
+    if (url) return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
+    if ((book as any).cover_url) return (book as any).cover_url;
+    return 'https://placehold.co/80x96/f3f4f6/9ca3af?text=📚';
   }
 }
