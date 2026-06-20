@@ -57,6 +57,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
 
   // State
+  step: 'form' | 'preview' = 'form';
   categories: Category[] = [];
   suggestions: AutocompleteResult[] = [];
   showSuggestions = false;
@@ -444,6 +445,21 @@ export class PublishComponent implements OnInit, OnDestroy {
 
   get conditionLabel(): string {
     return this.conditions.find(c => c.value === this.condition)?.label || '—';
+  }
+
+  get conditionBadge(): string {
+    return this.conditions.find(c => c.value === this.condition)?.badge || 'bg-gray-100 text-gray-600';
+  }
+
+  showPreview() {
+    if (!this.isValid) return;
+    this.step = 'preview';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  backToForm() {
+    this.step = 'form';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   addPackItem() {

@@ -10,7 +10,106 @@
 </div>
 
 <div class="max-w-6xl mx-auto px-4 py-10">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+  <!-- ── ÉCRAN RÉCAPITULATIF ─────────────────────────────── -->
+  <div *ngIf="step === 'preview'" class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+      <!-- Header récap -->
+      <div class="bg-amber-50 border-b border-amber-100 px-6 py-4 flex items-center gap-3">
+        <span class="text-2xl">👀</span>
+        <div>
+          <p class="font-bold text-gray-900">Vérifie ton annonce avant de publier</p>
+          <p class="text-sm text-gray-500">Ces informations seront visibles par tous les acheteurs.</p>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-5">
+
+        <!-- Couverture + titre + auteur -->
+        <div class="flex gap-4 items-start">
+          <img *ngIf="selectedCover" [src]="selectedCover" class="w-20 h-28 object-cover rounded-xl shadow-sm shrink-0" />
+          <div *ngIf="!selectedCover && imagePreviews.length > 0" class="w-20 h-28 rounded-xl overflow-hidden shadow-sm shrink-0">
+            <img [src]="imagePreviews[0]" class="w-full h-full object-cover" />
+          </div>
+          <div *ngIf="!selectedCover && imagePreviews.length === 0" class="w-20 h-28 bg-gray-100 rounded-xl flex items-center justify-center shrink-0 text-3xl">📚</div>
+          <div class="flex-1 min-w-0">
+            <h2 class="font-black text-gray-900 text-lg leading-tight">{{ title || '—' }}</h2>
+            <p class="text-gray-500 text-sm mt-1">{{ isPack ? 'Pack de livres' : (author || '—') }}</p>
+            <span class="inline-block mt-2 text-xs font-semibold px-2.5 py-1 rounded-full" [ngClass]="conditionBadge">{{ conditionLabel }}</span>
+          </div>
+        </div>
+
+        <hr class="border-gray-100" />
+
+        <!-- Infos clés -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Prix</p>
+            <p class="font-bold text-gray-900 text-lg">{{ price | number }} FCFA</p>
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Localisation</p>
+            <p class="font-medium text-gray-700 text-sm">{{ locationLabel || '—' }}</p>
+          </div>
+          <div *ngIf="!isPack">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Type</p>
+            <p class="font-medium text-gray-700 text-sm">{{ bookType === 'textbook' ? 'Manuel scolaire' : bookType === 'novel' ? 'Roman' : 'Autre' }}</p>
+          </div>
+          <div *ngIf="acceptsExchange">
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Échange</p>
+            <p class="font-medium text-green-600 text-sm">✅ Accepté</p>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div *ngIf="imagePreviews.length > 0">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Photos ({{ imagePreviews.length }})</p>
+          <div class="flex gap-2 flex-wrap">
+            <img *ngFor="let img of imagePreviews" [src]="img" class="w-16 h-20 object-cover rounded-lg border border-gray-100" />
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div *ngIf="description">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Description</p>
+          <p class="text-sm text-gray-600">{{ description }}</p>
+        </div>
+
+        <!-- Pack items -->
+        <div *ngIf="isPack && validPackItems.length > 0">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Livres inclus</p>
+          <ul class="space-y-1">
+            <li *ngFor="let item of validPackItems" class="text-sm text-gray-700 flex items-center gap-2">
+              <span class="w-1.5 h-1.5 bg-primary rounded-full shrink-0"></span>{{ item }}
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="px-6 pb-6 flex flex-col sm:flex-row gap-3">
+        <button (click)="backToForm()"
+          class="flex-1 py-3 rounded-full border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors">
+          ← Modifier
+        </button>
+        <button (click)="submit()" [disabled]="submitting"
+          class="flex-1 py-3 rounded-full bg-primary text-white font-bold text-sm hover:bg-red-800 transition-colors disabled:opacity-50">
+          <span *ngIf="!submitting">✅ Confirmer et publier</span>
+          <span *ngIf="submitting" class="flex items-center justify-center gap-2">
+            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Publication en cours...
+          </span>
+        </button>
+      </div>
+
+    </div>
+    <p *ngIf="error" class="text-red-500 text-sm text-center mt-4">{{ error }}</p>
+  </div>
+
+  <!-- ── FORMULAIRE ──────────────────────────────────────── -->
+  <div *ngIf="step === 'form'" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
     <!-- Colonne principale -->
     <div class="lg:col-span-2 space-y-6">
@@ -427,19 +526,15 @@
           {{ error }}
         </div>
 
-        <!-- Bouton submit -->
+        <!-- Bouton preview -->
         <button
-          (click)="submit()"
-          [disabled]="!isValid || submitting"
-          [class]="'w-full mt-5 py-3 rounded-full font-bold text-sm transition-all ' + (isValid && !submitting ? 'bg-primary text-white hover:bg-red-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed')"
+          (click)="showPreview()"
+          [disabled]="!isValid"
+          [class]="'w-full mt-5 py-3 rounded-full font-bold text-sm transition-all ' + (isValid ? 'bg-primary text-white hover:bg-red-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed')"
         >
-          <span *ngIf="!submitting">Publier mon annonce →</span>
-          <span *ngIf="submitting" class="flex items-center justify-center gap-2">
-            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            Publication en cours...
-          </span>
+          Vérifier avant de publier →
         </button>
-        <p class="text-xs text-gray-400 text-center mt-3">Ton annonce sera visible immédiatement</p>
+        <p class="text-xs text-gray-400 text-center mt-3">Tu pourras relire toutes les informations avant de publier</p>
       </div>
 
     </div>
@@ -497,6 +592,8 @@
     </div>
 
   </div>
+  </div> <!-- fin step form -->
+
 </div>
 
 <app-footer />
