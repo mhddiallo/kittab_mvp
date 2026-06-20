@@ -108,9 +108,9 @@
               <span class="font-medium">Téléphone :</span>
               <a [href]="'tel:' + book.seller.phone" class="text-primary font-semibold hover:underline">{{ book.seller.phone }}</a>
             </div>
-            <div *ngIf="book.seller.address" class="flex items-center gap-2 text-gray-700">
+            <div *ngIf="book.location_label || book.seller.address" class="flex items-center gap-2 text-gray-700">
               <span class="font-medium">Localisation :</span>
-              <span>{{ book.seller.address }}</span>
+              <span>{{ book.location_label || book.seller.address }}</span>
             </div>
           </div>
           <div class="flex gap-3 mt-4">
