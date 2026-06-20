@@ -72,7 +72,8 @@ export class BookDetailComponent implements OnInit {
 
   contactSeller() {
     if (!this.auth.isLoggedIn) {
-      this.router.navigate(['/login']);
+      const returnUrl = `/messages?new=1&book_id=${this.book!.id}&other_user_id=${this.book!.seller.id}`;
+      this.router.navigate(['/login'], { state: { redirectUrl: returnUrl } });
       return;
     }
     this.router.navigate(['/messages'], {
@@ -82,7 +83,8 @@ export class BookDetailComponent implements OnInit {
 
   proposeExchange() {
     if (!this.auth.isLoggedIn) {
-      this.router.navigate(['/login']);
+      const returnUrl = `/messages?new=1&book_id=${this.book!.id}&other_user_id=${this.book!.seller.id}&exchange=1`;
+      this.router.navigate(['/login'], { state: { redirectUrl: returnUrl } });
       return;
     }
     this.router.navigate(['/messages'], {

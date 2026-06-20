@@ -269,6 +269,24 @@ export class MessagesComponent implements OnInit, OnDestroy {
     return new Date(dateStr).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   }
 
+  getDateLabel(dateStr: string): string {
+    const d = new Date(dateStr);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    if (sameDay(d, today)) return "Aujourd'hui";
+    if (sameDay(d, yesterday)) return 'Hier';
+    return d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  showDateSeparator(messages: any[], index: number): boolean {
+    if (index === 0) return true;
+    const cur = new Date(messages[index].created_at);
+    const prev = new Date(messages[index - 1].created_at);
+    return cur.toDateString() !== prev.toDateString();
+  }
+
   getInitial(username?: string): string {
     return username?.[0]?.toUpperCase() || '?';
   }

@@ -114,7 +114,14 @@
             Aucun message pour le moment. Commencez la conversation !
           </div>
 
-          <div *ngFor="let msg of activeConversation.messages"
+          <ng-container *ngFor="let msg of activeConversation.messages; let i = index">
+          <div *ngIf="showDateSeparator(activeConversation.messages, i)"
+               class="flex justify-center my-2">
+            <span class="bg-gray-100 text-gray-400 text-xs px-3 py-1 rounded-full">
+              {{ getDateLabel(msg.created_at) }}
+            </span>
+          </div>
+          <div
                class="flex"
                [class.justify-end]="msg.is_mine"
                [class.justify-start]="!msg.is_mine">
@@ -149,6 +156,7 @@
               </p>
             </div>
           </div>
+          </ng-container>
         </div>
 
         <!-- Input -->

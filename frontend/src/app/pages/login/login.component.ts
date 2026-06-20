@@ -118,7 +118,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       if (data.is_new_user) {
         this.router.navigate(['/profile'], { queryParams: { nouveau: '1' } });
       } else {
-        this.router.navigate([this.redirectUrl]);
+        this.router.navigateByUrl(this.redirectUrl);
       }
     } catch (e: any) { this.error = e.message || 'Code invalide'; }
     this.loading = false;
@@ -141,7 +141,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail);
       await this.auth.loadUser();
-      this.router.navigate([this.redirectUrl]);
+      this.router.navigateByUrl(this.redirectUrl);
     } catch (e: any) { this.error = e.message || 'Erreur lors de l\'enregistrement'; }
     this.loading = false;
   }
