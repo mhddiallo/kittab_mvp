@@ -338,19 +338,6 @@ export class PublishComponent implements OnInit, OnDestroy {
     } catch {}
   }
 
-  onTitleInput() {
-    clearTimeout(this.autocompleteTimeout);
-    if (this.title.length < 2) { this.suggestions = []; this.showSuggestions = false; return; }
-    this.autocompleteLoading = true;
-    this.autocompleteTimeout = setTimeout(async () => {
-      try {
-        const res = await fetch(`${environment.apiUrl}/api/books/autocomplete?q=${encodeURIComponent(this.title)}`);
-        if (res.ok) { this.suggestions = await res.json(); this.showSuggestions = this.suggestions.length > 0; }
-      } catch {}
-      this.autocompleteLoading = false;
-    }, 300);
-  }
-
   hideSuggestionsDelayed() {
     setTimeout(() => { this.showSuggestions = false; }, 400);
   }
