@@ -61,7 +61,7 @@ export class HomeComponent implements OnInit {
       const [boostedRes, wantedRes, categoriesRes] = await Promise.all([
         fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6&page=1`),
         fetch(`${environment.apiUrl}/api/wanted-books?page_size=4`),
-        fetch(`${environment.apiUrl}/api/categories`),
+        fetch(`${environment.apiUrl}/api/categories?with_books=true`),
       ]);
       if (boostedRes.ok) {
         const data = await boostedRes.json();
