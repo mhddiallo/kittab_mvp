@@ -22,14 +22,20 @@ export class HomeComponent implements OnInit {
   suggestions: any[] = [];
   private searchTimeout: any;
 
-  categories = [
-    { name: 'Romans', emoji: '📖', slug: 'romans' },
-    { name: 'Scolaire', emoji: '🎓', slug: 'scolaire' },
-    { name: 'Essais', emoji: '💡', slug: 'essais' },
-    { name: 'Bandes dessinées', emoji: '🎨', slug: 'bd' },
-    { name: 'Jeunesse', emoji: '🌟', slug: 'jeunesse' },
-    { name: 'Poésie', emoji: '📝', slug: 'poesie' },
-  ];
+  categories: { id: number; name: string; emoji: string }[] = [];
+
+  private categoryEmojis: Record<string, string> = {
+    'Romans': '📖', 'Roman': '📖',
+    'Scolaire': '🎓', 'Manuels scolaires': '🎓',
+    'Essais': '💡', 'Essai': '💡',
+    'Bandes dessinées': '🎨', 'BD': '🎨',
+    'Jeunesse': '🌟',
+    'Poésie': '📝', 'Poesie': '📝',
+    'Sciences': '🔬', 'Informatique': '💻',
+    'Histoire': '🏛️', 'Géographie': '🌍',
+    'Philosophie': '🧠', 'Religion': '🕌',
+    'Art': '🎨', 'Cuisine': '🍽️',
+  };
 
   private bookGradients = [
     'linear-gradient(160deg, #8B1A1A 0%, #C0392B 100%)',
@@ -52,9 +58,10 @@ export class HomeComponent implements OnInit {
 
   async loadData() {
     try {
-      const [boostedRes, wantedRes] = await Promise.all([
+      const [boostedRes, wantedRes, categoriesRes] = await Promise.all([
         fetch(`${environment.apiUrl}/api/books?boosted=true&page_size=6&page=1`),
         fetch(`${environment.apiUrl}/api/wanted-books?page_size=4`),
+        fetch(`${environment.apiUrl}/api/categories`),
       ]);
       if (boostedRes.ok) {
         const data = await boostedRes.json();
@@ -62,7 +69,15 @@ export class HomeComponent implements OnInit {
       }
       if (wantedRes.ok) {
         const data = await wantedRes.json();
-        this.wantedBooks = data.items ?? data;
+        this.wantedBooks = Array.isArray(data) ? data : (data.items ?? []);
+      }
+      if (categoriesRes.ok) {
+        const data: { id: number; name: string }[] = await categoriesRes.json();
+        this.categories = data.map(c => ({
+          id: c.id,
+          name: c.name,
+          emoji: this.categoryEmojis[c.name] ?? '📚',
+        }));
       }
     } catch {}
     if (!this.trendingBooks.length) {
