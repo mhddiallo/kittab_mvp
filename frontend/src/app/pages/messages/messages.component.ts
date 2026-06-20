@@ -101,8 +101,7 @@ export class MessagesComponent implements OnInit, OnDestroy {
           });
           if (res.ok) {
             const conv = await res.json();
-            this.newMessage = prefillMsg;
-            this.router.navigate(['/messages', conv.id], { replaceUrl: true });
+            this.router.navigate(['/messages', conv.id], { replaceUrl: true, queryParams: { prefill: prefillMsg } });
             return;
           }
         } catch {}
@@ -125,6 +124,11 @@ export class MessagesComponent implements OnInit, OnDestroy {
     const id = this.route.snapshot.params['id'];
     if (id) {
       await this.loadConversationDetail(parseInt(id));
+      const prefill = this.route.snapshot.queryParamMap.get('prefill');
+      if (prefill) {
+        this.newMessage = prefill;
+        this.router.navigate([], { replaceUrl: true, queryParams: {} });
+      }
     }
 
     // Poll every 5 seconds (silent — no spinner)
