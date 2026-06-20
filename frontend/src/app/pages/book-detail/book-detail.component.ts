@@ -185,7 +185,8 @@ export class BookDetailComponent implements OnInit {
   get whatsappUrl(): string {
     if (!this.book) return '#';
     const phone = this.book.seller.phone.replace(/\D/g, '');
-    const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB. Est-il toujours disponible ?`);
+    const link = `${window.location.origin}/books/${this.book.id}`;
+    const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par votre livre "${this.book.title}" sur KITTAB. Est-il toujours disponible ?\n${link}`);
     return `https://wa.me/${phone}?text=${msg}`;
   }
 
