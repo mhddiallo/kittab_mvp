@@ -13,3 +13,4 @@ backend/uploads/
 .env
 *.env
 .claude/worktrees/
+__pycache__/
