@@ -275,7 +275,22 @@ def create_book(
     db.add(book)
     db.commit()
     db.refresh(book)
-    check_and_notify_alerts(db, book)
+
+    # Lancer les alertes en arrière-plan après avoir répondu au vendeur
+    book_id = book.id
+    import threading
+    from app.core.database import SessionLocal
+    def run_alerts():
+        bg_db = SessionLocal()
+        try:
+            from app.models.book import Book as BookModel
+            bg_book = bg_db.query(BookModel).get(book_id)
+            if bg_book:
+                check_and_notify_alerts(bg_db, bg_book)
+        finally:
+            bg_db.close()
+    threading.Thread(target=run_alerts, daemon=True).start()
+
     return book
 
 
