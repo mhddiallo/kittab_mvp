@@ -142,79 +142,29 @@
       @if (step === 'profile') {
         <div>
           <h1 class="text-xl font-extrabold text-gray-900 mb-1 text-center">Complétez votre profil</h1>
-          <p class="text-gray-400 text-sm mb-6 text-center">Ces informations permettront aux acheteurs de vous contacter</p>
+          <p class="text-gray-400 text-sm mb-6 text-center">Juste votre prénom et nom pour commencer</p>
 
           @if (error) {
             <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100">{{ error }}</div>
           }
 
-          <div class="space-y-4 mb-5">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
-                <input [(ngModel)]="firstName" type="text" placeholder="Votre prénom"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
-                <input [(ngModel)]="lastName" type="text" placeholder="Votre nom"
-                       class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-              </div>
-            </div>
+          <div class="grid grid-cols-2 gap-3 mb-5">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Numéro de téléphone <span class="text-red-500">*</span></label>
-              <input [(ngModel)]="profilePhone" type="text" inputmode="tel" placeholder="+221 XX XXX XX XX"
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
+              <input [(ngModel)]="firstName" type="text" placeholder="Votre prénom"
                      class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-              <p class="text-xs text-gray-400 mt-1">Un code de vérification sera envoyé sur ce numéro</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Email <span class="text-gray-400 text-xs font-normal">(optionnel)</span></label>
-              <input [(ngModel)]="email" type="email" placeholder="votre@email.com"
+              <label class="block text-sm font-medium text-gray-700 mb-1.5">Nom</label>
+              <input [(ngModel)]="lastName" type="text" placeholder="Votre nom"
                      class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
             </div>
           </div>
 
-          <button (click)="sendGooglePhoneOtp()" [disabled]="loading"
+          <button (click)="completeGoogleProfile()" [disabled]="loading"
                   class="w-full btn-primary py-3 font-semibold text-sm disabled:opacity-60">
-            {{ loading ? 'Envoi en cours...' : 'Envoyer le code de vérification' }}
+            {{ loading ? 'Enregistrement...' : 'Accéder à mon compte' }}
           </button>
-        </div>
-      }
-
-      @if (step === 'google-otp') {
-        <div>
-          <button (click)="step='profile'" class="flex items-center gap-1 text-gray-400 hover:text-gray-600 text-sm mb-6">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-            Retour
-          </button>
-
-          <h1 class="text-xl font-extrabold text-gray-900 mb-1 text-center">Vérifiez votre numéro</h1>
-          <p class="text-gray-400 text-sm mb-6 text-center">Code envoyé au <strong class="text-gray-800">{{ profilePhone }}</strong></p>
-
-          @if (googleDevCode) {
-            <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
-              <p class="text-blue-600 text-xs font-medium mb-1">Mode test — utilisez ce code :</p>
-              <span class="text-blue-800 text-2xl font-bold tracking-widest">{{ googleDevCode }}</span>
-            </div>
-          }
-
-          @if (error) {
-            <div class="bg-red-50 text-red-600 text-sm px-4 py-3 rounded-xl mb-4 border border-red-100">{{ error }}</div>
-          }
-
-          <label class="block text-sm font-medium text-gray-700 mb-1.5">Code à 6 chiffres</label>
-          <input [(ngModel)]="googleOtp" (keyup.enter)="verifyGoogleOtp()" type="text" maxlength="6" placeholder="000000"
-                 class="w-full border border-gray-200 rounded-xl px-4 py-4 text-center text-3xl tracking-widest font-bold focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary mb-5" />
-
-          <button (click)="verifyGoogleOtp()" [disabled]="loading"
-                  class="w-full btn-primary py-3 font-semibold text-sm disabled:opacity-60">
-            {{ loading ? 'Vérification...' : 'Valider et créer mon compte' }}
-          </button>
-
-          <p class="text-center text-xs text-gray-400 mt-4">
-            Code valable 10 min.
-            <button (click)="sendGooglePhoneOtp()" class="text-primary hover:underline ml-1">Renvoyer</button>
-          </p>
         </div>
       }
 

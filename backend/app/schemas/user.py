@@ -10,6 +10,7 @@ class RequestOTPInput(BaseModel):
 class VerifyOTPInput(BaseModel):
     phone: str
     code: str
+    email: Optional[str] = None
 
 
 class CompleteProfileInput(BaseModel):

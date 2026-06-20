@@ -80,6 +80,16 @@ export class BookDetailComponent implements OnInit {
     });
   }
 
+  proposeExchange() {
+    if (!this.auth.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+    this.router.navigate(['/messages'], {
+      queryParams: { new: '1', book_id: this.book!.id, other_user_id: this.book!.seller.id, exchange: '1' },
+    });
+  }
+
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const id = Number(params.get('id'));

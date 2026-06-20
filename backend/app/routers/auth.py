@@ -69,6 +69,17 @@ def verify_otp_endpoint(payload: VerifyOTPInput, db: Session = Depends(get_db)):
     is_new_user = user is None
 
     if is_new_user:
+        # Fusion silencieuse : si un compte Google existe avec cet email
+        email = (payload.email or '').strip() if payload.email else ''
+        if email:
+            google_user = db.query(User).filter(User.email == email, User.google_id.isnot(None)).first()
+            if google_user:
+                google_user.phone = phone
+                google_user.is_profile_complete = True
+                db.commit()
+                db.refresh(google_user)
+                token = create_access_token(subject=str(google_user.id))
+                return TokenResponse(access_token=token, is_new_user=False, user=UserOut.model_validate(google_user))
         username = _unique_username(db)
         user = User(phone=phone, username=username)
         db.add(user)
