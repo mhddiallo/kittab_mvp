@@ -36,6 +36,7 @@ export class CatalogueComponent implements OnInit {
   selectedCategoryId: number | null = null;
   selectedCondition = '';
   onlyExchange = false;
+  onlyPack = false;
   cityFilter = '';
   cityLoading = false;
   cityError = '';
@@ -110,6 +111,7 @@ export class CatalogueComponent implements OnInit {
     if (this.selectedCondition) count++;
     if (this.selectedPriceRange > 0) count++;
     if (this.onlyExchange) count++;
+    if (this.onlyPack) count++;
     if (this.cityFilter.trim()) count++;
     return count;
   }
@@ -162,6 +164,7 @@ export class CatalogueComponent implements OnInit {
       if (range.min !== null) url += `&min_price=${range.min}`;
       if (range.max !== null) url += `&max_price=${range.max}`;
       if (this.onlyExchange) url += `&accepts_exchange=true`;
+      if (this.onlyPack) url += `&is_pack=true`;
       if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
       const res = await fetch(url);
       if (res.ok) {
@@ -245,6 +248,7 @@ export class CatalogueComponent implements OnInit {
     this.selectedCondition = '';
     this.selectedPriceRange = 0;
     this.onlyExchange = false;
+    this.onlyPack = false;
     this.cityFilter = '';
     this.cityError = '';
     this.selectedCategoryId = null;

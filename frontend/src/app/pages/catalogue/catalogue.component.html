@@ -220,6 +220,13 @@
         🔄 Échange
       </button>
 
+      <!-- Packs -->
+      <button (click)="onlyPack = !onlyPack; applyFilters()"
+        class="flex items-center gap-2 border rounded-full px-4 py-2 text-sm font-medium transition-colors"
+        [ngClass]="onlyPack ? 'bg-primary/10 border-primary text-primary' : 'border-gray-200 text-gray-700 hover:border-gray-400'">
+        📦 Packs
+      </button>
+
       <!-- Filtre actif : reset -->
       <button *ngIf="activeFilterCount > 0" (click)="resetFilters()"
         class="flex items-center gap-1.5 bg-red-50 border border-primary/30 rounded-full px-3.5 py-2 text-sm font-medium text-primary hover:bg-red-100 transition-colors">
