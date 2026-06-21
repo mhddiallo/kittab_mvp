@@ -94,6 +94,10 @@ export class ProfileComponent implements OnInit {
   }
 
   async save() {
+    if (!this.firstName.trim() || !this.lastName.trim() || !this.address.trim()) {
+      this.error = 'Prénom, nom et Quartier ou Ville sont obligatoires.';
+      return;
+    }
     this.loading = true; this.success = false; this.error = '';
     try {
       const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
