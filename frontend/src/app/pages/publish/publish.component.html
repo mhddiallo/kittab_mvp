@@ -448,32 +448,38 @@
 
         <!-- Échange -->
         <div class="border-t border-gray-100 pt-5">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <div class="relative">
-              <input type="checkbox" [(ngModel)]="acceptsExchange" name="acceptsExchange" class="sr-only peer" />
-              <div class="w-11 h-6 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors"></div>
-              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-700">🔄 J'accepte les échanges</p>
-              <p class="text-xs text-gray-400">Les acheteurs pourront proposer un de leurs livres en échange</p>
-            </div>
-          </label>
+          <p class="text-sm font-semibold text-gray-700 mb-2">🔄 Acceptez-vous les échanges de livres ?</p>
+          <p class="text-xs text-gray-400 mb-3">Les acheteurs pourront proposer un de leurs livres en échange</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" (click)="acceptsExchange = true"
+                    [ngClass]="acceptsExchange ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
+              ✅ Oui
+            </button>
+            <button type="button" (click)="acceptsExchange = false"
+                    [ngClass]="!acceptsExchange ? 'border-gray-600 bg-gray-50 text-gray-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
+              ❌ Non
+            </button>
+          </div>
         </div>
 
         <!-- Contact WhatsApp -->
         <div class="border-t border-gray-100 pt-5">
-          <label class="flex items-center gap-3 cursor-pointer">
-            <div class="relative">
-              <input type="checkbox" [(ngModel)]="acceptsWhatsappContact" name="acceptsWhatsappContact" class="sr-only peer" />
-              <div class="w-11 h-6 bg-gray-200 peer-checked:bg-green-500 rounded-full transition-colors"></div>
-              <div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-5"></div>
-            </div>
-            <div>
-              <p class="text-sm font-semibold text-gray-700">💬 Accepter le contact WhatsApp</p>
-              <p class="text-xs text-gray-400">Les acheteurs pourront vous contacter directement sur WhatsApp</p>
-            </div>
-          </label>
+          <p class="text-sm font-semibold text-gray-700 mb-2">💬 Acceptez-vous d'être contacté sur WhatsApp ?</p>
+          <p class="text-xs text-gray-400 mb-3">Les acheteurs pourront vous contacter directement sur WhatsApp</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" (click)="acceptsWhatsappContact = true"
+                    [ngClass]="acceptsWhatsappContact ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
+              ✅ Oui
+            </button>
+            <button type="button" (click)="acceptsWhatsappContact = false"
+                    [ngClass]="!acceptsWhatsappContact ? 'border-gray-600 bg-gray-50 text-gray-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
+                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
+              ❌ Non
+            </button>
+          </div>
         </div>
       </div>
 
@@ -540,6 +546,11 @@
             <span class="text-gray-500">Prix</span>
             <span class="font-extrabold text-xl text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
           </div>
+        </div>
+
+        <!-- Photo manquante -->
+        <div *ngIf="images.length === 0" class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700 font-medium">
+          📸 Au moins 1 photo du livre est obligatoire
         </div>
 
         <!-- Erreur -->

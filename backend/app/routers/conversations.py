@@ -59,7 +59,7 @@ class CreateConversationIn(BaseModel):
     other_user_id: int
     book_id: Optional[int] = None
     wanted_book_id: Optional[int] = None
-    initial_message: str
+    initial_message: Optional[str] = None
 
 
 class SendMessageIn(BaseModel):
@@ -127,13 +127,14 @@ def create_conversation(
         db.add(ConversationParticipant(conversation_id=conv.id, user_id=current_user.id))
         db.add(ConversationParticipant(conversation_id=conv.id, user_id=body.other_user_id))
 
-    # Send initial message
-    msg = Message(
-        conversation_id=conv.id,
-        sender_id=current_user.id,
-        content=body.initial_message,
-    )
-    db.add(msg)
+    # Send initial message if provided
+    if body.initial_message:
+        msg = Message(
+            conversation_id=conv.id,
+            sender_id=current_user.id,
+            content=body.initial_message,
+        )
+        db.add(msg)
     db.commit()
     db.refresh(conv)
 

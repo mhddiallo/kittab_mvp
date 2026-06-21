@@ -487,6 +487,7 @@ export class PublishComponent implements OnInit, OnDestroy {
 
   get isValid() {
     if (!this.condition || !this.price || this.price <= 0) return false;
+    if (this.images.length === 0) return false;
     if (this.isPack) return this.title.trim().length > 0 && this.validPackItems.length >= 2;
     return this.title.trim().length > 0 && this.author.trim().length > 0 && this.locationLabel.trim().length > 0;
   }
