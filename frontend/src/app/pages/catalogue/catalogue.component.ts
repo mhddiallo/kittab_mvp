@@ -164,7 +164,7 @@ export class CatalogueComponent implements OnInit {
       if (range.min !== null) url += `&min_price=${range.min}`;
       if (range.max !== null) url += `&max_price=${range.max}`;
       if (this.onlyExchange) url += `&accepts_exchange=true`;
-      if (this.onlyPack) url += `&is_pack=true`;
+      if (this.onlyPack) url += `&pack_only=true`;
       if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
       const res = await fetch(url);
       if (res.ok) {
