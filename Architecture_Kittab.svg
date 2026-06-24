@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" width="900" height="620" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="2" dy="3" stdDeviation="4" flood-color="#00000022"/>
+    </filter>
+    <linearGradient id="grad-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#FF8C5A;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A2E;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2D2D4E;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-vercel" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#333333;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-render" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#46E3B7;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2EC4A0;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-db" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90D9;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#2E6FB8;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-cf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F6821F;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#E07010;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-twilio" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F22F46;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#CC1A30;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-s3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9900;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#E07800;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grad-pay" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6C63FF;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#4A42D6;stop-opacity:1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#F8F9FD" rx="16"/>
+
+  <!-- Title -->
+  <rect x="0" y="0" width="900" height="64" fill="url(#grad-dark)" rx="16"/>
+  <rect x="0" y="48" width="900" height="16" fill="url(#grad-dark)"/>
+  <text x="450" y="22" text-anchor="middle" fill="white" font-size="20" font-weight="bold">🚀 Architecture Kittab — Production</text>
+  <text x="450" y="46" text-anchor="middle" fill="#AAAACC" font-size="12">Angular · FastAPI · PostgreSQL · Cloudflare · Render · Vercel</text>
+
+  <!-- === USERS === -->
+  <rect x="370" y="82" width="160" height="56" rx="12" fill="url(#grad-orange)" filter="url(#shadow)"/>
+  <text x="450" y="107" text-anchor="middle" fill="white" font-size="22">👤</text>
+  <text x="450" y="128" text-anchor="middle" fill="white" font-size="13" font-weight="bold">Utilisateurs</text>
+
+  <!-- Arrow: Users → Cloudflare -->
+  <line x1="450" y1="138" x2="450" y2="168" stroke="#888" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- === CLOUDFLARE === -->
+  <rect x="310" y="168" width="280" height="60" rx="12" fill="url(#grad-cf)" filter="url(#shadow)"/>
+  <text x="450" y="193" text-anchor="middle" fill="white" font-size="13" font-weight="bold">☁️ Cloudflare</text>
+  <text x="450" y="212" text-anchor="middle" fill="#fff" font-size="11">DNS · HTTPS · CDN · DDoS protection</text>
+  <text x="450" y="225" text-anchor="middle" fill="#ffe0b0" font-size="10">kittab.sn</text>
+
+  <!-- Arrow: CF → Vercel -->
+  <line x1="360" y1="228" x2="230" y2="278" stroke="#888" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+  <!-- Arrow: CF → Render -->
+  <line x1="540" y1="228" x2="670" y2="278" stroke="#888" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- === VERCEL === -->
+  <rect x="80" y="278" width="260" height="90" rx="12" fill="url(#grad-vercel)" filter="url(#shadow)"/>
+  <text x="210" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">▲ Vercel</text>
+  <text x="210" y="323" text-anchor="middle" fill="#aaa" font-size="11">Frontend — Angular 17</text>
+  <text x="210" y="340" text-anchor="middle" fill="#888" font-size="10">Build statique · SSG · CDN global</text>
+  <text x="210" y="358" text-anchor="middle" fill="#46E3B7" font-size="10">app.kittab.sn</text>
+
+  <!-- === RENDER === -->
+  <rect x="560" y="278" width="260" height="90" rx="12" fill="url(#grad-render)" filter="url(#shadow)"/>
+  <text x="690" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">⬡ Render</text>
+  <text x="690" y="323" text-anchor="middle" fill="white" font-size="11">Backend — FastAPI (Python)</text>
+  <text x="690" y="340" text-anchor="middle" fill="#fff" font-size="10">API REST · Auth OTP · Websocket</text>
+  <text x="690" y="358" text-anchor="middle" fill="#1A1A2E" font-size="10">api.kittab.sn</text>
+
+  <!-- Arrow: Render → DB -->
+  <line x1="690" y1="368" x2="690" y2="418" stroke="#888" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#arr)"/>
+
+  <!-- === PostgreSQL on Render === -->
+  <rect x="560" y="418" width="260" height="70" rx="12" fill="url(#grad-db)" filter="url(#shadow)"/>
+  <text x="690" y="444" text-anchor="middle" fill="white" font-size="14" font-weight="bold">🐘 PostgreSQL</text>
+  <text x="690" y="462" text-anchor="middle" fill="#D0E8FF" font-size="11">Render Managed DB</text>
+  <text x="690" y="478" text-anchor="middle" fill="#A0C8F0" font-size="10">Backups automatiques</text>
+
+  <!-- Arrow: Render → S3 -->
+  <line x1="560" y1="323" x2="480" y2="440" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- === S3 / Cloudflare R2 === -->
+  <rect x="320" y="418" width="200" height="70" rx="12" fill="url(#grad-s3)" filter="url(#shadow)"/>
+  <text x="420" y="444" text-anchor="middle" fill="white" font-size="13" font-weight="bold">🗄️ Stockage Images</text>
+  <text x="420" y="462" text-anchor="middle" fill="#fff" font-size="10">Cloudflare R2 ou AWS S3</text>
+  <text x="420" y="478" text-anchor="middle" fill="#ffe0b0" font-size="10">Photos livres · Couvertures ISBN</text>
+
+  <!-- Arrow: Render → Twilio -->
+  <line x1="690" y1="278" x2="820" y2="228" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- === Twilio / OTP === -->
+  <rect x="750" y="168" width="130" height="60" rx="12" fill="url(#grad-twilio)" filter="url(#shadow)"/>
+  <text x="815" y="193" text-anchor="middle" fill="white" font-size="12" font-weight="bold">📱 OTP SMS</text>
+  <text x="815" y="210" text-anchor="middle" fill="#FFB0B8" font-size="10">Twilio / Africa's</text>
+  <text x="815" y="224" text-anchor="middle" fill="#FFB0B8" font-size="10">Talking</text>
+
+  <!-- Arrow: Render → Paiement -->
+  <line x1="560" y1="350" x2="480" y2="540" stroke="#888" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+
+  <!-- === Paiement === -->
+  <rect x="300" y="530" width="240" height="70" rx="12" fill="url(#grad-pay)" filter="url(#shadow)"/>
+  <text x="420" y="555" text-anchor="middle" fill="white" font-size="13" font-weight="bold">💳 Paiement Boosts</text>
+  <text x="420" y="573" text-anchor="middle" fill="#D0CCFF" font-size="10">Wave · Orange Money · Stripe</text>
+  <text x="420" y="589" text-anchor="middle" fill="#B0A8FF" font-size="10">Activation boost après paiement</text>
+
+  <!-- Arrow marker def -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#888"/>
+    </marker>
+  </defs>
+
+  <!-- Legend -->
+  <rect x="20" y="540" width="240" height="60" rx="10" fill="white" stroke="#DDD" stroke-width="1"/>
+  <text x="30" y="558" fill="#333" font-size="11" font-weight="bold">Légende</text>
+  <line x1="30" y1="568" x2="60" y2="568" stroke="#888" stroke-width="2"/>
+  <text x="65" y="572" fill="#555" font-size="10">Flux de données</text>
+  <line x1="30" y1="582" x2="60" y2="582" stroke="#888" stroke-width="2" stroke-dasharray="4,2"/>
+  <text x="65" y="586" fill="#555" font-size="10">Appel service externe</text>
+  <text x="30" y="595" fill="#999" font-size="9">kittab.sn · Lancement 1er août 2026</text>
+</svg>
