@@ -194,7 +194,7 @@ def list_books(
     education_level: Optional[str] = Query(None),
     boosted: Optional[bool] = Query(None),
     accepts_exchange: Optional[bool] = Query(None),
-    is_pack: Optional[bool] = Query(None),
+    pack_only: Optional[bool] = Query(None),
     city: Optional[str] = Query(None),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
@@ -213,8 +213,8 @@ def list_books(
         query = query.filter(Book.is_boosted == True)
     if accepts_exchange:
         query = query.filter(Book.accepts_exchange == True)
-    if is_pack is not None:
-        query = query.filter(Book.is_pack == is_pack)
+    if pack_only:
+        query = query.filter(Book.is_pack == True)
 
     if q:
         query = query.filter(
