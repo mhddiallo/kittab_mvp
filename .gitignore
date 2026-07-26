@@ -4,8 +4,10 @@ frontend/dist/
 frontend/.angular/
 
 # Backend
+backend/**/__pycache__/
 backend/__pycache__/
 backend/.venv/
+backend/**/*.pyc
 backend/*.pyc
 backend/uploads/
 
