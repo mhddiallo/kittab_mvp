@@ -61,7 +61,7 @@ async def scan_cover(file: UploadFile = File(...)):
 
     client = _anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
     message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
+        model="claude-haiku-4-5",
         max_tokens=256,
         messages=[{
             "role": "user",
@@ -87,8 +87,8 @@ async def scan_cover(file: UploadFile = File(...)):
             data = _json.loads(match.group())
             return {"title": data.get("title", ""), "author": data.get("author", ""), "category": data.get("category", ""), "language": data.get("language", "")}
         raise ValueError("no json")
-    except Exception:
-        raise HTTPException(status_code=422, detail="Impossible d'extraire les informations du livre")
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=f"Impossible d'extraire les informations du livre: {str(e)}")
 
 
 @router.get("/autocomplete", response_model=list[CatalogSuggestion])
