@@ -61,7 +61,7 @@ async def scan_cover(file: UploadFile = File(...)):
 
     client = _anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
     message = client.messages.create(
-        model="claude-haiku-4-5",
+        model="claude-haiku-4-5-20251001",
         max_tokens=256,
         messages=[{
             "role": "user",
