@@ -58,36 +58,38 @@ async def scan_cover(file: UploadFile = File(...)):
     content = await file.read()
     b64 = base64.standard_b64encode(content).decode("utf-8")
     ext = (file.content_type or "image/jpeg")
-
-    client = _anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=256,
-        messages=[{
-            "role": "user",
-            "content": [
-                {
-                    "type": "image",
-                    "source": {"type": "base64", "media_type": ext, "data": b64},
-                },
-                {
-                    "type": "text",
-                    "text": "This is a book cover or back cover. Extract: title, author name, category, and language of the book. For category, use ONE of: Autobiographies, Romans, Histoire, Sciences, Manuels scolaires, Développement personnel, Religion & Spiritualité, Philosophie, Économie & Business, Droit, Médecine & Santé, Informatique, Littérature africaine, Jeunesse, Poésie, BD & Comics, Langues & Dictionnaires, Autres. For language use the language name in French (Français, Anglais, Arabe, Portugais, Wolof, etc). Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\", \"category\": \"...\", \"language\": \"...\"}. If you cannot determine a field, use an empty string.",
-                },
-            ],
-        }],
-    )
+    print(f"[SCAN-COVER] content_type={ext} size={len(content)}")
 
     import json as _json
     import re as _re
     try:
+        client = _anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+        message = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=256,
+            messages=[{
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {"type": "base64", "media_type": ext, "data": b64},
+                    },
+                    {
+                        "type": "text",
+                        "text": "This is a book cover or back cover. Extract: title, author name, category, and language of the book. For category, use ONE of: Autobiographies, Romans, Histoire, Sciences, Manuels scolaires, Développement personnel, Religion & Spiritualité, Philosophie, Économie & Business, Droit, Médecine & Santé, Informatique, Littérature africaine, Jeunesse, Poésie, BD & Comics, Langues & Dictionnaires, Autres. For language use the language name in French (Français, Anglais, Arabe, Portugais, Wolof, etc). Reply ONLY with valid JSON: {\"title\": \"...\", \"author\": \"...\", \"category\": \"...\", \"language\": \"...\"}. If you cannot determine a field, use an empty string.",
+                    },
+                ],
+            }],
+        )
         text = message.content[0].text.strip()
+        print(f"[SCAN-COVER] Claude response: {text[:200]}")
         match = _re.search(r'\{.*?\}', text, _re.DOTALL)
         if match:
             data = _json.loads(match.group())
             return {"title": data.get("title", ""), "author": data.get("author", ""), "category": data.get("category", ""), "language": data.get("language", "")}
-        raise ValueError("no json")
+        raise ValueError("no json in response")
     except Exception as e:
+        print(f"[SCAN-COVER] ERROR: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=422, detail=f"Impossible d'extraire les informations du livre: {str(e)}")
 
 
