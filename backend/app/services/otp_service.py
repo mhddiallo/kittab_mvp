@@ -50,9 +50,30 @@ def verify_otp(db: Session, phone: str, code: str) -> bool:
 
 def send_otp(phone: str, code: str) -> dict:
     """
-    Simulate OTP sending. Replace with Twilio in production.
-    Checks WhatsApp availability first, falls back to SMS.
+    Envoie le code OTP via WhatsApp (Twilio).
+    Si les credentials Twilio ne sont pas configurés, simule l'envoi.
     """
-    # TODO: integrate Twilio WhatsApp + SMS
-    print(f"[OTP SIMULATION] Sending code {code} to {phone} via WhatsApp/SMS")
+    from app.core.config import settings
+
+    message_body = (
+        f"🔐 Votre code de connexion Kittab est : *{code}*\n"
+        f"Il est valable pendant 10 minutes."
+    )
+
+    if settings.TWILIO_ACCOUNT_SID and settings.TWILIO_AUTH_TOKEN:
+        try:
+            from twilio.rest import Client
+            client = Client(settings.TWILIO_ACCOUNT_SID, settings.TWILIO_AUTH_TOKEN)
+            client.messages.create(
+                from_=f"whatsapp:{settings.TWILIO_WHATSAPP_FROM}",
+                to=f"whatsapp:{phone}",
+                body=message_body,
+            )
+            print(f"[OTP] WhatsApp envoyé à {phone}")
+            return {"channel": "whatsapp", "phone": phone}
+        except Exception as e:
+            print(f"[OTP] Erreur Twilio: {e}")
+            raise
+
+    print(f"[OTP SIMULATION] Code {code} pour {phone}")
     return {"simulated": True, "phone": phone, "code": code}

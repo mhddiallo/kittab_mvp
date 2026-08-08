@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     CLOUDINARY_API_SECRET: str = ""
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_WHATSAPP_FROM: str = "+14155238886"
 
     class Config:
         env_file = ".env"

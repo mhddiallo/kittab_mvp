@@ -16,3 +16,4 @@ anthropic==0.40.0
 cloudinary==1.40.0
 google-auth==2.29.0
 requests==2.31.0
+twilio==9.3.3
