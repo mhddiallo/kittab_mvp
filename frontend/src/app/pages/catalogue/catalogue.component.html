@@ -274,8 +274,8 @@
             <p class="text-gray-500 text-sm">Ce livre n'est pas encore dans notre catalogue.</p>
           </div>
 
-          <!-- Formulaire alerte -->
-          <div *ngIf="!alertSent" class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
+          <!-- Formulaire alerte (désactivé pour MVP) -->
+          <!-- <div *ngIf="!alertSent" class="bg-amber-50 border border-amber-200 rounded-2xl p-5">
             <p class="text-sm font-semibold text-amber-900 mb-1">🔔 Être notifié quand il sera disponible</p>
             <p class="text-xs text-amber-700 mb-4">On t'envoie un email dès qu'un vendeur publie ce livre.</p>
             <div class="space-y-3">
@@ -302,12 +302,11 @@
             </div>
           </div>
 
-          <!-- Confirmation -->
           <div *ngIf="alertSent" class="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
             <div class="text-3xl mb-2">✅</div>
             <p class="font-semibold text-green-800 mb-1">Alerte enregistrée !</p>
             <p class="text-sm text-green-700">On t'enverra un email dès que ce livre sera disponible sur Kittab.</p>
-          </div>
+          </div> -->
         </div>
       </div>
 
