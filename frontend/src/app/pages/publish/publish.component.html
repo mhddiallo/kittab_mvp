@@ -127,8 +127,8 @@
           Informations du livre
         </h2>
 
-        <!-- Toggle livre / pack -->
-        <div class="grid grid-cols-2 gap-3 mb-6">
+        <!-- Toggle livre / pack (désactivé pour MVP) -->
+        <!-- <div class="grid grid-cols-2 gap-3 mb-6">
           <button type="button" (click)="isPack = false"
                   [ngClass]="!isPack ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
                   class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
@@ -139,7 +139,7 @@
                   class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
             📦 Pack de livres
           </button>
-        </div>
+        </div> -->
 
         <!-- Scan livre -->
         <div *ngIf="!isPack" class="mb-4">
@@ -161,15 +161,15 @@
                 <div class="text-xs text-gray-400">Pointez vers le code-barres ISBN</div>
               </div>
             </button>
-            <!-- Option 2 : Upload image -->
-            <button type="button" (click)="scanUploadInput.click()" [disabled]="scanLoading"
+            <!-- Option 2 : Upload image (désactivé pour MVP) -->
+            <!-- <button type="button" (click)="scanUploadInput.click()" [disabled]="scanLoading"
                     class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors">
               <span class="text-lg">🖼️</span>
               <div class="text-left">
                 <div class="font-medium">Uploader une photo</div>
                 <div class="text-xs text-gray-400">Code-barres ou couverture du livre</div>
               </div>
-            </button>
+            </button> -->
           </div>
 
           <!-- Caméra code-barres -->
