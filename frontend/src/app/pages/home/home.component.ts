@@ -80,12 +80,7 @@ export class HomeComponent implements OnInit {
         }));
       }
     } catch {}
-    if (!this.trendingBooks.length) {
-      this.trendingBooks = this.mockTrending();
-    }
-    if (!this.wantedBooks.length) {
-      this.wantedBooks = this.mockWanted();
-    }
+    // Pas de données fictives : si aucun livre boosté, la section "À la une" est masquée
     this.loading = false;
   }
 
