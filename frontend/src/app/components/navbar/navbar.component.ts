@@ -12,7 +12,6 @@ import { environment } from '../../../environments/environment';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   menuOpen = false;
-  moreOpen = false;
   unreadCount = 0;
 
   private pollInterval: any;
