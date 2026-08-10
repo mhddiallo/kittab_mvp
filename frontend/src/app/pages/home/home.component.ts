@@ -19,6 +19,7 @@ export class HomeComponent implements OnInit {
   loading = true;
   searchQuery = '';
   activeTab = 'acheter';
+  howItWorksTab: 'buy' | 'sell' = 'buy';
   suggestions: any[] = [];
   private searchTimeout: any;
 

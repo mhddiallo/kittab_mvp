@@ -185,29 +185,7 @@
   </div>
 </section>
 
-<!-- ⑤ PROMO CARDS -->
-<section class="max-w-7xl mx-auto px-5 md:px-8 py-3 grid md:grid-cols-2 gap-4">
-  <!-- Boost (désactivé pour MVP v2)
-  <div class="bg-amber-50 border border-amber-100 rounded-2xl p-5 md:p-6">
-    <div class="flex items-center gap-3 mb-3">
-      <div class="w-10 h-10 bg-amber-400 rounded-xl flex items-center justify-center text-xl">⭐</div>
-      <p class="text-amber-700 text-[10px] font-bold uppercase tracking-wider">Mise en avant</p>
-    </div>
-    <h3 class="font-black text-gray-900 text-lg md:text-xl mb-2">Boost ton annonce, vends plus vite</h3>
-    <p class="text-gray-500 text-sm mb-5 leading-relaxed">Un livre boosté s'affiche en tête du catalogue et dans la section « À la une » de l'accueil. Plus de visibilité, plus de contacts — tu choisis la durée.</p>
-    <a routerLink="/publish" class="inline-block bg-gray-900 text-white font-bold px-6 py-3 rounded-full text-sm hover:bg-gray-800 transition-colors">Booster un livre →</a>
-  </div> -->
-  <!-- Disponible partout -->
-  <div class="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
-    <div class="flex items-center gap-3 mb-3">
-      <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-xl">🌍</div>
-      <span class="bg-gray-100 text-gray-500 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Bientôt</span>
-    </div>
-    <h3 class="font-black text-gray-900 text-lg md:text-xl mb-2">Disponible partout</h3>
-    <p class="text-gray-500 text-sm mb-5 leading-relaxed">Dakar, Abidjan, Conakry, Bamako... Kittab s'étend dans toute l'Afrique de l'Ouest pour que chaque lecteur trouve son bonheur, où qu'il soit.</p>
-    <p class="text-gray-400 text-sm font-medium">Bientôt dans votre ville</p>
-  </div>
-</section>
+<!-- ⑤ PROMO CARDS (désactivé pour MVP) -->
 
 <!-- ⑥ ACHETER -->
 <section class="max-w-7xl mx-auto px-5 md:px-8 py-12 md:py-16 flex flex-col md:flex-row items-center gap-10 md:gap-16">
@@ -249,35 +227,72 @@
 
 <!-- ⑧ COMMENT ÇA MARCHE -->
 <section class="max-w-7xl mx-auto px-5 md:px-8 py-14 md:py-16">
-  <div class="text-center mb-10">
-    <p class="text-primary text-xs font-bold uppercase tracking-wider mb-2">En 3 étapes</p>
-    <h2 class="font-black text-2xl md:text-3xl text-gray-900">Comment ça marche ?</h2>
+  <div class="text-center mb-8">
+    <h2 class="font-black text-2xl md:text-3xl text-gray-900 mb-2">Comment ça marche ?</h2>
+    <p class="text-gray-500 text-sm mb-6">Acheter ou vendre un livre n'a jamais été aussi simple</p>
+    <!-- Toggle -->
+    <div class="inline-flex bg-gray-100 rounded-full p-1 gap-1">
+      <button (click)="howItWorksTab='buy'"
+              [class]="howItWorksTab === 'buy' ? 'bg-primary text-white' : 'text-gray-600 hover:text-gray-900'"
+              class="px-5 py-2 rounded-full text-sm font-bold transition-all">
+        📖 J'achète un livre
+      </button>
+      <button (click)="howItWorksTab='sell'"
+              [class]="howItWorksTab === 'sell' ? 'bg-primary text-white' : 'text-gray-600 hover:text-gray-900'"
+              class="px-5 py-2 rounded-full text-sm font-bold transition-all">
+        🔥 Je vends un livre
+      </button>
+    </div>
   </div>
-  <div class="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5">
-    <div class="bg-white rounded-2xl p-6 shadow-sm">
-      <div class="flex justify-between items-start mb-5">
-        <span class="text-3xl">🔍</span>
-        <span class="text-5xl font-black text-gray-100 leading-none">1</span>
-      </div>
-      <h3 class="font-black text-gray-900 text-base mb-2">Trouve la perle rare</h3>
-      <p class="text-gray-500 text-sm leading-relaxed">Recherche par titre, auteur ou ville. Le catalogue grandit chaque jour.</p>
+
+  <!-- J'achète -->
+  <div *ngIf="howItWorksTab === 'buy'" class="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5">
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🔍</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">1</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Trouve ton livre</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Parcours le catalogue ou recherche par titre, auteur ou ville.</p>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm">
-      <div class="flex justify-between items-start mb-5">
-        <span class="text-3xl">💬</span>
-        <span class="text-5xl font-black text-gray-100 leading-none">2</span>
-      </div>
-      <h3 class="font-black text-gray-900 text-base mb-2">Discute & conviens</h3>
-      <p class="text-gray-500 text-sm leading-relaxed">Échange par message, fixe un prix juste et un point de rendez-vous.</p>
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">💬</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">2</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Contacte le vendeur</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Discute par message, conviens d'un prix et d'un point de rencontre.</p>
     </div>
-    <div class="bg-white rounded-2xl p-6 shadow-sm">
-      <div class="flex justify-between items-start mb-5">
-        <span class="text-3xl">📚</span>
-        <span class="text-5xl font-black text-gray-100 leading-none">3</span>
-      </div>
-      <h3 class="font-black text-gray-900 text-base mb-2">Lis & recommence</h3>
-      <p class="text-gray-500 text-sm leading-relaxed">Récupère ton livre, plonge dedans — puis remets-le en circulation.</p>
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-red-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">📖</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">3</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Récupère et lis</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Échange en main propre ou par livraison. Le livre est à toi !</p>
     </div>
+  </div>
+
+  <!-- Je vends -->
+  <div *ngIf="howItWorksTab === 'sell'" class="space-y-3 md:space-y-0 md:grid md:grid-cols-3 md:gap-5">
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">📷</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">1</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Scanne ou saisis</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Scanne le code-barres ISBN ou entre le titre manuellement. Les infos se remplissent automatiquement.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">💰</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">2</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Fixe ton prix</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Ajoute une photo, fixe ton prix et publie. Zéro commission — tu gardes tout.</p>
+    </div>
+    <div class="bg-white rounded-2xl p-6 shadow-sm text-center">
+      <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">🤝</div>
+      <div class="w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-xs font-black mx-auto mb-3">3</div>
+      <h3 class="font-black text-gray-900 text-base mb-2">Vends & encaisse</h3>
+      <p class="text-gray-500 text-sm leading-relaxed">Un acheteur te contacte, vous convenez d'un lieu. Remets le livre et encaisse directement.</p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="flex flex-col sm:flex-row justify-center gap-4 mt-10">
+    <a routerLink="/catalogue" class="bg-primary text-white font-bold px-8 py-3 rounded-full text-sm hover:bg-red-800 transition-colors text-center">Parcourir le catalogue →</a>
+    <a routerLink="/how-it-works" class="border-2 border-primary text-primary font-bold px-8 py-3 rounded-full text-sm hover:bg-red-50 transition-colors text-center">Comment ça marche</a>
   </div>
 </section>
 
