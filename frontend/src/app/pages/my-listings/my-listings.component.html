@@ -79,11 +79,12 @@
                     class="text-xs px-3 py-1.5 border border-green-300 rounded-full text-green-700 hover:bg-green-50 transition-colors disabled:opacity-50 font-semibold">
               {{ markingSoldId === book.id ? '...' : '✓ Marquer comme vendu' }}
             </button>
+            <!-- Bouton Booster désactivé pour le MVP
             <button *ngIf="!book.is_boosted"
                     (click)="openBoostModal(book)" [disabled]="boostingId === book.id"
                     class="text-xs px-3 py-1.5 border border-amber-300 rounded-full text-amber-600 hover:bg-amber-50 transition-colors disabled:opacity-50 font-semibold">
               {{ boostingId === book.id ? '...' : '⭐ Booster' }}
-            </button>
+            </button> -->
             <span *ngIf="book.is_boosted" class="text-xs px-3 py-1.5 bg-amber-100 text-amber-700 rounded-full font-semibold">
               ⭐ Boosté
             </span>
