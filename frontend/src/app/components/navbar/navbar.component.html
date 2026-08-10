@@ -33,10 +33,11 @@
           </svg>
         </button>
         <div *ngIf="moreOpen" class="absolute left-0 top-full mt-2 w-48 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
+          <!-- Comment ça marche (désactivé pour MVP)
           <a routerLink="/how-it-works" (click)="moreOpen=false" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-primary">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             Comment ça marche
-          </a>
+          </a> -->
           <a routerLink="/contact" (click)="moreOpen=false" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 hover:text-primary">
             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
             Contactez-nous
@@ -123,7 +124,8 @@
     <a routerLink="/community" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">
       Communauté <span class="text-[10px] bg-amber-100 text-amber-600 font-bold px-1 py-px rounded leading-none">Bientôt</span>
     </a>
-    <a routerLink="/how-it-works" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Comment ça marche</a>
+    <!-- Comment ça marche (désactivé pour MVP)
+    <a routerLink="/how-it-works" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Comment ça marche</a> -->
     <a routerLink="/contact" (click)="menuOpen=false" routerLinkActive="text-primary bg-red-50" class="flex items-center px-3 py-2.5 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Contactez-nous</a>
 
     <div class="border-t border-gray-100 pt-3 mt-3 space-y-2">
