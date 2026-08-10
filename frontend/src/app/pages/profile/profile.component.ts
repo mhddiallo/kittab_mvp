@@ -17,7 +17,6 @@ export class ProfileComponent implements OnInit {
   username = '';
   firstName = '';
   lastName = '';
-  address = '';
   phone = '';
   newPhone = '';
   email = '';
@@ -26,9 +25,6 @@ export class ProfileComponent implements OnInit {
   error = '';
   isNewUser = false;
   isIncomplete = false;
-  addressSuggestions: { label: string }[] = [];
-  showAddressSuggestions = false;
-  private addressTimeout: any;
 
   constructor(public auth: AuthService, private route: ActivatedRoute) {}
 
@@ -40,7 +36,6 @@ export class ProfileComponent implements OnInit {
       this.username = u.username || '';
       this.firstName = u.first_name || '';
       this.lastName = u.last_name || '';
-      this.address = u.address || '';
       this.phone = u.phone || '';
       this.email = u.email || '';
     };
@@ -60,47 +55,17 @@ export class ProfileComponent implements OnInit {
     return digits.length >= 7 && digits.length <= 15;
   }
 
-  onAddressInput() {
-    clearTimeout(this.addressTimeout);
-    this.showAddressSuggestions = false;
-    if (this.address.length < 2) { this.addressSuggestions = []; return; }
-    this.addressTimeout = setTimeout(async () => {
-      try {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.address)}&format=json&addressdetails=1&limit=5&countrycodes=sn,gn,ci,ml,fr&accept-language=fr`;
-        const res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
-        const data = await res.json();
-        this.addressSuggestions = data.map((item: any) => ({ label: this.shortenAddress(item) }));
-        this.showAddressSuggestions = this.addressSuggestions.length > 0;
-      } catch {}
-    }, 400);
-  }
-
-  private shortenAddress(item: any): string {
-    const a = item.address ?? {};
-    const parts: string[] = [];
-    const neighbourhood = a.neighbourhood || a.suburb || a.quarter || a.hamlet || a.village;
-    const city = a.city || a.town || a.municipality || a.county;
-    const country = a.country;
-    if (neighbourhood) parts.push(neighbourhood);
-    if (city && city !== neighbourhood) parts.push(city);
-    if (country) parts.push(country);
-    return parts.length > 0 ? parts.join(', ') : item.display_name;
-  }
-
-  selectAddress(s: { label: string }) {
-    this.address = s.label;
-    this.addressSuggestions = [];
-    this.showAddressSuggestions = false;
-  }
-
   async save() {
-    if (!this.firstName.trim() || !this.lastName.trim() || !this.address.trim()) {
-      this.error = 'Prénom, nom et Quartier ou Ville sont obligatoires.';
+    if (!this.firstName.trim() || !this.lastName.trim()) {
+      this.error = 'Prénom et nom sont obligatoires.';
       return;
     }
     this.loading = true; this.success = false; this.error = '';
     try {
-      const body: any = { first_name: this.firstName, last_name: this.lastName, address: this.address };
+      // address n'est volontairement pas envoyé : le backend ne touche au champ
+      // que s'il est présent, ce qui préserve l'adresse déjà enregistrée des
+      // comptes existants. La localisation est désormais demandée à la publication.
+      const body: any = { first_name: this.firstName, last_name: this.lastName };
       if (this.isGoogleUser && this.newPhone.trim()) {
         if (!this.isValidPhone(this.newPhone)) {
           this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)';
