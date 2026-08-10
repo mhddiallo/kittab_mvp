@@ -28,24 +28,28 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ngOnInit() {}
 
   ngAfterViewInit() {
-    setTimeout(() => this.initGoogleButton(), 100);
+    // Connexion Google désactivée pour le MVP — voir initGoogleButton() ci-dessous.
+    // setTimeout(() => this.initGoogleButton(), 100);
   }
 
-  private initGoogleButton() {
-    if (typeof google !== 'undefined') {
-      google.accounts.id.initialize({
-        client_id: '211698271206-1smssf8ul4pp3dn771sdma0np7boblmu.apps.googleusercontent.com',
-        callback: (response: any) => this.zone.run(() => this.handleGoogleCallback(response)),
-      });
-      const btn = document.getElementById('google-btn');
-      const width = btn?.offsetWidth || 360;
-      google.accounts.id.renderButton(btn, {
-        theme: 'outline', size: 'large', width: width, text: 'continue_with'
-      });
-    } else {
-      setTimeout(() => this.initGoogleButton(), 300);
-    }
-  }
+  // Connexion Google désactivée pour le MVP. Le bouton correspondant est
+  // commenté dans le template : sans cet appel, la boucle de réessai ci-dessous
+  // tournerait indéfiniment à la recherche d'un élément qui n'existe plus.
+  // private initGoogleButton() {
+  //   if (typeof google !== 'undefined') {
+  //     google.accounts.id.initialize({
+  //       client_id: '211698271206-1smssf8ul4pp3dn771sdma0np7boblmu.apps.googleusercontent.com',
+  //       callback: (response: any) => this.zone.run(() => this.handleGoogleCallback(response)),
+  //     });
+  //     const btn = document.getElementById('google-btn');
+  //     const width = btn?.offsetWidth || 360;
+  //     google.accounts.id.renderButton(btn, {
+  //       theme: 'outline', size: 'large', width: width, text: 'continue_with'
+  //     });
+  //   } else {
+  //     setTimeout(() => this.initGoogleButton(), 300);
+  //   }
+  // }
 
   async handleGoogleCallback(response: any) {
     this.loading = true; this.error = '';
