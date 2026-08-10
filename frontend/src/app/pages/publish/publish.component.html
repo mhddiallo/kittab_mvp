@@ -45,16 +45,23 @@
 </div>
 
 <div class="bg-[#FBF5EC] min-h-screen">
-  <div class="max-w-5xl mx-auto px-5 md:px-8 py-10 md:py-14">
+  <!-- pb généreux sur mobile : la barre d'action fixe recouvre le bas de page -->
+  <div class="max-w-5xl mx-auto px-5 md:px-8 pt-6 lg:pt-12 pb-28 lg:pb-14">
 
     <!-- ── En-tête ──────────────────────────────────────── -->
-    <div class="text-center mb-8 md:mb-10">
-      <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] mb-3">Nouvelle annonce</p>
-      <h1 class="font-black text-gray-900 text-3xl md:text-[40px] leading-tight tracking-tight">{{ currentStep.heading }}</h1>
+    <div class="text-center mb-5 lg:mb-8">
+      <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] lg:mb-3">Nouvelle annonce</p>
+      <h1 class="hidden lg:block font-black text-gray-900 text-3xl md:text-[40px] leading-tight tracking-tight">{{ currentStep.heading }}</h1>
     </div>
 
-    <!-- ── Fil d'étapes ─────────────────────────────────── -->
-    <div class="flex items-start justify-center mb-9 md:mb-11 max-w-lg mx-auto">
+    <!-- Barre de progression (mobile) -->
+    <div class="flex gap-1.5 mb-5 lg:hidden">
+      <div *ngFor="let s of steps" class="h-1 flex-1 rounded-full transition-colors"
+           [ngClass]="step >= s.n ? 'bg-primary' : 'bg-[#EDE2D3]'"></div>
+    </div>
+
+    <!-- ── Fil d'étapes (desktop) ───────────────────────── -->
+    <div class="hidden lg:flex items-start justify-center mb-9 md:mb-11 max-w-lg mx-auto">
       <ng-container *ngFor="let s of steps; let last = last">
         <div class="flex flex-col items-center shrink-0 w-16">
           <div class="w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-base transition-colors"
@@ -71,8 +78,16 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6">
 
-      <!-- ── Carte illustrée ────────────────────────────── -->
-      <div class="relative overflow-hidden rounded-[24px] p-7 text-white bg-gradient-to-br flex flex-col min-h-[300px] lg:min-h-[470px]"
+      <!-- ── Bandeau compact (mobile) ───────────────────── -->
+      <div class="lg:hidden relative overflow-hidden rounded-[18px] px-5 py-4 text-white bg-gradient-to-br flex items-center gap-3"
+           [ngClass]="currentStep.gradient">
+        <span class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10"></span>
+        <span class="relative text-2xl">{{ currentStep.emoji }}</span>
+        <p class="relative font-bold text-[15px]">Étape {{ step }} sur 4 — {{ currentStep.label }}</p>
+      </div>
+
+      <!-- ── Carte illustrée (desktop) ──────────────────── -->
+      <div class="hidden lg:flex relative overflow-hidden rounded-[24px] p-7 text-white bg-gradient-to-br flex-col min-h-[470px]"
            [ngClass]="currentStep.gradient">
         <span class="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10"></span>
         <span class="absolute -bottom-14 -left-12 w-48 h-48 rounded-full bg-white/[0.08]"></span>
@@ -91,8 +106,8 @@
         </div>
       </div>
 
-      <!-- ── Carte formulaire ───────────────────────────── -->
-      <div class="bg-white rounded-[24px] p-6 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.05)] flex flex-col">
+      <!-- ── Formulaire — carte blanche à partir de lg, à même le fond sur mobile ── -->
+      <div class="lg:bg-white lg:rounded-[24px] lg:p-8 lg:shadow-[0_2px_20px_rgba(0,0,0,0.05)] flex flex-col">
 
         <!-- ÉTAPE 1 — Livre -->
         <div *ngIf="step === 1">
@@ -128,7 +143,22 @@
             <p class="text-xs text-gray-500">Couverture trouvée automatiquement</p>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Mobile : pas de libellé, l'intitulé sert de valeur par défaut -->
+          <div class="grid grid-cols-2 gap-3 lg:hidden">
+            <select [(ngModel)]="categoryId" name="categoryIdMobile"
+                    class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+              <option [ngValue]="null">Catégorie</option>
+              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
+            <select [(ngModel)]="language" name="languageMobile"
+                    class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+              <option value="">Langue</option>
+              <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
+            </select>
+          </div>
+
+          <!-- Desktop : libellés au-dessus -->
+          <div class="hidden lg:grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-bold text-gray-900 mb-2">Catégorie</label>
               <select [(ngModel)]="categoryId" name="categoryId"
@@ -150,7 +180,10 @@
 
         <!-- ÉTAPE 2 — État -->
         <div *ngIf="step === 2">
-          <label class="block text-sm font-bold text-gray-900 mb-3">Dans quel état est ton livre ? <span class="text-primary">*</span></label>
+          <label class="block text-sm font-bold text-gray-900 mb-3">
+            <span class="lg:hidden">État du livre <span class="text-primary">*</span></span>
+            <span class="hidden lg:inline">Dans quel état est ton livre ? <span class="text-primary">*</span></span>
+          </label>
           <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-6">
             <button *ngFor="let c of conditionChoices" type="button" (click)="condition = c.value"
                     class="rounded-2xl border bg-white px-1.5 py-3 flex flex-col items-center gap-2 transition-colors"
@@ -179,7 +212,7 @@
           </div>
           <p class="text-xs text-gray-400 mb-5">Pour que les acheteurs sachent où récupérer le livre.</p>
 
-          <label class="block text-sm font-bold text-gray-900 mb-2">Description <span class="font-medium text-gray-400">(optionnel)</span></label>
+          <label class="block text-sm font-bold text-gray-900 mb-2">Description <span class="hidden lg:inline font-medium text-gray-400">(optionnel)</span></label>
           <textarea [(ngModel)]="description" name="description" rows="4" placeholder="Ex : quelques annotations au crayon..."
                     class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"></textarea>
         </div>
@@ -194,39 +227,47 @@
           </div>
           <p class="text-xs text-gray-400 mb-6 text-center">Fixe librement ton prix.</p>
 
-          <div class="bg-[#FBF5EC] rounded-2xl p-4 mb-4">
+          <div class="bg-[#F6EEE2] rounded-2xl p-4 mb-4">
             <p class="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
               <span>🔄</span> Acceptes-tu les échanges ?
             </p>
             <p class="text-xs text-gray-500 mb-3.5">Un livre contre un livre, sans argent à faire circuler.</p>
             <div class="grid grid-cols-2 gap-3">
               <button type="button" (click)="acceptsExchange = true"
-                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
-                      [ngClass]="acceptsExchange === true ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                      class="rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsExchange === true ? 'border-green-500 bg-green-50' : 'bg-white border-gray-200 hover:border-gray-300'">
                 <span>✅</span> Oui
               </button>
               <button type="button" (click)="acceptsExchange = false"
-                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
-                      [ngClass]="acceptsExchange === false ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                      class="rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsExchange === false ? 'border-red-400 bg-red-50' : 'bg-white border-gray-200 hover:border-gray-300'">
                 <span>❌</span> Non
               </button>
             </div>
           </div>
 
-          <div class="bg-[#FBF5EC] rounded-2xl p-4">
+          <div class="bg-[#F6EEE2] rounded-2xl p-4">
             <p class="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
               <span>💬</span> Contact par WhatsApp ?
+              <button type="button" (click)="showWhatsappInfo = !showWhatsappInfo"
+                      [attr.aria-expanded]="showWhatsappInfo" aria-label="En savoir plus"
+                      class="w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold leading-none flex items-center justify-center hover:bg-gray-300 transition-colors">i</button>
             </p>
+
+            <div *ngIf="showWhatsappInfo" class="bg-gray-900 text-white text-xs font-semibold rounded-xl px-4 py-3 leading-snug mb-2.5">
+              Quand c'est oui, tu pourras être contacté aussi via WhatsApp.
+            </div>
+
             <p class="text-xs text-gray-500 mb-3.5">Via la messagerie intégrée de Kittab et WhatsApp.</p>
             <div class="grid grid-cols-2 gap-3">
               <button type="button" (click)="acceptsWhatsappContact = true"
-                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
-                      [ngClass]="acceptsWhatsappContact === true ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                      class="rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsWhatsappContact === true ? 'border-green-500 bg-green-50' : 'bg-white border-gray-200 hover:border-gray-300'">
                 <span>✅</span> Oui
               </button>
               <button type="button" (click)="acceptsWhatsappContact = false"
-                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
-                      [ngClass]="acceptsWhatsappContact === false ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                      class="rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsWhatsappContact === false ? 'border-red-400 bg-red-50' : 'bg-white border-gray-200 hover:border-gray-300'">
                 <span>❌</span> Non
               </button>
             </div>
@@ -238,7 +279,7 @@
           <div class="bg-amber-100/70 rounded-2xl p-4 flex items-start gap-2.5 mb-5">
             <span class="shrink-0">📷</span>
             <p class="text-sm text-gray-700 leading-relaxed">
-              Ajoute des photos claires (couverture, dos, pages intérieures) — au moins une, jusqu'à quatre.
+              Ajoute des photos claires<span class="hidden lg:inline"> (couverture, dos, pages intérieures)</span> — au moins une, jusqu'à quatre.
             </p>
           </div>
 
@@ -260,7 +301,7 @@
                     class="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors">+</button>
           </div>
 
-          <div class="bg-[#FBF5EC] rounded-2xl p-4">
+          <div class="bg-[#F6EEE2] rounded-2xl p-4">
             <p class="font-bold text-gray-900 text-sm mb-3">Récapitulatif</p>
             <div class="flex items-center justify-between text-sm mb-2">
               <span class="text-gray-400">Livre</span>
@@ -279,8 +320,8 @@
           <p *ngIf="error" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mt-4">{{ error }}</p>
         </div>
 
-        <!-- ── Navigation ────────────────────────────────── -->
-        <div class="border-t border-gray-100 mt-7 pt-5 flex items-center justify-between">
+        <!-- ── Navigation (desktop) ──────────────────────── -->
+        <div class="hidden lg:flex border-t border-gray-100 mt-7 pt-5 items-center justify-between">
           <button type="button" (click)="prev()" [disabled]="step === 1"
                   class="font-bold text-sm transition-colors"
                   [ngClass]="step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-primary'">
@@ -303,6 +344,27 @@
       </div>
     </div>
   </div>
+</div>
+
+<!-- ── Navigation fixe (mobile) ─────────────────────────── -->
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-gray-100 px-5 py-3 flex items-center gap-4">
+  <button type="button" (click)="prev()" [disabled]="step === 1"
+          class="font-bold text-sm shrink-0 transition-colors"
+          [ngClass]="step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600'">
+    &#8592; Retour
+  </button>
+
+  <button *ngIf="step < 4" type="button" (click)="next()" [disabled]="!canContinue"
+          class="flex-1 font-bold text-sm py-3.5 rounded-full transition-colors"
+          [ngClass]="canContinue ? 'bg-primary text-white' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+    Continuer &#8594;
+  </button>
+
+  <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
+          class="flex-1 font-bold text-sm py-3.5 rounded-full transition-colors"
+          [ngClass]="isValid && !submitting ? 'bg-primary text-white' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+    {{ submitting ? 'Publication...' : 'Publier l\'annonce →' }}
+  </button>
 </div>
 
 <app-footer />

@@ -63,6 +63,9 @@ export class PublishComponent implements OnInit, OnDestroy {
   // ── Assistant en 4 étapes ──────────────────────────────
   step = 1;
 
+  /** Infobulle du "i" à côté de "Contact par WhatsApp ?". */
+  showWhatsappInfo = false;
+
   readonly steps = [
     {
       n: 1, label: 'Livre', heading: 'Quel livre vends-tu ?', emoji: '📖',
