@@ -124,6 +124,11 @@ export class CatalogueComponent implements OnInit {
     if (q) this.searchQuery = q;
     const categoryId = params.get('category_id');
     if (categoryId) this.selectedCategoryId = Number(categoryId);
+    const categoryName = params.get('category');
+    if (categoryName) {
+      // sera résolu après le chargement des catégories
+      (this as any)._pendingCategoryName = categoryName;
+    }
     const tab = params.get('tab');
     if (tab === 'demandes') {
       this.activeTab = 'demandes';
@@ -139,7 +144,16 @@ export class CatalogueComponent implements OnInit {
   async loadCategories() {
     try {
       const res = await fetch(`${environment.apiUrl}/api/categories`);
-      if (res.ok) this.categories = await res.json();
+      if (res.ok) {
+        this.categories = await res.json();
+        const pending = (this as any)._pendingCategoryName;
+        if (pending) {
+          const match = this.categories.find((c: any) =>
+            c.name.toLowerCase() === pending.toLowerCase()
+          );
+          if (match) this.selectedCategoryId = match.id;
+        }
+      }
     } catch {}
   }
 

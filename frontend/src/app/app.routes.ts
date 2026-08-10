@@ -8,6 +8,7 @@ export const routes: Routes = [
   { path: 'wanted-books', loadComponent: () => import('./pages/wanted-books/wanted-books.component').then(m => m.WantedBooksComponent) },
   { path: 'login', loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent) },
   { path: 'books/:id', loadComponent: () => import('./pages/book-detail/book-detail.component').then(m => m.BookDetailComponent) },
+  { path: 'books/:id/:slug', loadComponent: () => import('./pages/book-detail/book-detail.component').then(m => m.BookDetailComponent) },
   { path: 'how-it-works', loadComponent: () => import('./pages/how-it-works/how-it-works.component').then(m => m.HowItWorksComponent) },
   { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
   { path: 'community', loadComponent: () => import('./pages/community/community.component').then(m => m.CommunityComponent) },

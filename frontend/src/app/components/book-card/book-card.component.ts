@@ -47,4 +47,11 @@ export class BookCardComponent {
   onImageError(event: Event) {
     (event.target as HTMLImageElement).src = 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
   }
+
+  slugify(text: string): string {
+    return text.toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
 }
