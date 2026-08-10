@@ -42,8 +42,11 @@ export class PublishComponent implements OnInit, OnDestroy {
   selectedCover = '';
   language = '';
   pageCount: number | null = null;
-  acceptsExchange = false;
-  acceptsWhatsappContact = false;
+  // null tant que l'utilisateur n'a pas répondu : dans la maquette, ni "Oui"
+  // ni "Non" n'est pré-sélectionné. Ces deux réponses restent facultatives
+  // (pas d'astérisque), et sont converties en booléen à l'envoi.
+  acceptsExchange: boolean | null = null;
+  acceptsWhatsappContact: boolean | null = null;
   educationLevel = '';
   locationLabel = '';
   locationLat: number | null = null;
@@ -56,6 +59,80 @@ export class PublishComponent implements OnInit, OnDestroy {
 
   languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
   educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
+
+  // ── Assistant en 4 étapes ──────────────────────────────
+  step = 1;
+
+  readonly steps = [
+    {
+      n: 1, label: 'Livre', heading: 'Quel livre vends-tu ?', emoji: '📖',
+      text: 'Scanne son ISBN pour un remplissage automatique, ou renseigne-le manuellement.',
+      tip: "Un titre précis attire plus d'acheteurs.",
+      gradient: 'from-[#C0452F] to-[#A63A28]',
+    },
+    {
+      n: 2, label: 'État', heading: 'Décris son état', emoji: '🏷️',
+      text: "Sois honnête sur l'état : ça crée la confiance et évite les mauvaises surprises.",
+      tip: 'Précise ta ville pour faciliter la rencontre.',
+      gradient: 'from-[#3E8E5A] to-[#2E7A4A]',
+    },
+    {
+      n: 3, label: 'Prix', heading: 'Fixe tes conditions', emoji: '💰',
+      text: 'Choisis ton prix librement. Tu peux aussi accepter les échanges ou la messagerie via WhatsApp.',
+      tip: 'Les échanges livre contre livre plaisent beaucoup.',
+      gradient: 'from-[#5B7FE0] to-[#3F62D4]',
+    },
+    {
+      n: 4, label: 'Photos', heading: 'Dernière étape', emoji: '📸',
+      text: 'Ajoute de vraies photos de ton exemplaire : couverture, dos, pages intérieures.',
+      tip: 'Les annonces avec photos se vendent 3x plus vite.',
+      gradient: 'from-[#E8A317] to-[#CE8A00]',
+    },
+  ];
+
+  // Les quatre états réels de la maquette. "Je ne sais pas" n'est pas une
+  // valeur stockée : ce bouton ouvre le questionnaire, qui déduit l'état.
+  readonly conditionChoices = [
+    { value: 'new',      label: 'Parfait',  emoji: '✨', iconBg: 'bg-green-500' },
+    { value: 'like_new', label: 'Très bon', emoji: '🙂', iconBg: 'bg-blue-500' },
+    { value: 'good',     label: 'Correct',  emoji: '📙', iconBg: 'bg-amber-400' },
+    { value: 'fair',     label: 'Dégradé',  emoji: '📕', iconBg: 'bg-gray-500' },
+  ];
+
+  get currentStep() {
+    return this.steps[this.step - 1];
+  }
+
+  /** Champs marqués d'un astérisque dans la maquette, étape par étape. */
+  stepValid(step: number): boolean {
+    switch (step) {
+      case 1: return this.title.trim().length > 0 && this.author.trim().length > 0;
+      case 2: return !!this.condition && this.locationLabel.trim().length > 0;
+      case 3: return !!this.price && this.price > 0;
+      case 4: return this.images.length > 0;
+      default: return false;
+    }
+  }
+
+  get canContinue(): boolean {
+    return this.stepValid(this.step);
+  }
+
+  next() {
+    if (!this.canContinue || this.step >= 4) return;
+    this.step++;
+    this.scrollToTop();
+  }
+
+  prev() {
+    if (this.step <= 1) return;
+    this.step--;
+    this.scrollToTop();
+  }
+
+  private scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   // State
   showPreviewModal = false;
@@ -486,10 +563,11 @@ export class PublishComponent implements OnInit, OnDestroy {
   }
 
   get isValid() {
-    if (!this.condition || !this.price || this.price <= 0) return false;
-    if (this.images.length === 0) return false;
-    if (this.isPack) return this.title.trim().length > 0 && this.validPackItems.length >= 2;
-    return this.title.trim().length > 0 && this.author.trim().length > 0 && this.locationLabel.trim().length > 0;
+    if (this.isPack) {
+      if (!this.condition || !this.price || this.price <= 0 || this.images.length === 0) return false;
+      return this.title.trim().length > 0 && this.validPackItems.length >= 2;
+    }
+    return [1, 2, 3, 4].every(s => this.stepValid(s));
   }
 
   async submit() {
@@ -516,8 +594,8 @@ export class PublishComponent implements OnInit, OnDestroy {
         condition: this.condition,
         price: this.price,
         book_type: this.bookType,
-        accepts_exchange: this.acceptsExchange,
-        accepts_whatsapp_contact: this.acceptsWhatsappContact,
+        accepts_exchange: !!this.acceptsExchange,
+        accepts_whatsapp_contact: !!this.acceptsWhatsappContact,
         is_pack: this.isPack,
       };
       if (this.categoryId) payload.category_id = this.categoryId;

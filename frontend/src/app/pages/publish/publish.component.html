@@ -1,631 +1,308 @@
 <app-navbar />
 
-<!-- Header -->
-<div class="bg-gradient-to-br from-primary to-red-900 py-10">
-  <div class="max-w-6xl mx-auto px-4">
-    <p class="text-red-200 text-sm font-medium mb-1">Vendeur · Nouvelle annonce</p>
-    <h1 class="text-3xl font-extrabold text-white">Publier une annonce</h1>
-    <p class="text-red-100 mt-1 text-sm">Remplis les informations ci-dessous pour mettre ton livre en vente</p>
-  </div>
+<!-- ── Caméra code-barres ─────────────────────────────── -->
+<div *ngIf="showBarcodeCamera" class="fixed inset-0 z-[60] bg-black/90 flex flex-col items-center justify-center p-5">
+  <video #barcodeVideo autoplay playsinline class="w-full max-w-md rounded-[20px]"></video>
+  <p class="text-white/80 text-sm mt-4">Vise le code-barres au dos du livre</p>
+  <button type="button" (click)="stopBarcodeCamera()"
+          class="mt-5 bg-white text-gray-900 font-bold px-7 py-3 rounded-full text-sm">Annuler</button>
 </div>
 
-<!-- ── MODAL RÉCAPITULATIF ─────────────────────────────── -->
-<div *ngIf="showPreviewModal" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" (click)="closePreview()"></div>
-  <div class="relative bg-white w-full sm:max-w-lg rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-
-    <!-- Header -->
-    <div class="bg-amber-50 border-b border-amber-100 px-5 py-4 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-2">
-        <span class="text-xl">👀</span>
-        <p class="font-bold text-gray-900 text-sm">Vérifie ton annonce</p>
-      </div>
-      <button (click)="closePreview()" class="text-gray-400 hover:text-gray-600">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-      </button>
+<!-- ── Questionnaire "Je ne sais pas" ─────────────────── -->
+<div *ngIf="showConditionQuiz" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-5">
+  <div class="bg-white rounded-[24px] w-full max-w-md p-6 md:p-7">
+    <div class="flex items-start justify-between mb-5">
+      <h3 class="font-black text-gray-900 text-lg">Trouvons l'état ensemble</h3>
+      <button type="button" (click)="closeConditionQuiz()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
     </div>
 
-    <!-- Contenu scrollable -->
-    <div class="overflow-y-auto p-5 space-y-4 flex-1">
-
-      <!-- Couverture + titre + auteur -->
-      <div class="flex gap-4 items-start">
-        <img *ngIf="selectedCover" [src]="selectedCover" class="w-16 h-22 object-cover rounded-xl shadow-sm shrink-0" />
-        <div *ngIf="!selectedCover && imagePreviews.length > 0" class="w-16 h-22 rounded-xl overflow-hidden shadow-sm shrink-0">
-          <img [src]="imagePreviews[0]" class="w-full h-full object-cover" />
-        </div>
-        <div *ngIf="!selectedCover && imagePreviews.length === 0" class="w-16 h-22 bg-gray-100 rounded-xl flex items-center justify-center shrink-0 text-2xl">📚</div>
-        <div class="flex-1 min-w-0">
-          <h2 class="font-black text-gray-900 leading-tight">{{ title || '—' }}</h2>
-          <p class="text-gray-500 text-sm mt-0.5">{{ isPack ? 'Pack de livres' : (author || '—') }}</p>
-          <span class="inline-block mt-1.5 text-xs font-semibold px-2.5 py-1 rounded-full" [ngClass]="conditionBadge">{{ conditionLabel }}</span>
-        </div>
-      </div>
-
-      <hr class="border-gray-100" />
-
-      <!-- Infos clés -->
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Prix</p>
-          <p class="font-bold text-gray-900">{{ price | number }} FCFA</p>
-        </div>
-        <div>
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Localisation</p>
-          <p class="font-medium text-gray-700 text-sm">{{ locationLabel || '—' }}</p>
-        </div>
-        <div *ngIf="!isPack">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Type</p>
-          <p class="font-medium text-gray-700 text-sm">{{ bookType === 'textbook' ? 'Manuel scolaire' : bookType === 'novel' ? 'Roman' : 'Autre' }}</p>
-        </div>
-        <div *ngIf="acceptsExchange">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Échange</p>
-          <p class="font-medium text-green-600 text-sm">✅ Accepté</p>
-        </div>
-        <div *ngIf="acceptsWhatsappContact">
-          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">WhatsApp</p>
-          <p class="font-medium text-green-600 text-sm">💬 Activé</p>
-        </div>
-      </div>
-
-      <!-- Photos -->
-      <div *ngIf="imagePreviews.length > 0">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Photos ({{ imagePreviews.length }})</p>
-        <div class="flex gap-2 flex-wrap">
-          <img *ngFor="let img of imagePreviews" [src]="img" class="w-14 h-18 object-cover rounded-lg border border-gray-100" />
-        </div>
-      </div>
-
-      <!-- Description -->
-      <div *ngIf="description">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Description</p>
-        <p class="text-sm text-gray-600">{{ description }}</p>
-      </div>
-
-      <!-- Pack items -->
-      <div *ngIf="isPack && validPackItems.length > 0">
-        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Livres inclus</p>
-        <ul class="space-y-1">
-          <li *ngFor="let item of validPackItems" class="text-sm text-gray-700 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-primary rounded-full shrink-0"></span>{{ item }}
-          </li>
-        </ul>
-      </div>
-
-      <p *ngIf="error" class="text-red-500 text-xs">{{ error }}</p>
-    </div>
-
-    <!-- Actions fixes en bas -->
-    <div class="px-5 py-4 border-t border-gray-100 flex gap-3 shrink-0">
-      <button (click)="closePreview()"
-        class="flex-1 py-3 rounded-full border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-50 transition-colors">
-        ← Modifier
-      </button>
-      <button (click)="submit()" [disabled]="submitting"
-        class="flex-1 py-3 rounded-full bg-primary text-white font-bold text-sm hover:bg-red-800 transition-colors disabled:opacity-50">
-        <span *ngIf="!submitting">✅ Publier</span>
-        <span *ngIf="submitting" class="flex items-center justify-center gap-2">
-          <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          En cours...
-        </span>
-      </button>
-    </div>
-
-  </div>
-</div>
-
-<div class="max-w-6xl mx-auto px-4 py-10">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-    <!-- Colonne principale -->
-    <div class="lg:col-span-2 space-y-6">
-
-      <!-- Bloc 1 : Informations du livre -->
-      <div class="card p-6">
-        <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
-          <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">1</span>
-          Informations du livre
-        </h2>
-
-        <!-- Toggle livre / pack (désactivé pour MVP) -->
-        <!-- <div class="grid grid-cols-2 gap-3 mb-6">
-          <button type="button" (click)="isPack = false"
-                  [ngClass]="!isPack ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                  class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
-            📖 Livre seul
-          </button>
-          <button type="button" (click)="isPack = true"
-                  [ngClass]="isPack ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                  class="flex items-center justify-center gap-2 border-2 rounded-xl py-3 text-sm font-semibold transition-colors">
-            📦 Pack de livres
-          </button>
-        </div> -->
-
-        <!-- Scan livre -->
-        <div *ngIf="!isPack" class="mb-4">
-          <!-- Bouton principal -->
-          <button type="button" (click)="showScanMenu = !showScanMenu"
-                  class="w-full flex items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-xl py-3 text-sm font-medium text-gray-600 hover:border-primary hover:text-primary transition-colors">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
-            📷 Scanner le livre
-          </button>
-
-          <!-- Menu options -->
-          <div *ngIf="showScanMenu" class="mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-            <!-- Option 1 : Caméra code-barres -->
-            <button type="button" (click)="startBarcodeCamera()" [disabled]="scanLoading"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors border-b border-gray-100">
-              <span class="text-lg">📷</span>
-              <div class="text-left">
-                <div class="font-medium">Scanner avec la caméra</div>
-                <div class="text-xs text-gray-400">Pointez vers le code-barres ISBN</div>
-              </div>
-            </button>
-            <!-- Option 2 : Upload image (désactivé pour MVP) -->
-            <!-- <button type="button" (click)="scanUploadInput.click()" [disabled]="scanLoading"
-                    class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-primary transition-colors">
-              <span class="text-lg">🖼️</span>
-              <div class="text-left">
-                <div class="font-medium">Uploader une photo</div>
-                <div class="text-xs text-gray-400">Code-barres ou couverture du livre</div>
-              </div>
-            </button> -->
-          </div>
-
-          <!-- Caméra code-barres -->
-          <div *ngIf="showBarcodeCamera" class="mt-3 relative rounded-xl overflow-hidden bg-black">
-            <video #barcodeVideo class="w-full h-48 object-cover" autoplay playsinline></video>
-            <button type="button" (click)="stopBarcodeCamera()"
-                    class="absolute top-2 right-2 bg-black/60 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm">✕</button>
-            <div class="absolute bottom-2 left-0 right-0 text-center text-white text-xs">
-              Centrez le code-barres dans le cadre
-            </div>
-          </div>
-
-          <!-- Loading / erreur -->
-          <div *ngIf="scanLoading" class="mt-2 flex items-center gap-2 text-xs text-primary">
-            <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block"></span>
-            {{ scanLoading === 'barcode' ? 'Recherche du livre...' : 'Analyse de l\'image...' }}
-          </div>
-          <p *ngIf="scanError" class="text-xs text-red-500 mt-1">{{ scanError }}</p>
-
-          <!-- Inputs cachés -->
-          <input #scanUploadInput type="file" accept="image/*" class="hidden" (change)="onScanUpload($event)" />
-        </div>
-
-        <!-- Titre + Auteur -->
-        <div *ngIf="!isPack" class="mb-4 space-y-4">
-          <!-- Titre -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Titre du livre <span class="text-primary">*</span></label>
-            <div class="relative">
-              <input
-                type="text"
-                [(ngModel)]="title"
-                placeholder="Recherche un livre..."
-                class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary pr-10"
-              />
-              <svg *ngIf="!autocompleteLoading" class="w-4 h-4 text-gray-400 absolute right-3 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-              <div *ngIf="autocompleteLoading" class="absolute right-3 top-3 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-
-              <!-- Suggestions dropdown -->
-              <div *ngIf="showSuggestions && suggestions.length > 0"
-                   class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-20 overflow-hidden">
-                <button
-                  *ngFor="let s of suggestions"
-                  (mousedown)="selectSuggestion(s)"
-                  class="w-full px-4 py-3 flex items-center gap-3 hover:bg-red-50 text-left border-b border-gray-50 last:border-0">
-                  <img *ngIf="s.thumbnail" [src]="s.thumbnail" class="w-8 h-10 object-cover rounded shrink-0" />
-                  <div *ngIf="!s.thumbnail" class="w-8 h-10 bg-gray-100 rounded flex items-center justify-center text-lg shrink-0">📚</div>
-                  <div>
-                    <p class="text-sm font-semibold text-gray-800">{{ s.title }}</p>
-                    <p class="text-xs text-gray-500">{{ s.author }} · <span [class]="s.source === 'internal' ? 'text-primary' : 'text-gray-400'">{{ s.source === 'internal' ? 'Catalogue Kittab' : 'Google Books' }}</span></p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Auteur -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Auteur <span class="text-primary">*</span></label>
-            <input type="text" [(ngModel)]="author" placeholder="Nom de l'auteur"
-                   class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-          </div>
-
-          <!-- Couverture sélectionnée -->
-          <div *ngIf="selectedCover" class="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <img [src]="selectedCover" class="w-12 h-16 object-cover rounded shadow" />
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-800 truncate">{{ title }}</p>
-              <p class="text-xs text-gray-500">Couverture récupérée automatiquement</p>
-            </div>
-            <button type="button" (click)="selectedCover = ''" class="text-gray-400 hover:text-gray-600">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Nom du pack -->
-        <div *ngIf="isPack" class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nom du pack <span class="text-primary">*</span></label>
-          <input type="text" [(ngModel)]="title" placeholder="Ex: Pack 6ème — Collège Mariama Bâ"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        </div>
-
-        <!-- Champs pack -->
-        <div *ngIf="isPack" class="mb-4 space-y-4">
-          <!-- Niveau scolaire optionnel -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-              Niveau scolaire <span class="text-gray-400 font-normal">(optionnel)</span>
-            </label>
-            <select [(ngModel)]="educationLevel"
-                    class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-              <option value="">— Pas un manuel scolaire —</option>
-              <option *ngFor="let l of educationLevels" [value]="l">{{ l }}</option>
-            </select>
-            <p class="text-xs text-gray-400 mt-1">Laissez vide pour un pack de romans, séries, etc.</p>
-          </div>
-
-          <!-- Liste des livres -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Livres inclus dans le pack <span class="text-primary">*</span>
-              <span class="text-gray-400 font-normal ml-1">(min. 2, max. 10)</span>
-            </label>
-            <div class="space-y-2">
-              <div *ngFor="let item of packItems; let i = index" class="flex items-center gap-2">
-                <input type="text" [(ngModel)]="item.value" [placeholder]="'Livre ' + (i+1)"
-                       class="flex-1 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-                <button type="button" *ngIf="packItems.length > 1" (click)="removePackItem(i)"
-                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors text-lg shrink-0">✕</button>
-              </div>
-            </div>
-            <button type="button" *ngIf="packItems.length < 10" (click)="addPackItem()"
-                    class="mt-2 flex items-center gap-1 text-primary text-sm font-medium hover:underline">
-              + Ajouter un livre
-            </button>
-          </div>
-        </div>
-
-        <!-- Catégorie -->
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Catégorie</label>
-          <select [(ngModel)]="categoryId"
-                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
-            <option [ngValue]="null">Choisir une catégorie</option>
-            <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
-          </select>
-        </div>
-
-        <!-- Langue -->
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Langue <span class="text-gray-400 font-normal">(optionnel)</span>
-          </label>
-          <select [(ngModel)]="language"
-                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white">
-            <option value="">— Sélectionner une langue —</option>
-            <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
-          </select>
-        </div>
-
-        <!-- Lieu de récupération -->
-        <div class="mb-4" *ngIf="!isPack">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Quartier ou Ville <span class="text-primary">*</span>
-          </label>
-          <div class="relative">
-            <input type="text" [(ngModel)]="locationLabel" (input)="onLocationInput()"
-                   (blur)="showLocationSuggestions = false"
-                   placeholder="Ex: Médina, Dakar"
-                   class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary pr-8" />
-            <span *ngIf="locationLat" class="absolute right-3 top-2.5 text-green-500 text-sm">✓</span>
-            <div *ngIf="locationLoading" class="absolute right-3 top-3 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-
-            <!-- Suggestions -->
-            <div *ngIf="showLocationSuggestions && locationSuggestions.length > 0"
-                 class="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 z-20 overflow-hidden">
-              <button *ngFor="let s of locationSuggestions"
-                      type="button"
-                      (mousedown)="selectLocation(s)"
-                      class="w-full px-4 py-2.5 text-left text-xs text-gray-700 hover:bg-red-50 hover:text-primary border-b border-gray-50 last:border-0 truncate">
-                📍 {{ s.label }}
-              </button>
-            </div>
-          </div>
-          <p class="text-xs text-gray-400 mt-1">Tape ton quartier ou ta ville pour que les acheteurs sachent où récupérer le livre</p>
-        </div>
-
-        <!-- Nombre de pages -->
-        <div class="mb-4">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Nombre de pages <span class="text-gray-400 font-normal">(optionnel)</span>
-          </label>
-          <input type="number" [(ngModel)]="pageCount" min="1" placeholder="Ex: 320"
-                 class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary" />
-        </div>
-
-        <!-- Description -->
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">
-            Description <span class="text-gray-400 font-normal">(optionnel)</span>
-          </label>
-          <textarea
-            [(ngModel)]="description"
-            rows="3"
-            placeholder="Ex: Livre en bon état, quelques annotations au crayon..."
-            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none"
-          ></textarea>
-        </div>
-      </div>
-
-      <!-- Bloc 2 : État & Prix -->
-      <div class="card p-6">
-        <h2 class="font-bold text-gray-800 text-lg mb-5 flex items-center gap-2">
-          <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">2</span>
-          État & Prix
-        </h2>
-
-        <!-- État -->
-        <div class="mb-6">
-          <label class="block text-sm font-semibold text-gray-700 mb-3">État du livre <span class="text-primary">*</span></label>
-
-          <!-- Illustration + description dynamique -->
-          <div class="rounded-2xl overflow-hidden border border-gray-200 mb-4 bg-gray-50">
-            <div class="relative">
-              <img
-                [src]="selectedCondition ? selectedCondition.img : 'assets/conditions/condition-new.jpg'"
-                alt="État du livre"
-                class="w-full h-48 object-cover transition-all duration-300"
-                [class.opacity-30]="!condition"
-              />
-              <!-- Badge état sélectionné -->
-              <div *ngIf="selectedCondition"
-                   class="absolute bottom-3 left-3 px-3 py-1.5 rounded-full text-sm font-bold shadow-lg"
-                   [ngClass]="selectedCondition.badge">
-                {{ selectedCondition.label }}
-              </div>
-              <!-- Overlay si rien sélectionné -->
-              <div *ngIf="!condition"
-                   class="absolute inset-0 flex items-center justify-center bg-black/20">
-                <p class="text-white font-semibold text-sm bg-black/40 px-4 py-2 rounded-full">Sélectionne un état ci-dessous</p>
-              </div>
-            </div>
-            <!-- Description -->
-            <div *ngIf="selectedCondition" class="px-4 py-3">
-              <p class="text-sm text-gray-600 leading-relaxed">{{ selectedCondition.desc }}</p>
-            </div>
-          </div>
-
-          <!-- Options radio 2x2 -->
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <button *ngFor="let c of conditions"
-                    type="button"
-                    (click)="condition = c.value"
-                    class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all"
-                    [ngClass]="condition === c.value ? c.color + ' ' + c.bg : 'border-gray-200 bg-white hover:border-gray-300'">
-              <div class="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-all"
-                   [ngClass]="condition === c.value ? 'border-current' : 'border-gray-300'">
-                <div *ngIf="condition === c.value" class="w-2 h-2 rounded-full bg-current"></div>
-              </div>
-              <span class="text-sm font-semibold text-gray-800">{{ c.label }}</span>
-            </button>
-          </div>
-
-          <!-- Je ne sais pas -->
-          <button type="button" (click)="openConditionQuiz()"
-                  class="w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-dashed border-gray-300 hover:border-primary hover:bg-red-50 transition-all group">
-            <div class="flex items-center gap-3">
-              <span class="text-xl">🤔</span>
-              <div class="text-left">
-                <p class="text-sm font-semibold text-gray-700 group-hover:text-primary">Je ne sais pas quel état choisir</p>
-                <p class="text-xs text-gray-400">Réponds à quelques questions et on t'aide à évaluer</p>
-              </div>
-            </div>
-            <svg class="w-4 h-4 text-gray-400 group-hover:text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-          </button>
-        </div>
-
-        <!-- Prix -->
-        <div class="mb-5">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">Prix <span class="text-primary">*</span></label>
-          <div class="relative">
-            <input
-              type="number"
-              [(ngModel)]="price"
-              placeholder="0"
-              min="0"
-              class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary pr-16"
-            />
-            <span class="absolute right-4 top-2.5 text-sm font-semibold text-gray-400">FCFA</span>
-          </div>
-          <p class="text-xs text-gray-400 mt-1.5">Prix moyen pour ce type de livre : 3 000 – 25 000 FCFA</p>
-        </div>
-
-        <!-- Échange -->
-        <div class="border-t border-gray-100 pt-5">
-          <p class="text-sm font-semibold text-gray-700 mb-2">🔄 Acceptez-vous les échanges de livres ?</p>
-          <p class="text-xs text-gray-400 mb-3">Les acheteurs pourront proposer un de leurs livres en échange</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" (click)="acceptsExchange = true"
-                    [ngClass]="acceptsExchange ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
-              ✅ Oui
-            </button>
-            <button type="button" (click)="acceptsExchange = false"
-                    [ngClass]="!acceptsExchange ? 'border-gray-600 bg-gray-50 text-gray-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
-              ❌ Non
-            </button>
-          </div>
-        </div>
-
-        <!-- Contact WhatsApp -->
-        <div class="border-t border-gray-100 pt-5">
-          <p class="text-sm font-semibold text-gray-700 mb-2">💬 Acceptez-vous d'être contacté sur WhatsApp ?</p>
-          <p class="text-xs text-gray-400 mb-3">Les acheteurs pourront vous contacter directement sur WhatsApp</p>
-          <div class="grid grid-cols-2 gap-2">
-            <button type="button" (click)="acceptsWhatsappContact = true"
-                    [ngClass]="acceptsWhatsappContact ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
-              ✅ Oui
-            </button>
-            <button type="button" (click)="acceptsWhatsappContact = false"
-                    [ngClass]="!acceptsWhatsappContact ? 'border-gray-600 bg-gray-50 text-gray-700' : 'border-gray-200 text-gray-500 hover:border-gray-300'"
-                    class="flex items-center justify-center gap-2 border-2 rounded-xl py-2.5 text-sm font-semibold transition-colors">
-              ❌ Non
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Colonne droite -->
-    <div class="space-y-6">
-
-      <!-- Photos -->
-      <div class="card p-6">
-        <h2 class="font-bold text-gray-800 text-base mb-2 flex items-center gap-2">
-          <span class="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold">3</span>
-          Photos <span class="text-gray-400 font-normal text-sm">(max 4)</span>
-        </h2>
-        <p class="text-xs text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
-          📸 Ajoutez des photos claires de votre livre pour que les acheteurs puissent voir son état réel (couverture, dos, pages intérieures).
-        </p>
-
-        <!-- Drop zone -->
-        <label *ngIf="images.length < 4"
-               class="block border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-primary cursor-pointer transition-colors mb-3">
-          <input type="file" accept="image/jpeg,image/png,image/webp" multiple (change)="onImageChange($event)" class="hidden" />
-          <div class="text-3xl mb-2">📷</div>
-          <p class="text-sm font-semibold text-gray-700">Ajouter des photos</p>
-          <p class="text-xs text-gray-400 mt-1">JPG, PNG ou WEBP · Max 5 Mo</p>
-        </label>
-
-        <!-- Miniatures -->
-        <div *ngIf="imagePreviews.length > 0" class="grid grid-cols-4 gap-2">
-          <div *ngFor="let preview of imagePreviews; let i = index" class="relative aspect-square">
-            <img [src]="preview" class="w-full h-full object-cover rounded-lg border border-gray-200" />
-            <button (click)="removeImage(i)"
-                    class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600">
-              ×
-            </button>
-          </div>
-          <ng-container *ngFor="let _ of emptySlots">
-            <div class="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-300 text-xl">+</div>
-          </ng-container>
-        </div>
-      </div>
-
-      <!-- Récapitulatif -->
-      <div class="card p-6">
-        <h2 class="font-bold text-gray-800 text-base mb-4">Récapitulatif</h2>
-        <div class="space-y-2 text-sm">
-          <div class="flex justify-between gap-2">
-            <span class="text-gray-500 shrink-0">Livre</span>
-            <span class="font-semibold text-gray-800 text-right truncate">{{ title || '—' }}</span>
-          </div>
-          <div *ngIf="locationLabel" class="flex justify-between gap-2">
-            <span class="text-gray-500 shrink-0">Lieu</span>
-            <span class="font-semibold text-gray-800 text-right truncate text-xs">📍 {{ locationLabel }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">État</span>
-            <span class="font-semibold text-gray-800">{{ conditionLabel }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-500">Photos</span>
-            <span class="font-semibold text-gray-800">{{ imagePreviews.length }} / 4</span>
-          </div>
-          <div class="border-t border-gray-100 pt-2 mt-2 flex justify-between items-center">
-            <span class="text-gray-500">Prix</span>
-            <span class="font-extrabold text-xl text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
-          </div>
-        </div>
-
-        <!-- Photo manquante -->
-        <div *ngIf="images.length === 0" class="mt-3 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700 font-medium">
-          📸 Au moins 1 photo du livre est obligatoire
-        </div>
-
-        <!-- Erreur -->
-        <div *ngIf="error" class="mt-4 bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
-          {{ error }}
-        </div>
-
-        <!-- Bouton preview -->
-        <button
-          (click)="showPreview()"
-          [disabled]="!isValid"
-          [class]="'w-full mt-5 py-3 rounded-full font-bold text-sm transition-all ' + (isValid ? 'bg-primary text-white hover:bg-red-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed')"
-        >
-          Vérifier avant de publier →
-        </button>
-        <p class="text-xs text-gray-400 text-center mt-3">Tu pourras relire toutes les informations avant de publier</p>
-      </div>
-
-    </div>
-  </div>
-
-<!-- Modal questionnaire état -->
-<div *ngIf="showConditionQuiz" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeConditionQuiz()">
-  <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl" (click)="$event.stopPropagation()">
-
-    <!-- Question -->
     <div *ngIf="!quizSuggestion">
-      <div class="flex items-center justify-between mb-6">
-        <div class="flex gap-1">
-          <div *ngFor="let q of quizQuestions; let i = index"
-               [class]="'w-8 h-1 rounded-full ' + (i <= quizStep ? 'bg-primary' : 'bg-gray-200')"></div>
-        </div>
-        <button (click)="closeConditionQuiz()" class="text-gray-400 hover:text-gray-600 text-xl">✕</button>
-      </div>
-
-      <div class="text-3xl mb-4 text-center">{{ quizQuestions[quizStep].question.includes('pages') ? '📄' : quizQuestions[quizStep].question.includes('couverture') ? '📕' : quizQuestions[quizStep].question.includes('annotations') ? '✏️' : '📚' }}</div>
-      <h3 class="font-bold text-gray-900 text-lg text-center mb-6">{{ quizQuestions[quizStep].question }}</h3>
-
-      <div class="space-y-3">
-        <button *ngFor="let opt of quizQuestions[quizStep].options"
-                (click)="answerQuiz(opt.score)"
-                class="w-full text-left px-4 py-3 border-2 border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:border-primary hover:bg-red-50 transition-colors">
+      <p class="text-xs text-gray-400 font-bold uppercase tracking-wider mb-2">
+        Question {{ quizStep + 1 }} / {{ quizQuestions.length }}
+      </p>
+      <p class="font-bold text-gray-900 mb-4">{{ quizQuestions[quizStep].question }}</p>
+      <div class="space-y-2.5">
+        <button *ngFor="let opt of quizQuestions[quizStep].options" type="button" (click)="answerQuiz(opt.score)"
+                class="w-full text-left border border-gray-200 rounded-2xl px-4 py-3 text-sm text-gray-700 hover:border-primary hover:bg-red-50 transition-colors">
           {{ opt.label }}
         </button>
       </div>
-
-      <p class="text-xs text-gray-400 text-center mt-4">Question {{ quizStep + 1 }} / {{ quizQuestions.length }}</p>
     </div>
 
-    <!-- Résultat -->
     <div *ngIf="quizSuggestion" class="text-center">
-      <button (click)="closeConditionQuiz()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">✕</button>
-      <div class="text-5xl mb-4">🎯</div>
-      <h3 class="font-bold text-gray-900 text-xl mb-2">Notre suggestion</h3>
-      <p class="text-gray-500 text-sm mb-5">D'après tes réponses, ton livre est en :</p>
+      <div class="text-4xl mb-3">🎯</div>
+      <p class="text-gray-500 text-sm mb-1">L'état de ton livre semble être</p>
+      <p class="font-black text-gray-900 text-xl mb-4">{{ quizSuggestion.label }}</p>
+      <p class="text-gray-500 text-sm mb-5">
+        Prix conseillé : {{ quizSuggestion.priceMin | number:'1.0-0' }} à {{ quizSuggestion.priceMax | number:'1.0-0' }} FCFA
+      </p>
+      <button type="button" (click)="applyQuizSuggestion()"
+              class="w-full bg-primary text-white font-bold py-3.5 rounded-full text-sm hover:bg-red-800 transition-colors">
+        Appliquer cet état
+      </button>
+    </div>
+  </div>
+</div>
 
-      <div class="bg-primary/10 border-2 border-primary rounded-2xl p-4 mb-4">
-        <p class="text-2xl font-extrabold text-primary mb-1">{{ quizSuggestion.label }}</p>
-        <p class="text-sm text-gray-600">Prix suggéré : <span class="font-bold text-gray-900">{{ quizSuggestion.priceMin | number }} – {{ quizSuggestion.priceMax | number }} FCFA</span></p>
+<div class="bg-[#FBF5EC] min-h-screen">
+  <div class="max-w-5xl mx-auto px-5 md:px-8 py-10 md:py-14">
+
+    <!-- ── En-tête ──────────────────────────────────────── -->
+    <div class="text-center mb-8 md:mb-10">
+      <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] mb-3">Nouvelle annonce</p>
+      <h1 class="font-black text-gray-900 text-3xl md:text-[40px] leading-tight tracking-tight">{{ currentStep.heading }}</h1>
+    </div>
+
+    <!-- ── Fil d'étapes ─────────────────────────────────── -->
+    <div class="flex items-start justify-center mb-9 md:mb-11 max-w-lg mx-auto">
+      <ng-container *ngFor="let s of steps; let last = last">
+        <div class="flex flex-col items-center shrink-0 w-16">
+          <div class="w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-base transition-colors"
+               [ngClass]="step >= s.n ? 'bg-primary text-white' : 'bg-white text-gray-400 border border-gray-200'">
+            <span *ngIf="step > s.n">&#10003;</span>
+            <span *ngIf="step <= s.n">{{ s.n }}</span>
+          </div>
+          <span class="mt-2 text-xs font-bold" [ngClass]="step >= s.n ? 'text-gray-800' : 'text-gray-400'">{{ s.label }}</span>
+        </div>
+        <div *ngIf="!last" class="h-[3px] flex-1 mt-[22px] md:mt-6 rounded-full"
+             [ngClass]="step > s.n ? 'bg-primary' : 'bg-[#EDE2D3]'"></div>
+      </ng-container>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-6">
+
+      <!-- ── Carte illustrée ────────────────────────────── -->
+      <div class="relative overflow-hidden rounded-[24px] p-7 text-white bg-gradient-to-br flex flex-col min-h-[300px] lg:min-h-[470px]"
+           [ngClass]="currentStep.gradient">
+        <span class="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-white/10"></span>
+        <span class="absolute -bottom-14 -left-12 w-48 h-48 rounded-full bg-white/[0.08]"></span>
+
+        <div class="relative">
+          <div class="text-3xl mb-5">{{ currentStep.emoji }}</div>
+          <h2 class="font-black text-xl md:text-2xl mb-2.5">{{ currentStep.heading }}</h2>
+          <p class="text-white/85 text-[15px] leading-relaxed">{{ currentStep.text }}</p>
+        </div>
+
+        <div class="relative mt-auto pt-8">
+          <div class="bg-white/15 rounded-2xl px-4 py-3.5 flex items-start gap-2.5">
+            <span class="shrink-0">✨</span>
+            <p class="text-sm font-semibold leading-snug">{{ currentStep.tip }}</p>
+          </div>
+        </div>
       </div>
 
-      <p class="text-xs text-gray-400 mb-5">Tu pourras toujours modifier l'état et le prix manuellement.</p>
+      <!-- ── Carte formulaire ───────────────────────────── -->
+      <div class="bg-white rounded-[24px] p-6 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.05)] flex flex-col">
 
-      <button (click)="applyQuizSuggestion()"
-              class="w-full bg-primary text-white rounded-xl py-3 font-semibold text-sm hover:bg-red-800 transition-colors">
-        Appliquer cette suggestion
-      </button>
-      <button (click)="closeConditionQuiz()" class="w-full mt-2 text-sm text-gray-400 hover:text-gray-600 py-2">
-        Choisir moi-même
-      </button>
+        <!-- ÉTAPE 1 — Livre -->
+        <div *ngIf="step === 1">
+          <button type="button" (click)="startBarcodeCamera()" [disabled]="scanLoading"
+                  class="w-full border-2 border-dashed border-amber-300 bg-amber-50/50 rounded-2xl py-4 px-4 flex items-center justify-center gap-2.5 text-amber-700 font-bold text-sm hover:bg-amber-50 transition-colors disabled:opacity-60 mb-6">
+            <span>📷</span>
+            {{ scanLoading ? 'Recherche en cours...' : 'Scanner le code ISBN' }}
+          </button>
+
+          <p *ngIf="scanError" class="text-xs text-orange-600 -mt-4 mb-4">{{ scanError }}</p>
+
+          <label class="block text-sm font-bold text-gray-900 mb-2">Titre du livre <span class="text-primary">*</span></label>
+          <div class="relative mb-5">
+            <input type="text" [(ngModel)]="title" name="title" placeholder="Ex : Une si longue lettre"
+                   (blur)="hideSuggestionsDelayed()"
+                   class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
+            <div *ngIf="showSuggestions && suggestions.length > 0"
+                 class="absolute z-20 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+              <button *ngFor="let s of suggestions" type="button" (mousedown)="selectSuggestion(s)"
+                      class="w-full text-left px-4 py-3 hover:bg-red-50 border-b border-gray-50 last:border-0">
+                <p class="text-sm font-semibold text-gray-800 truncate">{{ s.title }}</p>
+                <p class="text-xs text-gray-500 truncate">{{ s.author }}</p>
+              </button>
+            </div>
+          </div>
+
+          <label class="block text-sm font-bold text-gray-900 mb-2">Auteur <span class="text-primary">*</span></label>
+          <input type="text" [(ngModel)]="author" name="author" placeholder="Nom de l'auteur"
+                 class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors mb-5" />
+
+          <div *ngIf="selectedCover" class="flex items-center gap-3 mb-5">
+            <img [src]="selectedCover" alt="" class="w-12 h-16 object-cover rounded-lg border border-gray-100" />
+            <p class="text-xs text-gray-500">Couverture trouvée automatiquement</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-900 mb-2">Catégorie</label>
+              <select [(ngModel)]="categoryId" name="categoryId"
+                      class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+                <option [ngValue]="null">Choisir...</option>
+                <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-900 mb-2">Langue</label>
+              <select [(ngModel)]="language" name="language"
+                      class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+                <option value="">— Choisir —</option>
+                <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 2 — État -->
+        <div *ngIf="step === 2">
+          <label class="block text-sm font-bold text-gray-900 mb-3">Dans quel état est ton livre ? <span class="text-primary">*</span></label>
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5 mb-6">
+            <button *ngFor="let c of conditionChoices" type="button" (click)="condition = c.value"
+                    class="rounded-2xl border bg-white px-1.5 py-3 flex flex-col items-center gap-2 transition-colors"
+                    [ngClass]="condition === c.value ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+              <span class="w-10 h-10 rounded-xl flex items-center justify-center text-lg" [ngClass]="c.iconBg">{{ c.emoji }}</span>
+              <span class="text-xs font-bold text-gray-800 leading-tight text-center">{{ c.label }}</span>
+            </button>
+
+            <button type="button" (click)="openConditionQuiz()"
+                    class="rounded-2xl border border-dashed border-gray-300 bg-[#FBF5EC] px-1.5 py-3 flex flex-col items-center gap-2 hover:border-primary transition-colors">
+              <span class="w-10 h-10 rounded-xl bg-[#F0E4D4] flex items-center justify-center text-lg">🤔</span>
+              <span class="text-xs font-bold text-gray-800 leading-tight text-center">Je ne sais pas</span>
+            </button>
+          </div>
+
+          <label class="block text-sm font-bold text-gray-900 mb-2">Quartier ou ville <span class="text-primary">*</span></label>
+          <div class="relative mb-1.5">
+            <input type="text" [(ngModel)]="locationLabel" name="locationLabel" (input)="onLocationInput()"
+                   (blur)="showLocationSuggestions = false" placeholder="Ex : Médina, Dakar"
+                   class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
+            <ul *ngIf="showLocationSuggestions && locationSuggestions.length > 0"
+                class="absolute z-20 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+              <li *ngFor="let s of locationSuggestions" (mousedown)="selectLocation(s)"
+                  class="px-4 py-3 text-sm text-gray-700 hover:bg-red-50 cursor-pointer">{{ s.label }}</li>
+            </ul>
+          </div>
+          <p class="text-xs text-gray-400 mb-5">Pour que les acheteurs sachent où récupérer le livre.</p>
+
+          <label class="block text-sm font-bold text-gray-900 mb-2">Description <span class="font-medium text-gray-400">(optionnel)</span></label>
+          <textarea [(ngModel)]="description" name="description" rows="4" placeholder="Ex : quelques annotations au crayon..."
+                    class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors"></textarea>
+        </div>
+
+        <!-- ÉTAPE 3 — Prix et conditions -->
+        <div *ngIf="step === 3">
+          <label class="block text-sm font-bold text-gray-900 mb-2">Prix <span class="text-primary">*</span></label>
+          <div class="relative mb-1.5">
+            <input type="number" [(ngModel)]="price" name="price" min="0" placeholder="0"
+                   class="w-full border border-gray-200 rounded-2xl px-4 py-4 text-center text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none focus:border-primary transition-colors" />
+            <span class="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-gray-400 pointer-events-none">FCFA</span>
+          </div>
+          <p class="text-xs text-gray-400 mb-6 text-center">Fixe librement ton prix.</p>
+
+          <div class="bg-[#FBF5EC] rounded-2xl p-4 mb-4">
+            <p class="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
+              <span>🔄</span> Acceptes-tu les échanges ?
+            </p>
+            <p class="text-xs text-gray-500 mb-3.5">Un livre contre un livre, sans argent à faire circuler.</p>
+            <div class="grid grid-cols-2 gap-3">
+              <button type="button" (click)="acceptsExchange = true"
+                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsExchange === true ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                <span>✅</span> Oui
+              </button>
+              <button type="button" (click)="acceptsExchange = false"
+                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsExchange === false ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                <span>❌</span> Non
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-[#FBF5EC] rounded-2xl p-4">
+            <p class="font-bold text-gray-900 text-sm flex items-center gap-2 mb-1">
+              <span>💬</span> Contact par WhatsApp ?
+            </p>
+            <p class="text-xs text-gray-500 mb-3.5">Via la messagerie intégrée de Kittab et WhatsApp.</p>
+            <div class="grid grid-cols-2 gap-3">
+              <button type="button" (click)="acceptsWhatsappContact = true"
+                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsWhatsappContact === true ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                <span>✅</span> Oui
+              </button>
+              <button type="button" (click)="acceptsWhatsappContact = false"
+                      class="bg-white rounded-xl border py-3 text-sm font-bold text-gray-800 flex items-center justify-center gap-2 transition-colors"
+                      [ngClass]="acceptsWhatsappContact === false ? 'border-primary bg-red-50' : 'border-gray-200 hover:border-gray-300'">
+                <span>❌</span> Non
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ÉTAPE 4 — Photos -->
+        <div *ngIf="step === 4">
+          <div class="bg-amber-100/70 rounded-2xl p-4 flex items-start gap-2.5 mb-5">
+            <span class="shrink-0">📷</span>
+            <p class="text-sm text-gray-700 leading-relaxed">
+              Ajoute des photos claires (couverture, dos, pages intérieures) — au moins une, jusqu'à quatre.
+            </p>
+          </div>
+
+          <button type="button" (click)="photoInput.click()" [disabled]="images.length >= 4"
+                  class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-9 flex flex-col items-center gap-1.5 hover:border-primary transition-colors disabled:opacity-50 mb-4">
+            <span class="text-2xl">📷</span>
+            <span class="font-bold text-gray-900 text-sm">Ajouter des photos</span>
+            <span class="text-xs text-gray-400">JPG, PNG ou WEBP</span>
+          </button>
+          <input #photoInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
+
+          <div class="grid grid-cols-4 gap-3 mb-5">
+            <div *ngFor="let src of imagePreviews; let i = index" class="relative aspect-square">
+              <img [src]="src" alt="" class="w-full h-full object-cover rounded-2xl border border-gray-100" />
+              <button type="button" (click)="removeImage(i)"
+                      class="absolute -top-1.5 -right-1.5 w-6 h-6 bg-white border border-gray-200 rounded-full text-gray-500 text-sm leading-none shadow-sm hover:text-primary">&times;</button>
+            </div>
+            <button *ngFor="let slot of emptySlots" type="button" (click)="photoInput.click()"
+                    class="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors">+</button>
+          </div>
+
+          <div class="bg-[#FBF5EC] rounded-2xl p-4">
+            <p class="font-bold text-gray-900 text-sm mb-3">Récapitulatif</p>
+            <div class="flex items-center justify-between text-sm mb-2">
+              <span class="text-gray-400">Livre</span>
+              <span class="font-bold text-gray-900 truncate ml-4">{{ title || '—' }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm mb-2">
+              <span class="text-gray-400">État</span>
+              <span class="font-bold text-gray-900">{{ conditionLabel }}</span>
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-400">Prix</span>
+              <span class="font-bold text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
+            </div>
+          </div>
+
+          <p *ngIf="error" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mt-4">{{ error }}</p>
+        </div>
+
+        <!-- ── Navigation ────────────────────────────────── -->
+        <div class="border-t border-gray-100 mt-7 pt-5 flex items-center justify-between">
+          <button type="button" (click)="prev()" [disabled]="step === 1"
+                  class="font-bold text-sm transition-colors"
+                  [ngClass]="step === 1 ? 'text-gray-300 cursor-not-allowed' : 'text-gray-600 hover:text-primary'">
+            &#8592; Retour
+          </button>
+
+          <button *ngIf="step < 4" type="button" (click)="next()" [disabled]="!canContinue"
+                  class="font-bold text-sm px-7 py-3.5 rounded-full transition-colors"
+                  [ngClass]="canContinue ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+            Continuer &#8594;
+          </button>
+
+          <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
+                  class="font-bold text-sm px-7 py-3.5 rounded-full transition-colors"
+                  [ngClass]="isValid && !submitting ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+            {{ submitting ? 'Publication...' : 'Publier l\'annonce →' }}
+          </button>
+        </div>
+
+      </div>
     </div>
-
   </div>
-  </div> <!-- fin step form -->
-
 </div>
 
 <app-footer />
