@@ -5,7 +5,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { FooterComponent } from '../../components/footer/footer.component';
+
 import { environment } from '../../../environments/environment';
 
 interface AutocompleteResult {
@@ -24,7 +24,7 @@ interface Category {
 @Component({
   selector: 'app-publish',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './publish.component.html',
 })
 export class PublishComponent implements OnInit, OnDestroy {

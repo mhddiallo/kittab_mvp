@@ -29,3 +29,23 @@ body { font-family: 'Inter', sans-serif; margin: 0; color: #1a1a1a; }
     @apply text-xs font-semibold px-2 py-0.5 rounded-full;
   }
 }
+
+/*
+ * iOS Safari zoome automatiquement sur un champ dont la police fait moins de
+ * 16px, et ne dézoome pas en sortant : la page reste décalée et l'utilisateur
+ * doit pincer pour revenir. Beaucoup de nos champs sont en text-sm (14px).
+ *
+ * On force donc 16px sur tous les champs de saisie en dessous de lg. Le
+ * !important est nécessaire pour passer devant les utilitaires Tailwind, qui
+ * sont générés après cette feuille.
+ *
+ * Ne jamais résoudre ce problème avec user-scalable=no ou maximum-scale=1 :
+ * cela retirerait le zoom manuel, dont dépendent les personnes malvoyantes.
+ */
+@media (max-width: 1023px) {
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}

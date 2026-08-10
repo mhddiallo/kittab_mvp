@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink, ActivatedRoute, Router } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { FooterComponent } from '../../components/footer/footer.component';
 import { AuthService } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
 
@@ -39,7 +38,7 @@ interface ConversationDetail {
 @Component({
   selector: 'app-messages',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent, FooterComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
   templateUrl: './messages.component.html',
 })
 export class MessagesComponent implements OnInit, OnDestroy {
@@ -53,7 +52,70 @@ export class MessagesComponent implements OnInit, OnDestroy {
   selectedImages: File[] = [];
   imagePreviews: string[] = [];
 
+  /** Filtre de la barre de recherche de la liste des conversations. */
+  search = '';
+
+  /**
+   * Détail du livre de la conversation ouverte. La conversation ne renvoie que
+   * l'id et le titre : on va chercher la couverture et le réglage WhatsApp,
+   * pour ne jamais annoncer "Contact WhatsApp activé" à tort.
+   */
+  activeBook: { cover_url: string | null; accepts_whatsapp_contact: boolean } | null = null;
+
   private pollInterval: any;
+
+  /** Palette d'avatars, choisie de façon stable à partir de l'id utilisateur. */
+  private readonly avatarColors = [
+    'bg-[#B03A28]', 'bg-[#3D5AF1]', 'bg-[#2E7A4A]',
+    'bg-[#D19100]', 'bg-[#7A4BC4]', 'bg-[#0E7490]',
+  ];
+
+  avatarColor(userId?: number): string {
+    return this.avatarColors[(userId ?? 0) % this.avatarColors.length];
+  }
+
+  /** "Aminata Diop" → "AD" ; "GorilleDiscret" → "GO". */
+  getInitials(username?: string): string {
+    const name = (username || '').trim();
+    if (!name) return '?';
+    const words = name.split(/\s+/);
+    if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }
+
+  get totalUnread(): number {
+    return this.conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+  }
+
+  get filteredConversations(): ConversationSummary[] {
+    const q = this.search.trim().toLowerCase();
+    if (!q) return this.conversations;
+    return this.conversations.filter(c =>
+      (c.other_user.username || '').toLowerCase().includes(q) ||
+      (c.book?.title || '').toLowerCase().includes(q) ||
+      (c.wanted_book?.title || '').toLowerCase().includes(q) ||
+      (c.last_message?.content || '').toLowerCase().includes(q)
+    );
+  }
+
+  /** Horodatage court de la liste : "09:42", "hier", "lun.", puis la date. */
+  listTime(dateStr: string): string {
+    const d = new Date(dateStr);
+    const now = new Date();
+    const sameDay = (a: Date, b: Date) =>
+      a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+    if (sameDay(d, now)) return this.formatTime(dateStr);
+
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (sameDay(d, yesterday)) return 'hier';
+
+    if ((now.getTime() - d.getTime()) / 86400000 < 7) {
+      return d.toLocaleDateString('fr-FR', { weekday: 'short' });
+    }
+    return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+  }
 
   constructor(
     public auth: AuthService,
@@ -170,9 +232,14 @@ export class MessagesComponent implements OnInit, OnDestroy {
         headers: { Authorization: `Bearer ${this.auth.token}` },
       });
       if (res.ok) {
+        const previousBookId = this.activeConversation?.book?.id ?? null;
         this.activeConversation = await res.json();
         const conv = this.conversations.find(c => c.id === id);
         if (conv) conv.unread_count = 0;
+        // Le détail du livre ne change pas d'un sondage à l'autre : on ne le
+        // recharge que si la conversation ouverte porte sur un autre livre.
+        const bookId = this.activeConversation?.book?.id ?? null;
+        if (bookId !== previousBookId) this.loadActiveBook(bookId);
         setTimeout(() => this.scrollToBottom(), 50);
       } else if (res.status === 403 || res.status === 404) {
         this.router.navigate(['/messages']);
@@ -182,6 +249,20 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   selectConversation(id: number) {
     this.router.navigate(['/messages', id]);
+  }
+
+  private async loadActiveBook(bookId: number | null) {
+    this.activeBook = null;
+    if (!bookId) return;
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/books/${bookId}`);
+      if (!res.ok) return;
+      const book = await res.json();
+      this.activeBook = {
+        cover_url: book.cover_url ?? book.images?.[0] ?? null,
+        accepts_whatsapp_contact: !!book.accepts_whatsapp_contact,
+      };
+    } catch {}
   }
 
   onImagesSelected(event: Event) {
@@ -304,7 +385,13 @@ export class MessagesComponent implements OnInit, OnDestroy {
     window.open(this.getImageUrl(url), '_blank');
   }
 
+  /**
+   * Doit rester aligné sur le point de rupture "lg" de Tailwind (1024px), celui
+   * où le template passe de l'affichage une-colonne au deux-panneaux. Un écart
+   * entre les deux ferait cohabiter la liste en pleine largeur et la
+   * conversation sur les tablettes.
+   */
   isMobile(): boolean {
-    return window.innerWidth < 768;
+    return window.innerWidth < 1024;
   }
 }

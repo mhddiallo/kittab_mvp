@@ -1,24 +1,37 @@
 <app-navbar />
 
-<div class="bg-gray-50 flex flex-col" style="height: calc(100vh - 4rem); overflow: hidden;">
-  <div class="flex-1 max-w-7xl mx-auto w-full px-4 py-4 flex gap-4 min-h-0">
+<div class="bg-[#FBF5EC] lg:bg-gray-50 flex flex-col" style="height: calc(100vh - 4rem); overflow: hidden;">
+  <div class="flex-1 max-w-7xl mx-auto w-full lg:px-4 lg:py-4 flex lg:gap-4 min-h-0">
 
-    <!-- Conversations list -->
-    <div class="w-full md:w-80 lg:w-96 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden min-h-0"
+    <!-- ══════════ Liste des conversations ══════════ -->
+    <div class="w-full lg:w-96 bg-[#FBF5EC] lg:bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 flex flex-col overflow-hidden min-h-0"
          [class.hidden]="activeConversation && isMobile()">
 
-      <div class="px-5 py-4 border-b border-gray-100">
-        <h2 class="text-lg font-bold text-gray-900">Messages</h2>
-        <p class="text-xs text-gray-400 mt-0.5">{{ conversations.length }} conversation{{ conversations.length !== 1 ? 's' : '' }}</p>
+      <!-- Titre + compteur non lus -->
+      <div class="px-5 pt-4 pb-3 lg:border-b lg:border-gray-100">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-2xl lg:text-lg font-black lg:font-bold text-gray-900">Messages</h2>
+          <span *ngIf="totalUnread > 0"
+                class="bg-primary text-white text-xs font-bold rounded-full min-w-[26px] h-[26px] px-2 flex items-center justify-center">
+            {{ totalUnread > 99 ? '99+' : totalUnread }}
+          </span>
+        </div>
+
+        <!-- Recherche -->
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+          <input [(ngModel)]="search" type="text" placeholder="Rechercher une conversation"
+                 class="w-full bg-white border border-gray-100 lg:border-gray-200 rounded-full pl-10 pr-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-primary transition-colors" />
+        </div>
       </div>
 
       <div class="flex-1 overflow-y-auto">
-        <!-- Loading state -->
+        <!-- Chargement -->
         <div *ngIf="loading" class="flex items-center justify-center py-12">
           <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
         </div>
 
-        <!-- Empty state -->
+        <!-- Aucune conversation -->
         <div *ngIf="!loading && conversations.length === 0" class="flex flex-col items-center justify-center py-16 px-6 text-center">
           <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
             <svg class="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -29,51 +42,57 @@
           <p class="text-xs text-gray-400 mt-1">Vos conversations apparaîtront ici.</p>
         </div>
 
-        <!-- Conversation items -->
-        <button
-          *ngFor="let conv of conversations"
-          (click)="selectConversation(conv.id)"
-          class="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors border-b border-gray-50 text-left"
-          [ngClass]="{'bg-red-50': activeConversation?.id === conv.id}"
-        >
-          <!-- Avatar -->
-          <div class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center text-base font-bold shrink-0">
-            {{ getInitial(conv.other_user.username) }}
+        <!-- Aucun résultat de recherche -->
+        <div *ngIf="!loading && conversations.length > 0 && filteredConversations.length === 0"
+             class="text-center text-sm text-gray-400 py-12 px-6">
+          Aucune conversation ne correspond à « {{ search }} ».
+        </div>
+
+        <!-- Conversations -->
+        <button *ngFor="let conv of filteredConversations" (click)="selectConversation(conv.id)"
+                class="w-full flex items-center gap-3 px-5 py-3.5 border-b border-black/[0.06] lg:border-gray-50 text-left transition-colors hover:bg-black/[0.02]"
+                [ngClass]="{'bg-red-50': activeConversation?.id === conv.id}">
+
+          <div class="w-12 h-12 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
+               [ngClass]="avatarColor(conv.other_user.id)">
+            {{ getInitials(conv.other_user.username) }}
           </div>
 
-          <!-- Content -->
           <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-0.5">
-              <span class="text-sm font-semibold text-gray-900 truncate">
+            <div class="flex items-baseline justify-between gap-2">
+              <span class="text-[15px] font-bold text-gray-900 truncate">
                 {{ conv.other_user.username || 'Utilisateur' }}
               </span>
-              <span class="text-[11px] text-gray-400 shrink-0 ml-2">
-                {{ conv.last_message ? timeAgo(conv.last_message.created_at) : timeAgo(conv.created_at) }}
+              <span class="text-[11px] text-gray-400 shrink-0">
+                {{ listTime(conv.last_message?.created_at || conv.created_at) }}
               </span>
             </div>
-            <div class="flex items-center justify-between">
-              <p class="text-xs text-gray-500 truncate flex-1">
+
+            <p *ngIf="conv.book || conv.wanted_book" class="text-[13px] font-semibold text-primary truncate mt-0.5">
+              📖 {{ conv.book?.title || conv.wanted_book?.title }}
+            </p>
+
+            <div class="flex items-center justify-between gap-2 mt-0.5">
+              <p class="text-[13px] truncate flex-1"
+                 [ngClass]="conv.unread_count > 0 ? 'text-gray-900 font-semibold' : 'text-gray-500'">
                 <span *ngIf="conv.last_message?.is_mine" class="text-gray-400">Vous : </span>
-                {{ conv.last_message?.content || (conv.book?.title || conv.wanted_book?.title || 'Nouvelle conversation') }}
+                {{ conv.last_message?.content || (conv.last_message?.image_url ? 'Photo' : 'Nouvelle conversation') }}
               </p>
               <span *ngIf="conv.unread_count > 0"
-                class="ml-2 bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
+                    class="bg-primary text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shrink-0">
                 {{ conv.unread_count > 9 ? '9+' : conv.unread_count }}
               </span>
             </div>
-            <p *ngIf="conv.book || conv.wanted_book" class="text-[11px] text-primary/70 truncate mt-0.5">
-              📚 {{ conv.book?.title || conv.wanted_book?.title }}
-            </p>
           </div>
         </button>
       </div>
     </div>
 
-    <!-- Conversation detail -->
-    <div class="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col overflow-hidden min-h-0"
+    <!-- ══════════ Conversation ══════════ -->
+    <div class="flex-1 bg-[#FBF5EC] lg:bg-white lg:rounded-2xl lg:shadow-sm lg:border lg:border-gray-100 flex flex-col overflow-hidden min-h-0"
          [class.hidden]="!activeConversation && isMobile()">
 
-      <!-- No conversation selected -->
+      <!-- Aucune conversation sélectionnée (desktop) -->
       <div *ngIf="!activeConversation" class="flex-1 flex flex-col items-center justify-center text-center px-8">
         <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5">
           <svg class="w-10 h-10 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -84,27 +103,51 @@
         <p class="text-sm text-gray-400">Choisissez une conversation dans la liste pour afficher les messages.</p>
       </div>
 
-      <!-- Active conversation -->
       <ng-container *ngIf="activeConversation">
-        <!-- Header -->
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center gap-3">
-          <!-- Back button mobile -->
-          <button class="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 mr-1" (click)="activeConversation = null; router.navigate(['/messages'])">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <!-- En-tête -->
+        <div class="bg-white px-4 py-3 border-b border-gray-100 flex items-center gap-3 shrink-0">
+          <button class="lg:hidden p-1 -ml-1 text-gray-500 shrink-0"
+                  (click)="activeConversation = null; router.navigate(['/messages'])" aria-label="Retour">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           </button>
-          <div class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center text-sm font-bold shrink-0">
-            {{ getInitial(activeConversation.other_user.username) }}
+
+          <div class="w-11 h-11 rounded-full text-white flex items-center justify-center text-sm font-bold shrink-0"
+               [ngClass]="avatarColor(activeConversation.other_user.id)">
+            {{ getInitials(activeConversation.other_user.username) }}
           </div>
+
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-bold text-gray-900">{{ activeConversation.other_user.username || 'Utilisateur' }}</p>
-            <p *ngIf="activeConversation.book || activeConversation.wanted_book" class="text-xs text-primary/70 truncate">
-              📚 {{ activeConversation.book?.title || activeConversation.wanted_book?.title }}
-            </p>
+            <p class="text-[15px] font-bold text-gray-900 truncate">{{ activeConversation.other_user.username || 'Utilisateur' }}</p>
+          </div>
+
+          <a *ngIf="activeConversation.book" [routerLink]="['/books', activeConversation.book.id]"
+             class="w-10 h-10 rounded-xl bg-green-50 text-lg flex items-center justify-center shrink-0 hover:bg-green-100 transition-colors"
+             aria-label="Voir l'annonce">📖</a>
+        </div>
+
+        <!-- Carte du livre -->
+        <div *ngIf="activeConversation.book || activeConversation.wanted_book" class="px-4 pt-3 shrink-0">
+          <div class="bg-white rounded-2xl border border-gray-100 p-3 flex items-center gap-3">
+            <img *ngIf="activeBook?.cover_url" [src]="getImageUrl(activeBook!.cover_url!)" alt=""
+                 class="w-12 h-14 object-cover rounded-lg shrink-0" />
+            <div *ngIf="!activeBook?.cover_url"
+                 class="w-12 h-14 rounded-lg shrink-0 bg-gradient-to-br from-[#C0452F] to-[#A63A28]"></div>
+
+            <div class="min-w-0">
+              <p class="font-bold text-gray-900 text-sm truncate">
+                {{ activeConversation.book?.title || activeConversation.wanted_book?.title }}
+              </p>
+              <p *ngIf="activeBook?.accepts_whatsapp_contact" class="text-xs font-semibold text-green-600 mt-0.5">
+                📱 Contact WhatsApp activé
+              </p>
+            </div>
           </div>
         </div>
 
         <!-- Messages -->
-        <div id="messages-container" class="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+        <!-- min-h-0 : sans lui, cet enfant flex refuse de descendre sous la
+             hauteur de son contenu et déborde sous la carte du livre. -->
+        <div id="messages-container" class="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-2.5">
           <div *ngIf="loadingConv" class="flex justify-center py-8">
             <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
           </div>
@@ -115,84 +158,67 @@
           </div>
 
           <ng-container *ngFor="let msg of activeConversation.messages; let i = index">
-          <div *ngIf="showDateSeparator(activeConversation.messages, i)"
-               class="flex justify-center my-2">
-            <span class="bg-gray-100 text-gray-400 text-xs px-3 py-1 rounded-full">
-              {{ getDateLabel(msg.created_at) }}
-            </span>
-          </div>
-          <div
-               class="flex"
-               [class.justify-end]="msg.is_mine"
-               [class.justify-start]="!msg.is_mine">
-            <div class="max-w-xs lg:max-w-md">
-              <!-- Image bubble -->
-              <div *ngIf="msg.image_url"
-                   class="overflow-hidden rounded-2xl cursor-pointer"
-                   [class.rounded-br-sm]="msg.is_mine"
-                   [class.rounded-bl-sm]="!msg.is_mine"
-                   (click)="openImage(msg.image_url!)">
-                <img [src]="getImageUrl(msg.image_url)"
-                     alt="Image"
-                     class="max-w-full block object-cover"
-                     style="max-height: 300px;" />
-              </div>
-              <!-- Text bubble -->
-              <div *ngIf="msg.content"
-                   class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
-                   [class.bg-primary]="msg.is_mine"
-                   [class.text-white]="msg.is_mine"
-                   [class.rounded-br-sm]="msg.is_mine"
-                   [class.bg-gray-100]="!msg.is_mine"
-                   [class.text-gray-800]="!msg.is_mine"
-                   [class.rounded-bl-sm]="!msg.is_mine"
-                   [class.mt-1]="msg.image_url">
-                {{ msg.content }}
-              </div>
-              <p class="text-[10px] text-gray-400 mt-1"
-                 [class.text-right]="msg.is_mine">
-                {{ formatTime(msg.created_at) }}
-                <span *ngIf="msg.is_mine && msg.read_at" class="ml-1 text-primary">✓✓</span>
-              </p>
+            <div *ngIf="showDateSeparator(activeConversation.messages, i)" class="flex justify-center my-2">
+              <span class="bg-black/5 text-gray-500 text-xs px-3 py-1 rounded-full">{{ getDateLabel(msg.created_at) }}</span>
             </div>
-          </div>
+
+            <div class="flex" [class.justify-end]="msg.is_mine" [class.justify-start]="!msg.is_mine">
+              <div class="max-w-[78%] lg:max-w-md">
+                <!-- Image -->
+                <div *ngIf="msg.image_url" class="overflow-hidden rounded-2xl cursor-pointer"
+                     (click)="openImage(msg.image_url!)">
+                  <img [src]="getImageUrl(msg.image_url)" alt="" class="max-w-full block object-cover" style="max-height: 300px;" />
+                </div>
+
+                <!-- Texte -->
+                <div *ngIf="msg.content"
+                     class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed"
+                     [ngClass]="msg.is_mine
+                       ? 'bg-primary text-white rounded-br-md'
+                       : 'bg-white text-gray-800 border border-gray-100 rounded-bl-md'"
+                     [class.mt-1]="msg.image_url">
+                  {{ msg.content }}
+                </div>
+
+                <p class="text-[10px] text-gray-400 mt-1 px-1" [class.text-right]="msg.is_mine">
+                  {{ formatTime(msg.created_at) }}
+                  <span *ngIf="msg.is_mine && msg.read_at" class="ml-1 text-primary">✓✓</span>
+                </p>
+              </div>
+            </div>
           </ng-container>
         </div>
 
-        <!-- Input -->
-        <div class="px-4 py-3 border-t border-gray-100 flex flex-col gap-2">
-          <!-- Image previews -->
+        <!-- Saisie -->
+        <div class="bg-white px-4 py-3 border-t border-gray-100 flex flex-col gap-2 shrink-0">
           <div *ngIf="imagePreviews.length > 0" class="flex flex-wrap gap-2">
             <div *ngFor="let preview of imagePreviews; let i = index" class="relative">
               <img [src]="preview" class="h-16 rounded-lg object-cover" />
-              <button (click)="removeImage(i)" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">
+              <button (click)="removeImage(i)" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center">
                 <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
           </div>
-          <div class="flex items-end gap-3">
-            <!-- Hidden file input — multiple images allowed -->
+
+          <div class="flex items-end gap-2.5">
             <input #imageInput type="file" accept="image/*" multiple class="hidden" (change)="onImagesSelected($event)" />
-            <!-- Attachment button -->
-            <button
-              (click)="imageInput.click()"
-              class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-primary transition-colors shrink-0">
+
+            <button (click)="imageInput.click()" aria-label="Joindre une photo"
+                    class="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-primary transition-colors shrink-0">
               <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
             </button>
-            <textarea
-              [(ngModel)]="newMessage"
-              (keydown)="onKeydown($event)"
-              placeholder="Écrire un message..."
-              rows="1"
-              class="flex-1 bg-gray-100 rounded-2xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none focus:ring-2 focus:ring-primary/20 transition-all"
-              style="max-height: 120px;"
-            ></textarea>
-            <button
-              (click)="sendMessage()"
-              [disabled]="(!newMessage.trim() && selectedImages.length === 0) || sending"
-              class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shrink-0 hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+
+            <textarea [(ngModel)]="newMessage" (keydown)="onKeydown($event)" rows="1"
+                      placeholder="Écris ton message..."
+                      class="flex-1 bg-[#FBF5EC] lg:bg-gray-100 border border-gray-100 rounded-full px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 outline-none resize-none focus:border-primary transition-colors"
+                      style="max-height: 120px;"></textarea>
+
+            <button (click)="sendMessage()"
+                    [disabled]="(!newMessage.trim() && selectedImages.length === 0) || sending"
+                    aria-label="Envoyer"
+                    class="w-11 h-11 bg-primary text-white rounded-full flex items-center justify-center shrink-0 hover:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               <svg *ngIf="!sending" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
               </svg>
