@@ -283,13 +283,22 @@
             </p>
           </div>
 
-          <button type="button" (click)="photoInput.click()" [disabled]="images.length >= 4"
-                  class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-9 flex flex-col items-center gap-1.5 hover:border-primary transition-colors disabled:opacity-50 mb-4">
+          <!--
+            Déclencheurs en <label for>, jamais input.click() : Safari iOS
+            bloque le clic programmatique sur un input non rendu, et le
+            sélecteur de fichiers ne s'ouvrait pas sur iPhone.
+          -->
+          <input id="publish-photos" type="file" accept="image/*" multiple class="sr-only"
+                 (change)="onImageChange($event)" />
+
+          <label for="publish-photos"
+                 class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-9 flex flex-col items-center gap-1.5 hover:border-primary transition-colors mb-4 cursor-pointer"
+                 [class.pointer-events-none]="images.length >= 4"
+                 [class.opacity-50]="images.length >= 4">
             <span class="text-2xl">📷</span>
             <span class="font-bold text-gray-900 text-sm">Ajouter des photos</span>
             <span class="text-xs text-gray-400">JPG, PNG ou WEBP</span>
-          </button>
-          <input #photoInput type="file" accept="image/*" multiple hidden (change)="onImageChange($event)" />
+          </label>
 
           <div class="grid grid-cols-4 gap-3 mb-5">
             <div *ngFor="let src of imagePreviews; let i = index" class="relative aspect-square">
@@ -297,8 +306,8 @@
               <button type="button" (click)="removeImage(i)"
                       class="absolute -top-1.5 -right-1.5 w-6 h-6 bg-white border border-gray-200 rounded-full text-gray-500 text-sm leading-none shadow-sm hover:text-primary">&times;</button>
             </div>
-            <button *ngFor="let slot of emptySlots" type="button" (click)="photoInput.click()"
-                    class="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors">+</button>
+            <label *ngFor="let slot of emptySlots" for="publish-photos"
+                   class="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors cursor-pointer">+</label>
           </div>
 
           <div class="bg-[#F6EEE2] rounded-2xl p-4">

@@ -1,27 +1,23 @@
 <app-navbar />
 
 <div class="bg-[#FBF5EC] min-h-screen">
-  <div class="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20">
+  <div class="max-w-6xl mx-auto px-5 md:px-8 py-9 md:py-20">
 
     <!-- En-tête -->
-    <div class="text-center mb-12 md:mb-16">
-      <p class="text-amber-600 text-xs md:text-[13px] font-bold uppercase tracking-[0.16em] mb-3">On t'écoute</p>
-      <h1 class="font-black text-gray-900 text-4xl md:text-[52px] leading-tight tracking-tight mb-5">Parlons-nous</h1>
-      <p class="text-gray-500 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
+    <div class="text-center mb-8 md:mb-16">
+      <p class="text-amber-600 text-xs md:text-[13px] font-bold uppercase tracking-[0.16em] mb-2.5 md:mb-3">On t'écoute</p>
+      <h1 class="font-black text-gray-900 text-[32px] md:text-[52px] leading-tight tracking-tight mb-3 md:mb-5">Parlons-nous</h1>
+      <p class="text-gray-500 text-[15px] md:text-lg leading-relaxed max-w-2xl mx-auto">
         Une question, une idée pour améliorer Kittab, ou un souci à signaler ?<br class="hidden md:block" />
         Écris-nous, on lit tout et on te répond.
       </p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
 
-      <!-- Colonne gauche : illustration + infos -->
-      <div class="space-y-4">
-        <div class="bg-white rounded-[24px] p-4 shadow-[0_2px_14px_rgba(0,0,0,0.05)] max-w-sm mx-auto">
-          <img src="assets/contact-illustration.png" alt=""
-               class="w-full object-contain rounded-2xl" />
-        </div>
-
+      <!-- Colonne infos — sous le formulaire sur mobile, le formulaire étant
+           l'action principale de la page -->
+      <div class="space-y-4 order-2 lg:order-1">
         <div class="bg-white rounded-[20px] p-4 flex items-center gap-4 shadow-[0_2px_14px_rgba(0,0,0,0.05)]">
           <div class="w-11 h-11 rounded-2xl bg-red-50 flex items-center justify-center text-xl shrink-0">✉️</div>
           <div class="min-w-0">
@@ -54,8 +50,8 @@
         </div>
       </div>
 
-      <!-- Colonne droite : formulaire -->
-      <div class="bg-white rounded-[28px] p-6 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)]">
+      <!-- Formulaire -->
+      <div class="bg-white rounded-[24px] md:rounded-[28px] p-5 md:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.06)] order-1 lg:order-2">
 
         <!-- Confirmation -->
         <div *ngIf="sent" class="text-center py-8">
