@@ -150,17 +150,40 @@ export class PublishComponent implements OnInit, OnDestroy {
   /** Renseigné quand l'annonce est créée mais que des photos ont échoué. */
   createdBookId: number | null = null;
 
-  /** Progression de l'envoi des photos, affichée sur le bouton. */
+  /** Progression de l'envoi des photos, affichée dans la fenêtre d'attente. */
   uploadDone = 0;
   uploadTotal = 0;
 
-  get submitLabel(): string {
-    if (!this.submitting) return "Publier l'annonce →";
-    if (this.uploadTotal === 0) return 'Publication...';
-    if (this.uploadDone < this.uploadTotal) {
-      return `Photo ${this.uploadDone + 1} sur ${this.uploadTotal}...`;
+  /**
+   * Étape en cours de la publication. Les messages affichés suivent le
+   * traitement réel plutôt que de défiler au hasard : l'utilisateur sait où
+   * il en est, et une attente qu'on peut situer paraît plus courte.
+   */
+  publishPhase: '' | 'creating' | 'optimizing' | 'uploading' | 'finalizing' = '';
+
+  get phaseMessage(): string {
+    switch (this.publishPhase) {
+      case 'creating':   return 'On prépare ton annonce...';
+      case 'optimizing': return 'On allège tes photos pour un envoi plus rapide...';
+      case 'uploading':  return 'Envoi de tes photos...';
+      case 'finalizing': return 'Presque fini, on met ton annonce en ligne...';
+      default:           return 'Publication en cours...';
     }
-    return 'Finalisation...';
+  }
+
+  get phaseHint(): string {
+    return this.publishPhase === 'uploading' && this.uploadTotal > 1
+      ? 'Reste sur cette page, ça peut prendre quelques secondes selon ta connexion.'
+      : 'Reste sur cette page, ça ne prend qu\'un instant.';
+  }
+
+  get uploadPercent(): number {
+    if (!this.uploadTotal) return 0;
+    return Math.round((this.uploadDone / this.uploadTotal) * 100);
+  }
+
+  get submitLabel(): string {
+    return this.submitting ? 'Publication...' : "Publier l'annonce →";
   }
   autocompleteTimeout: any;
   scanLoading: false | 'cover' | 'back' | 'barcode' = false;
@@ -669,6 +692,9 @@ export class PublishComponent implements OnInit, OnDestroy {
     if (!this.isValid || this.submitting) return;
     this.submitting = true;
     this.error = '';
+    this.publishPhase = 'creating';
+    this.uploadDone = 0;
+    this.uploadTotal = 0;
 
     const token = localStorage.getItem('kittab_token');
     if (!token) { this.router.navigate(['/login']); return; }
@@ -676,7 +702,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     const userPhone = this.auth.user?.phone;
     if (!userPhone || userPhone.startsWith('google_')) {
       this.error = 'Vous devez ajouter un numéro de téléphone dans votre profil avant de publier une annonce.';
-      this.submitting = false;
+      this.publishPhase = ""; this.submitting = false;
       this.router.navigate(['/profile']);
       return;
     }
@@ -718,7 +744,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         const err = await res.json();
         this.error = err.detail ?? 'Une erreur est survenue.';
         if (res.status === 401) this.router.navigate(['/login']);
-        this.submitting = false;
+        this.publishPhase = ""; this.submitting = false;
         return;
       }
 
@@ -726,7 +752,7 @@ export class PublishComponent implements OnInit, OnDestroy {
 
       if (!book?.id) {
         this.error = "L'annonce a été créée mais le serveur n'a pas renvoyé son identifiant : les photos n'ont pas pu être rattachées. Retrouve l'annonce dans « Mes annonces ».";
-        this.submitting = false;
+        this.publishPhase = ""; this.submitting = false;
         return;
       }
 
@@ -735,9 +761,11 @@ export class PublishComponent implements OnInit, OnDestroy {
       // photos et l'utilisateur était redirigé sans le moindre message.
       this.uploadTotal = this.images.length;
       this.uploadDone = 0;
+      this.publishPhase = 'optimizing';
 
       const sendOne = async (img: File): Promise<string | null> => {
         const optimised = await this.compressImage(img);
+        this.publishPhase = 'uploading';
         const form = new FormData();
         form.append('file', optimised);
         try {
@@ -768,10 +796,13 @@ export class PublishComponent implements OnInit, OnDestroy {
         [await sendOne(first), ...(await Promise.all(rest.map(sendOne)))]
       ).filter((f): f is string => f !== null);
 
+      this.publishPhase = 'finalizing';
+
       if (failures.length > 0) {
+        this.publishPhase = '';
         this.createdBookId = book.id;
         this.error = `Ton annonce a bien été créée, mais ${failures.length} photo(s) n'ont pas pu être envoyées (${failures[0]}). Tu peux les ajouter depuis « Mes annonces ».`;
-        this.submitting = false;
+        this.publishPhase = ""; this.submitting = false;
         return;
       }
 
@@ -779,6 +810,6 @@ export class PublishComponent implements OnInit, OnDestroy {
     } catch {
       this.error = 'Impossible de contacter le serveur.';
     }
-    this.submitting = false;
+    this.publishPhase = ""; this.submitting = false;
   }
 }

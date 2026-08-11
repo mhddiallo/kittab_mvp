@@ -8,6 +8,40 @@
           class="mt-5 bg-white text-gray-900 font-bold px-7 py-3 rounded-full text-sm">Annuler</button>
 </div>
 
+<!-- ── Fenêtre d'attente pendant la publication ────────── -->
+<div *ngIf="submitting" class="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-5">
+  <div class="bg-white rounded-[24px] w-full max-w-sm p-6 text-center" role="status" aria-live="polite">
+    <div class="w-12 h-12 mx-auto mb-5 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
+
+    <p class="font-black text-gray-900 text-lg leading-snug mb-2">{{ phaseMessage }}</p>
+    <p class="text-sm text-gray-500 leading-relaxed mb-5">{{ phaseHint }}</p>
+
+    <!-- Progression des photos -->
+    <div *ngIf="uploadTotal > 0" class="mb-5">
+      <div class="h-1.5 bg-[#EFE3D5] rounded-full overflow-hidden">
+        <div class="h-full bg-primary rounded-full transition-all duration-300" [style.width.%]="uploadPercent"></div>
+      </div>
+      <p class="text-xs text-gray-400 mt-2">{{ uploadDone }} / {{ uploadTotal }} photo{{ uploadTotal > 1 ? 's' : '' }}</p>
+    </div>
+
+    <!-- Récapitulatif -->
+    <div class="bg-[#F6EEE2] rounded-2xl p-4 text-left">
+      <div class="flex items-center justify-between text-sm mb-2">
+        <span class="text-gray-400">Livre</span>
+        <span class="font-bold text-gray-900 truncate ml-4">{{ title || '—' }}</span>
+      </div>
+      <div class="flex items-center justify-between text-sm mb-2">
+        <span class="text-gray-400">État</span>
+        <span class="font-bold text-gray-900">{{ conditionLabel }}</span>
+      </div>
+      <div class="flex items-center justify-between text-sm">
+        <span class="text-gray-400">Prix</span>
+        <span class="font-bold text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── Questionnaire "Je ne sais pas" ─────────────────── -->
 <div *ngIf="showConditionQuiz" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-5">
   <div class="bg-white rounded-[24px] w-full max-w-md p-6 md:p-7">
