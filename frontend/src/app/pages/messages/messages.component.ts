@@ -296,7 +296,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
       for (const file of this.selectedImages) {
         const formData = new FormData();
         formData.append('file', file);
-        const res = await fetch(`${environment.apiUrl}/api/conversations/${convId}/messages/image`, {
+        // ngsw-bypass : même raison que sur la publication d'annonce. Sur
+        // Safari iOS, un envoi multipart réémis par le service worker arrive
+        // au serveur sans son fichier.
+        const res = await fetch(`${environment.apiUrl}/api/conversations/${convId}/messages/image?ngsw-bypass=true`, {
           method: 'POST',
           headers: { Authorization: `Bearer ${this.auth.token}` },
           body: formData,

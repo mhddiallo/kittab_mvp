@@ -675,7 +675,12 @@ export class PublishComponent implements OnInit, OnDestroy {
         const form = new FormData();
         form.append('file', img);
         try {
-          const imgRes = await fetch(`${environment.apiUrl}/api/books/${book.id}/images`, {
+          // ngsw-bypass : le service worker ne doit pas intercepter cet envoi.
+          // Sur Safari iOS, un corps volumineux réémis par un service worker
+          // est perdu en route (le serveur répondait 422 "body.file : Field
+          // required"), alors que le JSON de création, plus petit, passait.
+          // Ce paramètre fait exécuter la requête nativement par le navigateur.
+          const imgRes = await fetch(`${environment.apiUrl}/api/books/${book.id}/images?ngsw-bypass=true`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: form,
