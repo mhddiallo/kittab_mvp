@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.countries import DEFAULT_COUNTRY, country_from_phone
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.security import create_access_token
@@ -81,7 +82,8 @@ def verify_otp_endpoint(payload: VerifyOTPInput, db: Session = Depends(get_db)):
                 token = create_access_token(subject=str(google_user.id))
                 return TokenResponse(access_token=token, is_new_user=False, user=UserOut.model_validate(google_user))
         username = _unique_username(db)
-        user = User(phone=phone, username=username)
+        # Le pays se déduit de l'indicatif : rien à demander de plus.
+        user = User(phone=phone, username=username, country_code=country_from_phone(phone))
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -128,6 +130,9 @@ def google_login(payload: GoogleTokenInput, db: Session = Depends(get_db)):
                 phone=f"google_{google_id}",
                 username=_unique_username(db),
                 is_profile_complete=bool(first_name and last_name),
+                # Compte Google : pas de numéro exploitable à ce stade, le pays
+                # sera affiné quand l'utilisateur renseignera son téléphone.
+                country_code=DEFAULT_COUNTRY,
             )
             db.add(user)
         db.commit()
@@ -186,6 +191,7 @@ def google_complete(
     else:
         # Nouveau numéro → compléter le compte Google actuel
         current_user.phone = phone
+        current_user.country_code = country_from_phone(phone)
         current_user.first_name = payload.first_name.strip()
         current_user.last_name = payload.last_name.strip()
         if payload.email:
@@ -210,6 +216,7 @@ def complete_profile(
     current_user.address = payload.address.strip() if payload.address else ''
     if payload.phone and current_user.phone.startswith('google_'):
         current_user.phone = payload.phone.strip()
+        current_user.country_code = country_from_phone(current_user.phone)
     if payload.email:
         current_user.email = payload.email.strip()
     current_user.is_profile_complete = True
@@ -245,6 +252,7 @@ def update_me(
         current_user.address = payload.address.strip()
     if payload.phone is not None and current_user.phone.startswith('google_'):
         current_user.phone = payload.phone.strip()
+        current_user.country_code = country_from_phone(current_user.phone)
     if current_user.first_name and current_user.last_name:
         current_user.is_profile_complete = True
     db.commit()

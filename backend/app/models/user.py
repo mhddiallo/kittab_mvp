@@ -16,6 +16,10 @@ class User(Base):
     first_name: Mapped[str | None] = mapped_column(String(100))
     last_name: Mapped[str | None] = mapped_column(String(100))
     address: Mapped[str | None] = mapped_column(String(500))
+    # Déduit de l'indicatif du téléphone à l'inscription (voir core/countries.py).
+    # Le pays est une propriété du compte, pas de chaque annonce : on le recopie
+    # sur l'annonce au moment de publier, sans le redemander.
+    country_code: Mapped[str | None] = mapped_column(String(2), nullable=True, index=True)
     is_profile_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)

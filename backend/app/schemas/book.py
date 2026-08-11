@@ -14,6 +14,15 @@ class CategoryOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class CityOut(BaseModel):
+    id: int
+    name: str
+    slug: str
+    country_code: str
+
+    model_config = {"from_attributes": True}
+
+
 class BookImageOut(BaseModel):
     id: int
     url: str
@@ -52,7 +61,8 @@ class BookCreate(BaseModel):
     language: Optional[str] = None
     open_library_id: Optional[str] = None
     page_count: Optional[int] = None
-    location_label: Optional[str] = None
+    location_label: Optional[str] = None  # quartier, saisie libre
+    city_id: Optional[int] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
 
@@ -109,6 +119,8 @@ class BookOut(BaseModel):
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
+    city: Optional[CityOut] = None
+    country_code: Optional[str] = None
     images: List[BookImageOut] = []
 
     @field_validator('pack_items', mode='before')
@@ -142,6 +154,8 @@ class BookListOut(BaseModel):
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None
+    city: Optional[CityOut] = None
+    country_code: Optional[str] = None
     images: List[BookImageOut] = []
 
     @field_validator('pack_items', mode='before')

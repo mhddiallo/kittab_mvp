@@ -14,8 +14,9 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.countries import country_from_phone
 from app.core.deps import get_current_user
-from app.models.book import Book, BookCondition, BookImage, BookType, BoostRequest, BoostRequestStatus
+from app.models.book import Book, BookCondition, BookImage, BookType, BoostRequest, BoostRequestStatus, City
 from app.models.user import User
 from app.schemas.book import (
     AlertCreate,
@@ -207,6 +208,8 @@ def list_books(
     accepts_exchange: Optional[bool] = Query(None),
     pack_only: Optional[bool] = Query(None),
     city: Optional[str] = Query(None),
+    city_id: Optional[int] = Query(None),
+    country: Optional[str] = Query(None, min_length=2, max_length=2),
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -243,8 +246,18 @@ def list_books(
         query = query.filter(Book.price <= max_price)
     if education_level:
         query = query.filter(Book.education_level.ilike(f"%{education_level}%"))
-    if city:
-        query = query.filter(Book.location_label.ilike(f"%{city}%"))
+    if city_id is not None:
+        # Filtre exact, celui du nouveau sélecteur de ville.
+        query = query.filter(Book.city_id == city_id)
+    elif city:
+        # Ancien filtre en texte libre, conservé pour les annonces créées avant
+        # la bascule et pour les liens déjà partagés. La recherche porte à la
+        # fois sur le nom de la ville et sur le quartier.
+        query = query.outerjoin(City, Book.city_id == City.id).filter(
+            City.name.ilike(f"%{city}%") | Book.location_label.ilike(f"%{city}%")
+        )
+    if country:
+        query = query.filter(Book.country_code == country.upper())
 
     total = query.count()
     items = query.order_by(Book.is_boosted.desc(), Book.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
@@ -291,7 +304,17 @@ def create_book(
     data = payload.model_dump()
     if data.get('pack_items') is not None:
         data['pack_items'] = json.dumps(data['pack_items'])
-    book = Book(**data, seller_id=current_user.id)
+
+    # La ville doit appartenir au pays du vendeur : sans cette vérification,
+    # un identifiant arbitraire rattacherait l'annonce à une ville d'un autre
+    # pays, et le filtre du catalogue afficherait n'importe quoi.
+    seller_country = current_user.country_code or country_from_phone(current_user.phone)
+    if data.get('city_id') is not None:
+        city = db.get(City, data['city_id'])
+        if not city or city.country_code != seller_country:
+            raise HTTPException(status_code=400, detail="Ville inconnue")
+
+    book = Book(**data, seller_id=current_user.id, country_code=seller_country)
     db.add(book)
     db.commit()
     db.refresh(book)

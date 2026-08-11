@@ -32,6 +32,31 @@ class Category(Base):
     books = relationship("Book", back_populates="category")
 
 
+class City(Base):
+    """
+    Référentiel fermé des villes, par pays.
+
+    La ville n'est plus saisie librement : elle est choisie dans cette liste.
+    Sans quoi le filtre du catalogue, qui cherchait une sous-chaîne dans un
+    champ libre, éclatait dès que les orthographes divergeaient ("Dakar",
+    "dakar", "DKR"). Le quartier, lui, reste libre : aucune liste ne le
+    couvrirait.
+
+    country_code suit la norme ISO 3166-1 alpha-2 (SN, CI, BF, ML, NE, GH...).
+    Il est indispensable dès maintenant : sans lui, impossible de distinguer
+    plus tard les homonymes entre pays, Saint-Louis ou Kayes par exemple.
+    """
+
+    __tablename__ = "cities"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    country_code: Mapped[str] = mapped_column(String(2), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    slug: Mapped[str] = mapped_column(String(120), nullable=False)
+
+    books = relationship("Book", back_populates="city")
+
+
 class Book(Base):
     __tablename__ = "books"
 
@@ -51,7 +76,10 @@ class Book(Base):
     language: Mapped[str | None] = mapped_column(String(50))
     open_library_id: Mapped[str | None] = mapped_column(String(100))
     page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # location_label devient le quartier seul : la ville est portée par city_id.
+    # Le champ reste en place pour les annonces créées avant la bascule.
     location_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    country_code: Mapped[str | None] = mapped_column(String(2), nullable=True, index=True)
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     is_available: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -66,9 +94,11 @@ class Book(Base):
 
     seller_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     category_id: Mapped[int | None] = mapped_column(ForeignKey("categories.id"))
+    city_id: Mapped[int | None] = mapped_column(ForeignKey("cities.id"), nullable=True, index=True)
 
     seller = relationship("User", back_populates="books")
     category = relationship("Category", back_populates="books")
+    city = relationship("City", back_populates="books")
     images = relationship("BookImage", back_populates="book", cascade="all, delete-orphan")
     boost_requests = relationship("BoostRequest", back_populates="book")
 
