@@ -8,35 +8,73 @@
           class="mt-5 bg-white text-gray-900 font-bold px-7 py-3 rounded-full text-sm">Annuler</button>
 </div>
 
-<!-- ── Fenêtre d'attente pendant la publication ────────── -->
-<div *ngIf="submitting" class="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-5">
-  <div class="bg-white rounded-[24px] w-full max-w-sm p-6 text-center" role="status" aria-live="polite">
-    <div class="w-12 h-12 mx-auto mb-5 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
+<!-- ── Confirmation puis progression de la publication ───── -->
+<div *ngIf="showConfirm" class="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-5">
+  <div class="bg-white rounded-[24px] w-full max-w-sm p-6 max-h-[88vh] overflow-y-auto">
 
-    <p class="font-black text-gray-900 text-lg leading-snug mb-2">{{ phaseMessage }}</p>
-    <p class="text-sm text-gray-500 leading-relaxed mb-5">{{ phaseHint }}</p>
+    <!-- Phase 1 : on relit avant d'envoyer -->
+    <ng-container *ngIf="!submitting">
+      <h2 class="font-black text-gray-900 text-xl text-center mb-1">On récapitule</h2>
+      <p class="text-sm text-gray-500 text-center mb-5">Vérifie que tout est bon avant de publier.</p>
 
-    <!-- Progression des photos -->
-    <div *ngIf="uploadTotal > 0" class="mb-5">
-      <div class="h-1.5 bg-[#EFE3D5] rounded-full overflow-hidden">
-        <div class="h-full bg-primary rounded-full transition-all duration-300" [style.width.%]="uploadPercent"></div>
+      <div class="flex items-center gap-3 mb-4">
+        <img *ngIf="imagePreviews.length" [src]="imagePreviews[0]" alt=""
+             class="w-14 h-16 object-cover rounded-xl border border-gray-100 shrink-0" />
+        <div class="min-w-0">
+          <p class="font-bold text-gray-900 truncate">{{ title }}</p>
+          <p class="text-sm text-gray-500 truncate">{{ author }}</p>
+        </div>
       </div>
-      <p class="text-xs text-gray-400 mt-2">{{ uploadDone }} / {{ uploadTotal }} photo{{ uploadTotal > 1 ? 's' : '' }}</p>
-    </div>
 
-    <!-- Récapitulatif -->
-    <div class="bg-[#F6EEE2] rounded-2xl p-4 text-left">
-      <div class="flex items-center justify-between text-sm mb-2">
-        <span class="text-gray-400">Livre</span>
-        <span class="font-bold text-gray-900 truncate ml-4">{{ title || '—' }}</span>
+      <div class="bg-[#F6EEE2] rounded-2xl p-4 space-y-2 mb-5">
+        <div class="flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-400 shrink-0">État</span>
+          <span class="font-bold text-gray-900 text-right">{{ conditionLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-400 shrink-0">Ville</span>
+          <span class="font-bold text-gray-900 text-right truncate">{{ locationLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-400 shrink-0">Échanges</span>
+          <span class="font-bold text-gray-900 text-right">{{ exchangeLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-400 shrink-0">Contact WhatsApp</span>
+          <span class="font-bold text-gray-900 text-right">{{ whatsappLabel }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-4 text-sm">
+          <span class="text-gray-400 shrink-0">Photos</span>
+          <span class="font-bold text-gray-900 text-right">{{ images.length }}</span>
+        </div>
+        <div class="flex items-center justify-between gap-4 text-sm pt-1 border-t border-black/5">
+          <span class="text-gray-400 shrink-0">Prix</span>
+          <span class="font-black text-primary text-right">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
+        </div>
       </div>
-      <div class="flex items-center justify-between text-sm mb-2">
-        <span class="text-gray-400">État</span>
-        <span class="font-bold text-gray-900">{{ conditionLabel }}</span>
-      </div>
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-gray-400">Prix</span>
-        <span class="font-bold text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</span>
+
+      <button type="button" (click)="submit()"
+              class="w-full bg-primary text-white font-bold py-3.5 rounded-full text-sm hover:bg-red-800 transition-colors mb-2.5">
+        Confirmer et publier →
+      </button>
+      <button type="button" (click)="closeConfirm()"
+              class="w-full text-sm font-bold text-gray-500 py-2 hover:text-primary transition-colors">
+        Modifier mon annonce
+      </button>
+    </ng-container>
+
+    <!-- Phase 2 : publication en cours -->
+    <div *ngIf="submitting" class="text-center" role="status" aria-live="polite">
+      <div class="w-12 h-12 mx-auto mb-5 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
+
+      <p class="font-black text-gray-900 text-lg leading-snug mb-2">{{ phaseMessage }}</p>
+      <p class="text-sm text-gray-500 leading-relaxed mb-5">{{ phaseHint }}</p>
+
+      <div *ngIf="uploadTotal > 0">
+        <div class="h-1.5 bg-[#EFE3D5] rounded-full overflow-hidden">
+          <div class="h-full bg-primary rounded-full transition-all duration-300" [style.width.%]="uploadPercent"></div>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">{{ uploadDone }} / {{ uploadTotal }} photo{{ uploadTotal > 1 ? 's' : '' }}</p>
       </div>
     </div>
   </div>
@@ -381,7 +419,7 @@
             Continuer &#8594;
           </button>
 
-          <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
+          <button *ngIf="step === 4" type="button" (click)="openConfirm()" [disabled]="!isValid || submitting"
                   class="font-bold text-sm px-7 py-3.5 rounded-full transition-colors"
                   [ngClass]="isValid && !submitting ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
             {{ submitLabel }}
@@ -407,7 +445,7 @@
     Continuer &#8594;
   </button>
 
-  <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
+  <button *ngIf="step === 4" type="button" (click)="openConfirm()" [disabled]="!isValid || submitting"
           class="flex-1 font-bold text-sm py-3.5 rounded-full transition-colors"
           [ngClass]="isValid && !submitting ? 'bg-primary text-white' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
     {{ submitLabel }}

@@ -185,6 +185,35 @@ export class PublishComponent implements OnInit, OnDestroy {
   get submitLabel(): string {
     return this.submitting ? 'Publication...' : "Publier l'annonce →";
   }
+
+  /**
+   * Étape de confirmation. Le bouton "Publier" n'envoie plus directement :
+   * il ouvre un récapitulatif que l'utilisateur valide. La publication ne
+   * démarre qu'après, et la même fenêtre affiche alors la progression.
+   */
+  showConfirm = false;
+
+  openConfirm() {
+    if (!this.isValid || this.submitting) return;
+    this.error = '';
+    this.createdBookId = null;
+    this.showConfirm = true;
+  }
+
+  closeConfirm() {
+    if (this.submitting) return;
+    this.showConfirm = false;
+  }
+
+  get exchangeLabel(): string {
+    if (this.acceptsExchange === null) return 'Non précisé';
+    return this.acceptsExchange ? 'Oui' : 'Non';
+  }
+
+  get whatsappLabel(): string {
+    if (this.acceptsWhatsappContact === null) return 'Non précisé';
+    return this.acceptsWhatsappContact ? 'Oui' : 'Non';
+  }
   autocompleteTimeout: any;
   scanLoading: false | 'cover' | 'back' | 'barcode' = false;
   scanError = '';
@@ -702,7 +731,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     const userPhone = this.auth.user?.phone;
     if (!userPhone || userPhone.startsWith('google_')) {
       this.error = 'Vous devez ajouter un numéro de téléphone dans votre profil avant de publier une annonce.';
-      this.publishPhase = ""; this.submitting = false;
+      this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
       this.router.navigate(['/profile']);
       return;
     }
@@ -744,7 +773,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         const err = await res.json();
         this.error = err.detail ?? 'Une erreur est survenue.';
         if (res.status === 401) this.router.navigate(['/login']);
-        this.publishPhase = ""; this.submitting = false;
+        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
         return;
       }
 
@@ -752,7 +781,7 @@ export class PublishComponent implements OnInit, OnDestroy {
 
       if (!book?.id) {
         this.error = "L'annonce a été créée mais le serveur n'a pas renvoyé son identifiant : les photos n'ont pas pu être rattachées. Retrouve l'annonce dans « Mes annonces ».";
-        this.publishPhase = ""; this.submitting = false;
+        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
         return;
       }
 
@@ -802,7 +831,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         this.publishPhase = '';
         this.createdBookId = book.id;
         this.error = `Ton annonce a bien été créée, mais ${failures.length} photo(s) n'ont pas pu être envoyées (${failures[0]}). Tu peux les ajouter depuis « Mes annonces ».`;
-        this.publishPhase = ""; this.submitting = false;
+        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
         return;
       }
 
@@ -810,6 +839,6 @@ export class PublishComponent implements OnInit, OnDestroy {
     } catch {
       this.error = 'Impossible de contacter le serveur.';
     }
-    this.publishPhase = ""; this.submitting = false;
+    this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
   }
 }
