@@ -575,6 +575,33 @@ export class PublishComponent implements OnInit, OnDestroy {
     return [1, 2, 3, 4].every(s => this.stepValid(s));
   }
 
+  /**
+   * Traduit une réponse d'erreur d'upload en texte lisible.
+   *
+   * FastAPI renvoie `detail` sous deux formes très différentes : une chaîne
+   * pour un HTTPException levé par notre code, mais une LISTE d'objets pour
+   * une erreur de validation 422. Interpoler cette liste telle quelle
+   * affichait "[object Object]", ce qui ne renseignait sur rien.
+   */
+  private async describeUploadError(res: Response): Promise<string> {
+    let body: any = null;
+    try { body = await res.json(); } catch {}
+    const detail = body?.detail;
+
+    let message = '';
+    if (typeof detail === 'string') {
+      message = detail;
+    } else if (Array.isArray(detail)) {
+      message = detail
+        .map((d: any) => `${(d?.loc ?? []).join('.')} : ${d?.msg ?? 'invalide'}`)
+        .join(' ; ');
+    } else if (detail) {
+      message = JSON.stringify(detail);
+    }
+
+    return message ? `HTTP ${res.status} — ${message}` : `HTTP ${res.status}`;
+  }
+
   async submit() {
     if (!this.isValid || this.submitting) return;
     this.submitting = true;
@@ -634,6 +661,12 @@ export class PublishComponent implements OnInit, OnDestroy {
 
       const book = await res.json();
 
+      if (!book?.id) {
+        this.error = "L'annonce a été créée mais le serveur n'a pas renvoyé son identifiant : les photos n'ont pas pu être rattachées. Retrouve l'annonce dans « Mes annonces ».";
+        this.submitting = false;
+        return;
+      }
+
       // Étape 2 : uploader les images une par une.
       // Les échecs étaient auparavant ignorés : l'annonce partait sans ses
       // photos et l'utilisateur était redirigé sans le moindre message.
@@ -647,13 +680,9 @@ export class PublishComponent implements OnInit, OnDestroy {
             headers: { Authorization: `Bearer ${token}` },
             body: form,
           });
-          if (!imgRes.ok) {
-            let detail = `erreur ${imgRes.status}`;
-            try { detail = (await imgRes.json()).detail || detail; } catch {}
-            failures.push(detail);
-          }
-        } catch {
-          failures.push('connexion interrompue');
+          if (!imgRes.ok) failures.push(await this.describeUploadError(imgRes));
+        } catch (e: any) {
+          failures.push(`connexion interrompue (${e?.message || 'inconnue'})`);
         }
       }
 
