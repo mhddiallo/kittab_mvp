@@ -37,6 +37,7 @@ class UserOut(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     address: Optional[str] = None
+    country_code: Optional[str] = None
     is_profile_complete: bool
     created_at: datetime
 

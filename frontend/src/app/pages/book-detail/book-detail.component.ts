@@ -18,6 +18,7 @@ interface BookDetail {
   images: string[];
   seller: { id: number; username?: string; first_name: string; last_name: string; phone: string; address: string };
   location_label: string | null;
+  city: { id: number; name: string } | null;
   cover_url: string | null;
   language: string | null;
   open_library_id: string | null;
@@ -51,6 +52,12 @@ interface BookInfo {
   templateUrl: './book-detail.component.html',
 })
 export class BookDetailComponent implements OnInit {
+  /** "Quartier, Ville" : les deux champs sont désormais stockés séparément. */
+  get locationText(): string {
+    if (!this.book) return '';
+    return [this.book.location_label, this.book.city?.name].filter(Boolean).join(', ');
+  }
+
   book: BookDetail | null = null;
   selectedImage = 0;
   loading = true;

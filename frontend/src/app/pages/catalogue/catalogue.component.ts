@@ -38,6 +38,23 @@ export class CatalogueComponent implements OnInit {
   onlyExchange = false;
   onlyPack = false;
   cityFilter = '';
+  /** Ville choisie dans le référentiel. cityFilter reste pour la géolocalisation. */
+  cityId: number | null = null;
+  cities: { id: number; name: string }[] = [];
+
+  get cityLabel(): string {
+    if (this.cityId !== null) {
+      return this.cities.find(c => c.id === this.cityId)?.name || 'Localisation';
+    }
+    return this.cityFilter || 'Localisation';
+  }
+
+  async loadCities() {
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/cities?country=SN`);
+      if (res.ok) this.cities = await res.json();
+    } catch {}
+  }
   cityLoading = false;
   cityError = '';
   showLocationDropdown = false;
@@ -112,13 +129,14 @@ export class CatalogueComponent implements OnInit {
     if (this.selectedPriceRange > 0) count++;
     if (this.onlyExchange) count++;
     if (this.onlyPack) count++;
-    if (this.cityFilter.trim()) count++;
+    if (this.cityId !== null || this.cityFilter.trim()) count++;
     return count;
   }
 
   constructor(public auth: AuthService, private route: ActivatedRoute, private router: Router) {}
 
   async ngOnInit() {
+    this.loadCities();
     const params = this.route.snapshot.queryParamMap;
     const q = params.get('q');
     if (q) this.searchQuery = q;
@@ -179,7 +197,8 @@ export class CatalogueComponent implements OnInit {
       if (range.max !== null) url += `&max_price=${range.max}`;
       if (this.onlyExchange) url += `&accepts_exchange=true`;
       if (this.onlyPack) url += `&pack_only=true`;
-      if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
+      if (this.cityId !== null) url += `&city_id=${this.cityId}`;
+      else if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();

@@ -75,11 +75,40 @@ export class LoginComponent implements OnInit, AfterViewInit {
     this.loading = false;
   }
 
+  /**
+   * Indicatifs proposés. Le pays du compte en est déduit côté serveur, et il
+   * détermine ensuite la liste de villes proposée à la publication : une
+   * erreur ici a des conséquences bien au-delà de la réception du code.
+   */
+  readonly dialCodes = [
+    { code: '+221', label: 'Sénégal' },
+    { code: '+225', label: "Côte d'Ivoire" },
+    { code: '+226', label: 'Burkina Faso' },
+    { code: '+223', label: 'Mali' },
+    { code: '+227', label: 'Niger' },
+    { code: '+233', label: 'Ghana' },
+    { code: '+224', label: 'Guinée' },
+    { code: '+228', label: 'Togo' },
+    { code: '+229', label: 'Bénin' },
+    { code: '+33',  label: 'France' },
+  ];
+
+  dialCode = '+221';
+
+  /**
+   * L'indicatif choisi remplace l'ancien "+221" écrit en dur. Auparavant,
+   * quelqu'un saisissant un numéro ivoirien sans indicatif se retrouvait avec
+   * un numéro sénégalais invalide, sans jamais recevoir de code ni comprendre
+   * pourquoi : l'hypothèse était invisible.
+   */
   normalizePhone(phone: string): string {
     let p = phone.trim().replace(/\s+/g, '').replace(/-/g, '');
     if (p.startsWith('00')) p = '+' + p.slice(2);
-    if (!p.startsWith('+')) p = '+221' + p;
-    return p;
+    if (p.startsWith('+')) return p;
+    // Un numéro local commence souvent par un 0 qu'il faut retirer avant
+    // l'indicatif international (06... en France, 07... en Côte d'Ivoire).
+    if (p.startsWith('0')) p = p.slice(1);
+    return this.dialCode + p;
   }
 
   isValidPhone(phone: string): boolean {

@@ -51,10 +51,9 @@ export class PublishComponent implements OnInit, OnDestroy {
   locationLabel = '';
   locationLat: number | null = null;
   locationLng: number | null = null;
-  locationSuggestions: { label: string; lat: number; lng: number }[] = [];
-  locationLoading = false;
-  locationTimeout: any;
-  showLocationSuggestions = false;
+  /** Quartier : saisie libre, facultative. La ville est portée par cityId. */
+  cityId: number | null = null;
+  cities: { id: number; name: string; slug: string }[] = [];
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
   languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
@@ -110,7 +109,7 @@ export class PublishComponent implements OnInit, OnDestroy {
   stepValid(step: number): boolean {
     switch (step) {
       case 1: return this.title.trim().length > 0 && this.author.trim().length > 0;
-      case 2: return !!this.condition && this.locationLabel.trim().length > 0;
+      case 2: return !!this.condition && this.cityId !== null;
       case 3: return !!this.price && this.price > 0;
       case 4: return this.images.length > 0;
       default: return false;
@@ -203,6 +202,10 @@ export class PublishComponent implements OnInit, OnDestroy {
   closeConfirm() {
     if (this.submitting) return;
     this.showConfirm = false;
+  }
+
+  get cityName(): string {
+    return this.cities.find(c => c.id === this.cityId)?.name || '—';
   }
 
   get exchangeLabel(): string {
@@ -356,7 +359,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     { value: 'other', label: 'Autre' },
   ];
 
-  constructor(private router: Router, private auth: AuthService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
+  constructor(private router: Router, public auth: AuthService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
   ngOnDestroy() { this.stopBarcodeCamera(); }
 
@@ -447,49 +450,25 @@ export class PublishComponent implements OnInit, OnDestroy {
   }
 
 
-  onLocationInput() {
-    clearTimeout(this.locationTimeout);
-    this.locationLat = null; this.locationLng = null;
-    if (this.locationLabel.length < 2) { this.locationSuggestions = []; this.showLocationSuggestions = false; return; }
-    this.locationLoading = true;
-    this.locationTimeout = setTimeout(async () => {
-      try {
-        const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(this.locationLabel)}&format=json&addressdetails=1&limit=5&countrycodes=sn,gn,ci,ml,fr&accept-language=fr`;
-        const res = await fetch(url, { headers: { 'Accept-Language': 'fr' } });
-        const data = await res.json();
-        this.locationSuggestions = data.map((item: any) => ({
-          label: this.shortenAddress(item),
-          lat: parseFloat(item.lat),
-          lng: parseFloat(item.lon),
-        }));
-        this.showLocationSuggestions = this.locationSuggestions.length > 0;
-      } catch {}
-      this.locationLoading = false;
-    }, 400);
-  }
-
-  private shortenAddress(item: any): string {
-    const a = item.address ?? {};
-    const parts: string[] = [];
-    const neighbourhood = a.neighbourhood || a.suburb || a.quarter || a.hamlet || a.village;
-    const city = a.city || a.town || a.municipality || a.county;
-    const country = a.country;
-    if (neighbourhood) parts.push(neighbourhood);
-    if (city && city !== neighbourhood) parts.push(city);
-    if (country) parts.push(country);
-    return parts.length > 0 ? parts.join(', ') : item.display_name;
-  }
-
-  selectLocation(s: { label: string; lat: number; lng: number }) {
-    this.locationLabel = s.label;
-    this.locationLat = s.lat;
-    this.locationLng = s.lng;
-    this.locationSuggestions = [];
-    this.showLocationSuggestions = false;
+  /**
+   * Chargement du référentiel de villes.
+   *
+   * Remplace l'autocomplétion Nominatim : celle-ci laissait saisir n'importe
+   * quelle orthographe, ce qui rendait le filtre du catalogue inexploitable,
+   * et OpenStreetMap plafonne l'usage à une requête par seconde — intenable
+   * dès que plusieurs personnes publient en même temps.
+   */
+  async loadCities() {
+    const country = this.auth.user?.country_code || 'SN';
+    try {
+      const res = await fetch(`${environment.apiUrl}/api/cities?country=${country}`);
+      if (res.ok) this.cities = await res.json();
+    } catch {}
   }
 
   ngOnInit() {
     this.loadCategories();
+    this.loadCities();
   }
 
   async loadCategories() {
@@ -754,7 +733,8 @@ export class PublishComponent implements OnInit, OnDestroy {
       if (this.language) payload.language = this.language;
       if (this.pageCount) payload.page_count = this.pageCount;
       if (this.googleBooksId) payload.open_library_id = this.googleBooksId;
-      if (this.locationLabel) payload.location_label = this.locationLabel;
+      if (this.cityId !== null) payload.city_id = this.cityId;
+      if (this.locationLabel) payload.location_label = this.locationLabel.trim();
       if (this.locationLat !== null) payload.latitude = this.locationLat;
       if (this.locationLng !== null) payload.longitude = this.locationLng;
       if (this.pageCount) payload.page_count = this.pageCount;

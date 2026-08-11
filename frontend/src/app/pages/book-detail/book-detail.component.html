@@ -106,7 +106,7 @@
             </div>
             <div *ngIf="book.location_label || book.seller.address" class="flex items-center gap-2 text-gray-700">
               <span class="font-medium">Localisation :</span>
-              <span>{{ book.location_label || book.seller.address }}</span>
+              <span>{{ locationText || book.seller.address }}</span>
             </div>
           </div>
 

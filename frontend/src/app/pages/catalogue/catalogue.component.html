@@ -133,11 +133,11 @@
       <div class="relative">
         <button (click)="showLocationDropdown = !showLocationDropdown; showPriceDropdown = false"
           class="flex items-center gap-2 border rounded-full px-4 py-2 text-sm font-medium transition-colors"
-          [ngClass]="cityFilter ? 'bg-primary/10 border-primary text-primary' : 'border-gray-200 text-gray-700 hover:border-gray-400'">
+          [ngClass]="cityId !== null || cityFilter ? 'bg-primary/10 border-primary text-primary' : 'border-gray-200 text-gray-700 hover:border-gray-400'">
           <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
           </svg>
-          {{ cityFilter || 'Localisation' }}
+          {{ cityLabel }}
           <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
           </svg>
@@ -154,14 +154,19 @@
               <span class="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin"></span> Détection...
             </span>
           </button>
+          <!-- Liste fermée : la saisie libre laissait passer "Dakar", "dakar"
+               et "DKR", que le filtre ne pouvait pas rapprocher. -->
           <div>
-            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5 block">Ville ou quartier</label>
-            <input [(ngModel)]="cityFilter" type="text" placeholder="Ex : Dakar, Plateau, Almadies..."
-              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm outline-none focus:border-primary transition-colors placeholder-gray-300" />
+            <label class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1.5 block">Ville</label>
+            <select [(ngModel)]="cityId"
+              class="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm bg-white outline-none focus:border-primary transition-colors">
+              <option [ngValue]="null">Toutes les villes</option>
+              <option *ngFor="let c of cities" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
           </div>
           <p *ngIf="cityError" class="text-xs text-red-400">{{ cityError }}</p>
           <div class="flex gap-2">
-            <button (click)="cityFilter=''; applyFilters(); showLocationDropdown=false"
+            <button (click)="cityId=null; cityFilter=''; applyFilters(); showLocationDropdown=false"
               class="flex-1 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 transition-colors">Effacer</button>
             <button (click)="applyFilters(); showLocationDropdown=false"
               class="flex-1 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors">Valider</button>

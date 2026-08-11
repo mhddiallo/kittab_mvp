@@ -33,7 +33,7 @@
         </div>
         <div class="flex items-center justify-between gap-4 text-sm">
           <span class="text-gray-400 shrink-0">Ville</span>
-          <span class="font-bold text-gray-900 text-right truncate">{{ locationLabel }}</span>
+          <span class="font-bold text-gray-900 text-right truncate">{{ cityName }}<span *ngIf="locationLabel" class="font-medium text-gray-500"> — {{ locationLabel }}</span></span>
         </div>
         <div class="flex items-center justify-between gap-4 text-sm">
           <span class="text-gray-400 shrink-0">Échanges</span>
@@ -271,17 +271,16 @@
             </button>
           </div>
 
-          <label class="block text-sm font-bold text-gray-900 mb-2">Quartier ou ville <span class="text-primary">*</span></label>
-          <div class="relative mb-1.5">
-            <input type="text" [(ngModel)]="locationLabel" name="locationLabel" (input)="onLocationInput()"
-                   (blur)="showLocationSuggestions = false" placeholder="Ex : Médina, Dakar"
-                   class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
-            <ul *ngIf="showLocationSuggestions && locationSuggestions.length > 0"
-                class="absolute z-20 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
-              <li *ngFor="let s of locationSuggestions" (mousedown)="selectLocation(s)"
-                  class="px-4 py-3 text-sm text-gray-700 hover:bg-red-50 cursor-pointer">{{ s.label }}</li>
-            </ul>
-          </div>
+          <label class="block text-sm font-bold text-gray-900 mb-2">Ville <span class="text-primary">*</span></label>
+          <select [(ngModel)]="cityId" name="cityId"
+                  class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors mb-4">
+            <option [ngValue]="null">Choisir ta ville...</option>
+            <option *ngFor="let c of cities" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+
+          <label class="block text-sm font-bold text-gray-900 mb-2">Quartier <span class="font-medium text-gray-400">(optionnel)</span></label>
+          <input type="text" [(ngModel)]="locationLabel" name="locationLabel" placeholder="Ex : Médina"
+                 class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors mb-1.5" />
           <p class="text-xs text-gray-400 mb-5">Pour que les acheteurs sachent où récupérer le livre.</p>
 
           <label class="block text-sm font-bold text-gray-900 mb-2">Description <span class="hidden lg:inline font-medium text-gray-400">(optionnel)</span></label>

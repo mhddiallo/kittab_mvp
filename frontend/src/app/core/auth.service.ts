@@ -9,6 +9,8 @@ export interface CurrentUser {
   phone: string;
   address?: string;
   city?: string;
+  /** Code pays ISO déduit de l'indicatif téléphonique à l'inscription. */
+  country_code?: string;
   is_admin?: boolean;
   is_profile_complete: boolean;
 }
