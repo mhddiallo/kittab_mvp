@@ -44,6 +44,15 @@ if settings.CLOUDINARY_CLOUD_NAME:
 MAX_IMAGES = 4
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
+# Repli quand le nom de fichier envoyé par le navigateur n'a pas d'extension
+# exploitable, cas fréquent depuis un téléphone.
+MIME_TO_EXTENSION = {
+    "image/jpeg": ".jpg",
+    "image/jpg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+}
+
 
 # ── Catalogue autocomplete ────────────────────────────────────────────────
 
@@ -377,9 +386,19 @@ async def upload_image(
     if len(book.images) >= MAX_IMAGES:
         raise HTTPException(status_code=400, detail=f"Maximum {MAX_IMAGES} photos par annonce")
 
+    # Le nom de fichier n'est pas fiable : selon le navigateur mobile et la
+    # source choisie (appareil photo, photothèque, gestionnaire de fichiers),
+    # il arrive sans extension ou avec une extension inattendue. On retombe
+    # donc sur le type MIME déclaré avant de rejeter.
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in ALLOWED_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Format non supporté (jpg, png, webp)")
+        ext = MIME_TO_EXTENSION.get((file.content_type or "").lower(), "")
+    if ext not in ALLOWED_EXTENSIONS:
+        received = os.path.splitext(file.filename or "")[1] or file.content_type or "inconnu"
+        raise HTTPException(
+            status_code=400,
+            detail=f"Format non supporté ({received}). Formats acceptés : jpg, png, webp.",
+        )
 
     content = await file.read()
 

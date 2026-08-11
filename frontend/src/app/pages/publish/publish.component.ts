@@ -147,6 +147,8 @@ export class PublishComponent implements OnInit, OnDestroy {
   imagePreviews: string[] = [];
   submitting = false;
   error = '';
+  /** Renseigné quand l'annonce est créée mais que des photos ont échoué. */
+  createdBookId: number | null = null;
   autocompleteTimeout: any;
   scanLoading: false | 'cover' | 'back' | 'barcode' = false;
   scanError = '';
@@ -632,15 +634,34 @@ export class PublishComponent implements OnInit, OnDestroy {
 
       const book = await res.json();
 
-      // Étape 2 : uploader les images une par une
+      // Étape 2 : uploader les images une par une.
+      // Les échecs étaient auparavant ignorés : l'annonce partait sans ses
+      // photos et l'utilisateur était redirigé sans le moindre message.
+      const failures: string[] = [];
       for (const img of this.images) {
         const form = new FormData();
         form.append('file', img);
-        await fetch(`${environment.apiUrl}/api/books/${book.id}/images`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
-        });
+        try {
+          const imgRes = await fetch(`${environment.apiUrl}/api/books/${book.id}/images`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: form,
+          });
+          if (!imgRes.ok) {
+            let detail = `erreur ${imgRes.status}`;
+            try { detail = (await imgRes.json()).detail || detail; } catch {}
+            failures.push(detail);
+          }
+        } catch {
+          failures.push('connexion interrompue');
+        }
+      }
+
+      if (failures.length > 0) {
+        this.createdBookId = book.id;
+        this.error = `Ton annonce a bien été créée, mais ${failures.length} photo(s) n'ont pas pu être envoyées (${failures[0]}). Tu peux les ajouter depuis « Mes annonces ».`;
+        this.submitting = false;
+        return;
       }
 
       this.router.navigate(['/books', book.id]);
