@@ -350,7 +350,7 @@
           <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
                   class="font-bold text-sm px-7 py-3.5 rounded-full transition-colors"
                   [ngClass]="isValid && !submitting ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
-            {{ submitting ? 'Publication...' : 'Publier l\'annonce →' }}
+            {{ submitLabel }}
           </button>
         </div>
 
@@ -376,7 +376,7 @@
   <button *ngIf="step === 4" type="button" (click)="submit()" [disabled]="!isValid || submitting"
           class="flex-1 font-bold text-sm py-3.5 rounded-full transition-colors"
           [ngClass]="isValid && !submitting ? 'bg-primary text-white' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
-    {{ submitting ? 'Publication...' : 'Publier l\'annonce →' }}
+    {{ submitLabel }}
   </button>
 </div>
 

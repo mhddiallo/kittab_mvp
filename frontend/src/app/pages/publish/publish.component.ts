@@ -149,6 +149,19 @@ export class PublishComponent implements OnInit, OnDestroy {
   error = '';
   /** Renseigné quand l'annonce est créée mais que des photos ont échoué. */
   createdBookId: number | null = null;
+
+  /** Progression de l'envoi des photos, affichée sur le bouton. */
+  uploadDone = 0;
+  uploadTotal = 0;
+
+  get submitLabel(): string {
+    if (!this.submitting) return "Publier l'annonce →";
+    if (this.uploadTotal === 0) return 'Publication...';
+    if (this.uploadDone < this.uploadTotal) {
+      return `Photo ${this.uploadDone + 1} sur ${this.uploadTotal}...`;
+    }
+    return 'Finalisation...';
+  }
   autocompleteTimeout: any;
   scanLoading: false | 'cover' | 'back' | 'barcode' = false;
   scanError = '';
@@ -575,6 +588,56 @@ export class PublishComponent implements OnInit, OnDestroy {
     return [1, 2, 3, 4].every(s => this.stepValid(s));
   }
 
+  // ── Optimisation des photos avant envoi ────────────────
+  //
+  // Une photo d'iPhone fait 2 à 5 Mo pour 3024x4032 px. C'est bien au-delà de
+  // ce qu'un écran affiche, et c'est ce qui rendait la publication lente en
+  // 4G. On redimensionne donc côté navigateur avant l'envoi.
+  //
+  // Réglages volontairement prudents pour préserver la lisibilité d'une
+  // couverture de livre (titre, auteur, mentions d'édition) : 2000 px sur le
+  // plus grand côté et qualité JPEG 0,85. Une photo passe typiquement de
+  // 2,5 Mo à 400-600 Ko, sans perte visible à l'écran.
+  private static readonly MAX_DIMENSION = 2000;
+  private static readonly JPEG_QUALITY = 0.85;
+  /** En dessous, l'image est déjà légère : on n'y touche pas. */
+  private static readonly SKIP_BELOW_BYTES = 700 * 1024;
+
+  private async compressImage(file: File): Promise<File> {
+    if (!file.type.startsWith('image/') || file.size <= PublishComponent.SKIP_BELOW_BYTES) {
+      return file;
+    }
+    try {
+      // imageOrientation évite que les photos prises à la verticale
+      // ressortent tournées : l'orientation EXIF est appliquée au dessin.
+      const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      const largestSide = Math.max(bitmap.width, bitmap.height);
+      const scale = Math.min(1, PublishComponent.MAX_DIMENSION / largestSide);
+      const width = Math.round(bitmap.width * scale);
+      const height = Math.round(bitmap.height * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return file;
+      ctx.drawImage(bitmap, 0, 0, width, height);
+      bitmap.close?.();
+
+      const blob = await new Promise<Blob | null>(resolve =>
+        canvas.toBlob(resolve, 'image/jpeg', PublishComponent.JPEG_QUALITY)
+      );
+
+      // Filet de sécurité : on ne remplace jamais l'original par plus lourd.
+      if (!blob || blob.size >= file.size) return file;
+
+      const name = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+      return new File([blob], name, { type: 'image/jpeg' });
+    } catch {
+      return file;
+    }
+  }
+
   /**
    * Traduit une réponse d'erreur d'upload en texte lisible.
    *
@@ -670,10 +733,13 @@ export class PublishComponent implements OnInit, OnDestroy {
       // Étape 2 : uploader les images une par une.
       // Les échecs étaient auparavant ignorés : l'annonce partait sans ses
       // photos et l'utilisateur était redirigé sans le moindre message.
-      const failures: string[] = [];
-      for (const img of this.images) {
+      this.uploadTotal = this.images.length;
+      this.uploadDone = 0;
+
+      const sendOne = async (img: File): Promise<string | null> => {
+        const optimised = await this.compressImage(img);
         const form = new FormData();
-        form.append('file', img);
+        form.append('file', optimised);
         try {
           // ngsw-bypass : le service worker ne doit pas intercepter cet envoi.
           // Sur Safari iOS, un corps volumineux réémis par un service worker
@@ -685,11 +751,22 @@ export class PublishComponent implements OnInit, OnDestroy {
             headers: { Authorization: `Bearer ${token}` },
             body: form,
           });
-          if (!imgRes.ok) failures.push(await this.describeUploadError(imgRes));
+          return imgRes.ok ? null : await this.describeUploadError(imgRes);
         } catch (e: any) {
-          failures.push(`connexion interrompue (${e?.message || 'inconnue'})`);
+          return `connexion interrompue (${e?.message || 'inconnue'})`;
+        } finally {
+          this.uploadDone++;
         }
-      }
+      };
+
+      // La première photo part seule : le serveur marque comme couverture la
+      // première image reçue. En tout envoyer en parallèle ferait dépendre la
+      // couverture de l'ordre d'arrivée des requêtes. Les suivantes, elles,
+      // partent ensemble.
+      const [first, ...rest] = this.images;
+      const failures = (
+        [await sendOne(first), ...(await Promise.all(rest.map(sendOne)))]
+      ).filter((f): f is string => f !== null);
 
       if (failures.length > 0) {
         this.createdBookId = book.id;
