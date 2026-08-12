@@ -100,6 +100,10 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   dialCode = this.dialCodes[0].code;
 
+  /** Numéro complet, indicatif compris, envoyé au serveur. Distinct du champ
+   *  de saisie, qui ne contient que la partie locale. */
+  fullPhone = '';
+
   /**
    * Un menu déroulant à une seule entrée n'a pas de sens : tant qu'un seul
    * pays est ouvert, l'indicatif reste affiché mais devient une simple
@@ -136,14 +140,17 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
   async requestOtp() {
     if (!this.phone.trim()) { this.error = 'Veuillez saisir votre numéro'; return; }
-    this.phone = this.normalizePhone(this.phone);
-    if (!this.isValidPhone(this.phone)) { this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)'; return; }
+
+    // Le champ garde ce que l'utilisateur a tapé. L'indicatif est déjà affiché
+    // à côté : le recopier dans le champ afficherait "+221" deux fois.
+    this.fullPhone = this.normalizePhone(this.phone);
+    if (!this.isValidPhone(this.fullPhone)) { this.error = 'Numéro de téléphone invalide (7 à 15 chiffres)'; return; }
     this.loading = true; this.error = '';
     try {
       const res = await fetch(`${environment.apiUrl}/api/auth/request-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: this.phone }),
+        body: JSON.stringify({ phone: this.fullPhone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail);
@@ -160,7 +167,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       const res = await fetch(`${environment.apiUrl}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: this.phone, code: this.otp }),
+        body: JSON.stringify({ phone: this.fullPhone, code: this.otp }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail);

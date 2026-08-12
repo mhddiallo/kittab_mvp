@@ -121,7 +121,9 @@
           </button>
 
           <h1 class="text-xl font-extrabold text-gray-900 mb-1 text-center">Vérifiez votre téléphone</h1>
-          <p class="text-gray-400 text-sm mb-6 text-center">Code envoyé au <strong class="text-gray-800">{{ phone }}</strong></p>
+          <!-- Le numéro complet, indicatif compris : c'est celui vers lequel le
+               code est réellement parti, et il confirme le bon pays. -->
+          <p class="text-gray-400 text-sm mb-6 text-center">Code envoyé au <strong class="text-gray-800">{{ fullPhone }}</strong></p>
 
           @if (devCode) {
             <div class="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-4">
