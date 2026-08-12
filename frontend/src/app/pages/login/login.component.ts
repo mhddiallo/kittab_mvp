@@ -82,11 +82,12 @@ export class LoginComponent implements OnInit, AfterViewInit {
    */
   readonly dialCodes = [
     { code: '+221', flag: '🇸🇳', label: 'Sénégal' },
-    { code: '+225', flag: '🇨🇮', label: "Côte d'Ivoire" },
     // Pays préparés mais pas encore ouverts. Les réactiver demande aussi
     // d'insérer leurs villes dans la table cities : sans elles, un compte
     // peut se créer mais la publication reste impossible, faute de ville
-    // à choisir.
+    // à choisir. Les villes de Côte d'Ivoire sont déjà en base (migration
+    // 023), il suffit donc de décommenter sa ligne.
+    // { code: '+225', flag: '🇨🇮', label: "Côte d'Ivoire" },
     // { code: '+226', flag: '🇧🇫', label: 'Burkina Faso' },
     // { code: '+223', flag: '🇲🇱', label: 'Mali' },
     // { code: '+227', flag: '🇳🇪', label: 'Niger' },
@@ -97,7 +98,20 @@ export class LoginComponent implements OnInit, AfterViewInit {
     // { code: '+33',  flag: '🇫🇷', label: 'France' },
   ];
 
-  dialCode = '+221';
+  dialCode = this.dialCodes[0].code;
+
+  /**
+   * Un menu déroulant à une seule entrée n'a pas de sens : tant qu'un seul
+   * pays est ouvert, l'indicatif reste affiché mais devient une simple
+   * mention. Le menu réapparaît de lui-même dès qu'un pays est décommenté.
+   */
+  get hasMultipleCountries(): boolean {
+    return this.dialCodes.length > 1;
+  }
+
+  get currentDial() {
+    return this.dialCodes.find(d => d.code === this.dialCode) ?? this.dialCodes[0];
+  }
 
   /**
    * L'indicatif choisi remplace l'ancien "+221" écrit en dur. Auparavant,
