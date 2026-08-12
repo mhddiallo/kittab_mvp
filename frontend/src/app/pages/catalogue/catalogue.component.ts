@@ -51,7 +51,10 @@ export class CatalogueComponent implements OnInit {
 
   async loadCities() {
     try {
-      const res = await fetch(`${environment.apiUrl}/api/cities?country=SN`);
+      // Suit le pays du compte : une liste figée sur SN priverait un
+      // utilisateur ivoirien de tout filtre utilisable.
+      const country = this.auth?.user?.country_code || 'SN';
+      const res = await fetch(`${environment.apiUrl}/api/cities?country=${country}`);
       if (res.ok) this.cities = await res.json();
     } catch {}
   }

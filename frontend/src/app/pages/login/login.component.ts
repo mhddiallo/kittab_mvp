@@ -81,16 +81,20 @@ export class LoginComponent implements OnInit, AfterViewInit {
    * erreur ici a des conséquences bien au-delà de la réception du code.
    */
   readonly dialCodes = [
-    { code: '+221', label: 'Sénégal' },
-    { code: '+225', label: "Côte d'Ivoire" },
-    { code: '+226', label: 'Burkina Faso' },
-    { code: '+223', label: 'Mali' },
-    { code: '+227', label: 'Niger' },
-    { code: '+233', label: 'Ghana' },
-    { code: '+224', label: 'Guinée' },
-    { code: '+228', label: 'Togo' },
-    { code: '+229', label: 'Bénin' },
-    { code: '+33',  label: 'France' },
+    { code: '+221', flag: '🇸🇳', label: 'Sénégal' },
+    { code: '+225', flag: '🇨🇮', label: "Côte d'Ivoire" },
+    // Pays préparés mais pas encore ouverts. Les réactiver demande aussi
+    // d'insérer leurs villes dans la table cities : sans elles, un compte
+    // peut se créer mais la publication reste impossible, faute de ville
+    // à choisir.
+    // { code: '+226', flag: '🇧🇫', label: 'Burkina Faso' },
+    // { code: '+223', flag: '🇲🇱', label: 'Mali' },
+    // { code: '+227', flag: '🇳🇪', label: 'Niger' },
+    // { code: '+233', flag: '🇬🇭', label: 'Ghana' },
+    // { code: '+224', flag: '🇬🇳', label: 'Guinée' },
+    // { code: '+228', flag: '🇹🇬', label: 'Togo' },
+    // { code: '+229', flag: '🇧🇯', label: 'Bénin' },
+    // { code: '+33',  flag: '🇫🇷', label: 'France' },
   ];
 
   dialCode = '+221';
