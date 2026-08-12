@@ -323,6 +323,17 @@ export class CatalogueComponent implements OnInit {
     return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
   }
 
+  /**
+   * Même règle que les cartes du catalogue : la couverture de l'éditeur passe
+   * avant la photo du vendeur, pour que le bandeau reste homogène.
+   */
+  featuredImage(book: any): string {
+    const cover = book?.cover_url;
+    const usable = cover && !/unavailable|nocover/i.test(cover);
+    if (!book?.is_pack && usable) return cover;
+    return this.getImageUrl(book?.images?.[0]?.url);
+  }
+
   async sendAlert() {
     if (!this.alertPhone || !this.searchQuery) return;
     try {

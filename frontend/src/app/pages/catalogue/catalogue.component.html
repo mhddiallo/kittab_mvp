@@ -82,8 +82,10 @@
     <div *ngFor="let book of boostedBooks"
          class="flex-shrink-0 w-36 bg-white rounded-xl border border-gray-100 p-3 cursor-pointer hover:shadow-md transition-shadow"
          [routerLink]="['/books', book.id]">
-      <div class="relative mb-2">
-        <img [src]="getImageUrl(book.images?.[0]?.url)" [alt]="book.title" class="w-full h-24 object-cover rounded-lg" />
+      <div class="relative mb-2 h-24 rounded-lg overflow-hidden bg-gray-50">
+        <img [src]="featuredImage(book)" alt="" aria-hidden="true"
+             class="absolute inset-0 w-full h-full object-cover scale-110 blur-lg opacity-40" />
+        <img [src]="featuredImage(book)" [alt]="book.title" class="relative w-full h-full object-contain" />
         <span class="absolute top-1 left-1 bg-amber-400 text-white text-xs font-bold px-1.5 py-0.5 rounded">⭐</span>
       </div>
       <div class="text-xs font-semibold text-gray-800 truncate">{{ book.title }}</div>

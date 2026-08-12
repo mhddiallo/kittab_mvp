@@ -52,7 +52,24 @@ export class BookCardComponent {
     return !url.toLowerCase().includes('unavailable') && !url.toLowerCase().includes('nocover');
   }
 
+  /**
+   * Vignette du catalogue : la couverture officielle passe avant les photos
+   * du vendeur.
+   *
+   * La grille mélangeait des couvertures d'éditeur et des clichés pris sur un
+   * coin de table, avec des cadrages et des lumières très inégaux. Quand
+   * l'ISBN a été scanné, on dispose de la couverture de l'éditeur : on
+   * l'affiche ici pour que le catalogue reste lisible d'un seul coup d'œil.
+   *
+   * Les vraies photos de l'exemplaire ne disparaissent pas pour autant : la
+   * fiche de l'annonce les montre en premier, et c'est là que l'acheteur
+   * juge l'état réel. Un pack n'a pas de couverture d'éditeur, il garde donc
+   * les photos du vendeur.
+   */
   get primaryImage(): string {
+    if (!this.book.is_pack && this.book.cover_url && this.isValidCover(this.book.cover_url)) {
+      return this.book.cover_url;
+    }
     const url = this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url;
     if (url) return url.startsWith('http') ? url : `${this.API}${url}`;
     if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return this.book.cover_url;
