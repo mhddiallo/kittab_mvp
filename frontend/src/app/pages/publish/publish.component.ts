@@ -160,6 +160,49 @@ export class PublishComponent implements OnInit, OnDestroy {
    */
   publishPhase: '' | 'creating' | 'optimizing' | 'uploading' | 'finalizing' = '';
 
+  /**
+   * Durée minimale d'affichage d'un message d'étape.
+   *
+   * La création de l'annonce et la compression des photos durent quelques
+   * centaines de millisecondes : leurs messages défilaient trop vite pour être
+   * lus, et on ne voyait que "Envoi de tes photos". Chaque étape est donc
+   * maintenue à l'écran le temps d'être lue, en file d'attente.
+   *
+   * Cette file ne ralentit pas le traitement : elle ne pilote que l'affichage.
+   */
+  private static readonly MIN_PHASE_MS = 900;
+  private phaseQueue: Promise<void> = Promise.resolve();
+  private lastRequestedPhase: typeof this.publishPhase = '';
+  /** Incrémenté à chaque remise à zéro : les étapes encore en file sont ignorées. */
+  private phaseRun = 0;
+
+  private setPhase(phase: typeof this.publishPhase) {
+    // L'envoi des photos passe par ici une fois par image : sans ce garde-fou,
+    // le même message serait mis en file autant de fois qu'il y a de photos.
+    if (phase === this.lastRequestedPhase) return;
+    this.lastRequestedPhase = phase;
+
+    const run = this.phaseRun;
+    this.phaseQueue = this.phaseQueue.then(async () => {
+      if (run !== this.phaseRun) return;
+      this.publishPhase = phase;
+      await new Promise(resolve => setTimeout(resolve, PublishComponent.MIN_PHASE_MS));
+    });
+  }
+
+  /** Ferme la fenêtre d'attente sans laisser un message en file la rouvrir. */
+  private resetPhase() {
+    this.phaseRun++;
+    this.phaseQueue = Promise.resolve();
+    this.lastRequestedPhase = '';
+    this.publishPhase = '';
+  }
+
+  /** Laisse le dernier message le temps d'être lu avant de quitter la page. */
+  private async flushPhases() {
+    await this.phaseQueue;
+  }
+
   get phaseMessage(): string {
     switch (this.publishPhase) {
       case 'creating':   return 'On prépare ton annonce...';
@@ -700,7 +743,8 @@ export class PublishComponent implements OnInit, OnDestroy {
     if (!this.isValid || this.submitting) return;
     this.submitting = true;
     this.error = '';
-    this.publishPhase = 'creating';
+    this.resetPhase();
+    this.setPhase('creating');
     this.uploadDone = 0;
     this.uploadTotal = 0;
 
@@ -710,7 +754,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     const userPhone = this.auth.user?.phone;
     if (!userPhone || userPhone.startsWith('google_')) {
       this.error = 'Vous devez ajouter un numéro de téléphone dans votre profil avant de publier une annonce.';
-      this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
+      this.resetPhase(); this.showConfirm = false; this.submitting = false;
       this.router.navigate(['/profile']);
       return;
     }
@@ -753,7 +797,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         const err = await res.json();
         this.error = err.detail ?? 'Une erreur est survenue.';
         if (res.status === 401) this.router.navigate(['/login']);
-        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
+        this.resetPhase(); this.showConfirm = false; this.submitting = false;
         return;
       }
 
@@ -761,7 +805,7 @@ export class PublishComponent implements OnInit, OnDestroy {
 
       if (!book?.id) {
         this.error = "L'annonce a été créée mais le serveur n'a pas renvoyé son identifiant : les photos n'ont pas pu être rattachées. Retrouve l'annonce dans « Mes annonces ».";
-        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
+        this.resetPhase(); this.showConfirm = false; this.submitting = false;
         return;
       }
 
@@ -770,11 +814,11 @@ export class PublishComponent implements OnInit, OnDestroy {
       // photos et l'utilisateur était redirigé sans le moindre message.
       this.uploadTotal = this.images.length;
       this.uploadDone = 0;
-      this.publishPhase = 'optimizing';
+      this.setPhase('optimizing');
 
       const sendOne = async (img: File): Promise<string | null> => {
         const optimised = await this.compressImage(img);
-        this.publishPhase = 'uploading';
+        this.setPhase('uploading');
         const form = new FormData();
         form.append('file', optimised);
         try {
@@ -805,20 +849,24 @@ export class PublishComponent implements OnInit, OnDestroy {
         [await sendOne(first), ...(await Promise.all(rest.map(sendOne)))]
       ).filter((f): f is string => f !== null);
 
-      this.publishPhase = 'finalizing';
+      this.setPhase('finalizing');
 
       if (failures.length > 0) {
-        this.publishPhase = '';
         this.createdBookId = book.id;
         this.error = `Ton annonce a bien été créée, mais ${failures.length} photo(s) n'ont pas pu être envoyées (${failures[0]}). Tu peux les ajouter depuis « Mes annonces ».`;
-        this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
+        this.resetPhase(); this.showConfirm = false; this.submitting = false;
         return;
       }
+
+      // Les envois peuvent finir avant que la file de messages soit épuisée :
+      // sans cette attente, on quitterait la page pendant "On allège tes
+      // photos" et les dernières étapes ne seraient jamais vues.
+      await this.flushPhases();
 
       this.router.navigate(['/books', book.id]);
     } catch {
       this.error = 'Impossible de contacter le serveur.';
     }
-    this.publishPhase = ""; this.showConfirm = false; this.submitting = false;
+    this.resetPhase(); this.showConfirm = false; this.submitting = false;
   }
 }

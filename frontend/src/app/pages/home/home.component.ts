@@ -20,6 +20,12 @@ export class HomeComponent implements OnInit {
   searchQuery = '';
   activeTab = 'acheter';
   howItWorksTab: 'buy' | 'sell' = 'buy';
+
+  /** Localisation d'une annonce : quartier et ville, à défaut l'adresse du vendeur. */
+  bookLocation(book: any): string {
+    const own = [book?.location_label, book?.city?.name].filter(Boolean).join(', ');
+    return own || book?.seller?.address || '';
+  }
   suggestions: any[] = [];
   private searchTimeout: any;
 

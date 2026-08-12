@@ -135,7 +135,10 @@
           <p class="font-bold text-sm text-gray-900 truncate">{{ book.title }}</p>
           <p class="text-xs text-gray-400 flex items-center gap-1 mt-0.5 truncate">
             {{ book.author }}
-            <ng-container *ngIf="book.seller?.address"> · <span class="text-primary">📍</span> {{ book.seller.address }}</ng-container>
+            <!-- Localisation du livre, pas du vendeur : son adresse de profil
+                 s'affichait sur toutes ses annonces, quelle que soit la ville
+                 choisie à la publication. -->
+            <ng-container *ngIf="bookLocation(book)"> · <span class="text-primary">📍</span> {{ bookLocation(book) }}</ng-container>
           </p>
         </div>
       </div>

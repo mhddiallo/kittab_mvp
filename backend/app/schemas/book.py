@@ -151,6 +151,7 @@ class BookListOut(BaseModel):
     is_pack: bool = False
     pack_items: Optional[List[str]] = None
     cover_url: Optional[str] = None
+    location_label: Optional[str] = None
     created_at: datetime
     seller: SellerBrief
     category: Optional[CategoryOut] = None

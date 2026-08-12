@@ -8,6 +8,8 @@ export interface BookCard {
   condition: string; book_type: string;
   images: { url: string; is_primary: boolean }[];
   seller: { first_name: string; last_name: string; phone: string; address?: string };
+  location_label?: string | null;
+  city?: { id: number; name: string } | null;
   is_available: boolean;
   views?: number;
   is_pack?: boolean;
@@ -24,6 +26,19 @@ export interface BookCard {
 })
 export class BookCardComponent {
   @Input() book!: BookCard;
+
+  /**
+   * Localisation du LIVRE, pas du vendeur.
+   *
+   * La carte affichait seller.address, c'est-à-dire l'adresse du profil : tous
+   * les livres d'un même vendeur portaient donc la même mention, quelle que
+   * soit la ville renseignée à la publication. On retombe sur l'adresse du
+   * profil uniquement pour les annonces antérieures au champ Ville.
+   */
+  get locationText(): string {
+    const own = [this.book.location_label, this.book.city?.name].filter(Boolean).join(', ');
+    return own || this.book.seller?.address || 'Non précisé';
+  }
 
   get conditionLabel(): string {
     return ({ new: 'Neuf', like_new: 'Très bon', good: 'Bon état', fair: 'Correct' } as any)[this.book.condition] || this.book.condition;
