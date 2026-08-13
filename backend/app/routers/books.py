@@ -123,34 +123,39 @@ def _google_image_link(volume_info: dict) -> Optional[str]:
     return None
 
 
-async def _resolve_cover(client, volume_info: dict, volume_id: Optional[str], isbn: Optional[str]) -> Optional[str]:
+# Motifs des images « pas de couverture » servies à la place d'une vraie.
+_PLACEHOLDER_MARKERS = ("no_cover", "nocover", "unavailable", "image_not_available")
+
+
+def _is_placeholder(url: str) -> bool:
+    lowered = url.lower()
+    return any(marker in lowered for marker in _PLACEHOLDER_MARKERS)
+
+
+async def _resolve_cover(client, volume_info: dict, isbn: Optional[str]) -> Optional[str]:
     """
     Couverture d'un livre, en descendant les sources jusqu'à en trouver une valide.
 
-    `imageLinks` est souvent absent des éditions françaises et africaines : la
-    recherche par ISBN renvoyait alors une fiche sans image et le formulaire
-    restait silencieusement vide. On se rabat donc sur le point d'accès
-    « content » de Google, qui sert une couverture à partir du seul
-    identifiant de volume, puis sur Open Library, qui indexe par ISBN sans clé
-    ni quota.
+    On ne retient que ce que Google déclare dans `imageLinks` : c'est le seul
+    endroit où sa présence signifie qu'une vraie couverture existe. Le point
+    d'accès « content », qu'on interrogeait à partir de l'identifiant de
+    volume, répond toujours 200 — avec l'image grise « Image not available »
+    quand il n'a rien. Cette image pesant plus que le seuil de validité, elle
+    passait pour une couverture et s'affichait sous la mention « Couverture
+    trouvée automatiquement ».
 
-    Chaque candidate est vérifiée avant d'être renvoyée : Open Library répond
-    par une image vide plutôt que par une erreur quand elle ne connaît pas le
-    livre, et une vignette cassée dans le formulaire est pire que pas d'image.
+    Faute de couverture chez Google, on interroge Open Library, qui indexe par
+    ISBN sans clé ni quota et répond 404 plutôt que de servir un substitut.
     """
     from app.services.catalog_service import is_valid_cover
 
     candidates = [_google_image_link(volume_info)]
-    if volume_id:
-        candidates.append(
-            f"https://books.google.com/books/content?id={volume_id}&printsec=frontcover&img=1&zoom=3"
-        )
     if isbn:
         # default=false : renvoie 404 au lieu d'un GIF d'un pixel.
         candidates.append(f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false")
 
     for url in candidates:
-        if url and await is_valid_cover(client, url):
+        if url and not _is_placeholder(url) and await is_valid_cover(client, url):
             return url
     return None
 
@@ -222,7 +227,7 @@ async def book_info(
 
             # Google peut ne rien connaître du livre et Open Library avoir sa
             # couverture : on tente quand même la résolution par ISBN.
-            cover_url = await _resolve_cover(client, volume_info or {}, volume_id, isbn)
+            cover_url = await _resolve_cover(client, volume_info or {}, isbn)
     except Exception:
         return {**empty, "lookup_failed": True}
 

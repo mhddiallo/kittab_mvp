@@ -227,8 +227,12 @@
           <input type="text" [(ngModel)]="author" name="author" placeholder="Nom de l'auteur"
                  class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors mb-5" />
 
+          <!-- (error) : dernier filet. Si malgré les vérifications du serveur
+               l'image ne charge pas, on la retire plutôt que d'annoncer une
+               couverture trouvée sous un cadre vide. -->
           <div *ngIf="selectedCover" class="flex items-center gap-3 mb-5">
-            <img [src]="selectedCover" alt="" class="w-12 h-16 object-cover rounded-lg border border-gray-100" />
+            <img [src]="selectedCover" alt="" (error)="onCoverError()"
+                 class="w-12 h-16 object-cover rounded-lg border border-gray-100" />
             <p class="text-xs text-gray-500">Couverture trouvée automatiquement</p>
           </div>
 

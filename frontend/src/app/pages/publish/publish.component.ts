@@ -556,6 +556,12 @@ export class PublishComponent implements OnInit, OnDestroy {
     return `Fiche trouvée, mais ${missing.join(' et ')} ${missing.length > 1 ? 'manquent' : 'manque'} : à compléter ci-dessous.`;
   }
 
+  /** L'image annoncée ne charge pas : on n'affirme pas l'avoir trouvée. */
+  onCoverError() {
+    this.selectedCover = '';
+    this.scanError = "La couverture trouvée n'a pas pu être chargée : ajoute une photo de la couverture à l'étape Photos.";
+  }
+
   async lookupByIsbn(isbn: string) {
     // On retient l'ISBN avant même d'interroger Google Books : qu'il y ait une
     // fiche ou non, c'est lui qui permettra plus tard de rattacher l'annonce à
