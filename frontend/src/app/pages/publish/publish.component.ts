@@ -571,7 +571,14 @@ export class PublishComponent implements OnInit, OnDestroy {
     this.scanLoading = 'barcode';
     this.scanError = '';
     try {
-      const res = await fetch(`${environment.apiUrl}/api/books/info?isbn=${encodeURIComponent(isbn)}`);
+      // On transmet aussi ce que le vendeur a déjà saisi : le serveur sait
+      // chercher par titre et auteur quand l'ISBN ne donne rien, mais ce
+      // second essai n'était jamais déclenché faute de lui envoyer ces champs.
+      const params = new URLSearchParams({ isbn });
+      if (this.title.trim()) params.set('title', this.title.trim());
+      if (this.author.trim()) params.set('author', this.author.trim());
+
+      const res = await fetch(`${environment.apiUrl}/api/books/info?${params}`);
       if (res.ok) {
         const data = await res.json();
         if (data.title) this.title = data.title;

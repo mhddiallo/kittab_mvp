@@ -108,58 +108,6 @@ async def book_autocomplete(q: str = Query(..., min_length=2), db: Session = Dep
     return await autocomplete(db, q)
 
 
-def _google_image_link(volume_info: dict) -> Optional[str]:
-    """
-    Meilleure couverture déclarée par Google Books, du plus grand format au plus petit.
-
-    Seul `thumbnail` était lu : les volumes qui n'exposent que `smallThumbnail`
-    revenaient donc sans image, alors qu'ils en avaient une.
-    """
-    links = volume_info.get("imageLinks") or {}
-    for key in ("extraLarge", "large", "medium", "small", "thumbnail", "smallThumbnail"):
-        url = links.get(key)
-        if url:
-            return url.replace("http://", "https://").replace("&zoom=1", "&zoom=3")
-    return None
-
-
-# Motifs des images « pas de couverture » servies à la place d'une vraie.
-_PLACEHOLDER_MARKERS = ("no_cover", "nocover", "unavailable", "image_not_available")
-
-
-def _is_placeholder(url: str) -> bool:
-    lowered = url.lower()
-    return any(marker in lowered for marker in _PLACEHOLDER_MARKERS)
-
-
-async def _resolve_cover(client, volume_info: dict, isbn: Optional[str]) -> Optional[str]:
-    """
-    Couverture d'un livre, en descendant les sources jusqu'à en trouver une valide.
-
-    On ne retient que ce que Google déclare dans `imageLinks` : c'est le seul
-    endroit où sa présence signifie qu'une vraie couverture existe. Le point
-    d'accès « content », qu'on interrogeait à partir de l'identifiant de
-    volume, répond toujours 200 — avec l'image grise « Image not available »
-    quand il n'a rien. Cette image pesant plus que le seuil de validité, elle
-    passait pour une couverture et s'affichait sous la mention « Couverture
-    trouvée automatiquement ».
-
-    Faute de couverture chez Google, on interroge Open Library, qui indexe par
-    ISBN sans clé ni quota et répond 404 plutôt que de servir un substitut.
-    """
-    from app.services.catalog_service import is_valid_cover
-
-    candidates = [_google_image_link(volume_info)]
-    if isbn:
-        # default=false : renvoie 404 au lieu d'un GIF d'un pixel.
-        candidates.append(f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false")
-
-    for url in candidates:
-        if url and not _is_placeholder(url) and await is_valid_cover(client, url):
-            return url
-    return None
-
-
 @router.get("/info")
 async def book_info(
     google_id: Optional[str] = Query(None),
@@ -168,13 +116,7 @@ async def book_info(
     isbn: Optional[str] = Query(None),
 ):
     import httpx
-
-    api_key = settings.GOOGLE_BOOKS_API_KEY
-    volume_info = None
-    volume_id = google_id
-    # Distingue « Google n'a pas répondu » de « Google ne connaît pas ce livre » :
-    # le formulaire ne peut pas expliquer un échec qu'on ne lui rapporte pas.
-    lookup_failed = False
+    from app.services.cover_service import fetch_google_volume, resolve_cover
 
     empty = {
         "title": None, "author": None, "language": None, "summary": None,
@@ -184,50 +126,31 @@ async def book_info(
     }
 
     try:
-        async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
-            if isbn:
-                params = {"q": f"isbn:{isbn}"}
-                if api_key:
-                    params["key"] = api_key
-                r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
-                if r.status_code == 200:
-                    items = r.json().get("items", [])
-                    if items:
-                        volume_info = items[0].get("volumeInfo")
-                        volume_id = items[0].get("id") or volume_id
-                else:
-                    # 429 en tête : le quota Google Books est vite atteint sans clé.
-                    lookup_failed = True
-
+        async with httpx.AsyncClient(timeout=8.0) as client:
+            volume_info, volume_id, lookup_failed = await fetch_google_volume(
+                client,
+                api_key=settings.GOOGLE_BOOKS_API_KEY,
+                isbn=isbn,
+                title=title,
+                author=author,
+            )
             if not volume_info and google_id:
-                params = {}
-                if api_key:
-                    params["key"] = api_key
-                r = await client.get(f"https://www.googleapis.com/books/v1/volumes/{google_id}", params=params)
-                if r.status_code == 200:
-                    volume_info = r.json().get("volumeInfo")
-                else:
-                    lookup_failed = True
-
-            if not volume_info and title:
-                q = f"intitle:{title}"
-                if author:
-                    q += f"+inauthor:{author}"
-                params = {"q": q, "maxResults": 1}
-                if api_key:
-                    params["key"] = api_key
-                r = await client.get("https://www.googleapis.com/books/v1/volumes", params=params)
-                if r.status_code == 200:
-                    items = r.json().get("items", [])
-                    if items:
-                        volume_info = items[0].get("volumeInfo")
-                        volume_id = items[0].get("id") or volume_id
-                else:
+                try:
+                    params = {"key": settings.GOOGLE_BOOKS_API_KEY} if settings.GOOGLE_BOOKS_API_KEY else {}
+                    r = await client.get(
+                        f"https://www.googleapis.com/books/v1/volumes/{google_id}", params=params
+                    )
+                    if r.status_code == 200:
+                        volume_info = r.json().get("volumeInfo")
+                        volume_id = google_id
+                    else:
+                        lookup_failed = True
+                except Exception:
                     lookup_failed = True
 
             # Google peut ne rien connaître du livre et Open Library avoir sa
             # couverture : on tente quand même la résolution par ISBN.
-            cover_url = await _resolve_cover(client, volume_info or {}, isbn)
+            cover_url = await resolve_cover(client, volume_info or {}, isbn)
     except Exception:
         return {**empty, "lookup_failed": True}
 
@@ -238,11 +161,10 @@ async def book_info(
     authors = volume_info.get("authors") or []
     lang_map = {"fr": "Français", "en": "Anglais", "ar": "Arabe", "pt": "Portugais", "wo": "Wolof", "ff": "Peul"}
     raw_lang = volume_info.get("language") or ""
-    language = lang_map.get(raw_lang[:2], None)
     return {
         "title": volume_info.get("title") or None,
         "author": ", ".join(authors) if authors else None,
-        "language": language,
+        "language": lang_map.get(raw_lang[:2], None),
         "summary": volume_info.get("description"),
         "subjects": gb_categories[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
