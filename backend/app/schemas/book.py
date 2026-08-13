@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, field_validator
 import json
 
+from app.core.isbn import normalize_isbn
 from app.models.book import BookCondition, BookType
 
 
@@ -72,6 +73,18 @@ class BookCreate(BaseModel):
         if isinstance(v, str):
             return json.loads(v)
         return v
+
+    @field_validator('isbn', mode='before')
+    @classmethod
+    def clean_isbn(cls, v):
+        """
+        Toujours stocker un ISBN-13 sans séparateur, ou rien.
+
+        C'est cette forme unique qui permettra de rattacher l'annonce à une
+        couverture de référence. Un code invalide est écarté plutôt que gardé :
+        il pointerait vers un autre livre.
+        """
+        return normalize_isbn(v)
 
 
 class BookUpdate(BaseModel):

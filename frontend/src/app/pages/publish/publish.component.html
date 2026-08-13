@@ -191,6 +191,23 @@
 
           <p *ngIf="scanError" class="text-xs text-orange-600 -mt-4 mb-4">{{ scanError }}</p>
 
+          <!-- Saisie manuelle de l'ISBN : le scan échoue quand le code-barres
+               est abîmé, mal éclairé, ou tout simplement absent du livre. -->
+          <label class="block text-sm font-bold text-gray-900 mb-2">Code ISBN</label>
+          <div class="flex gap-2 mb-1.5">
+            <input type="text" [(ngModel)]="isbn" name="isbn" inputmode="numeric"
+                   placeholder="Ex : 9782070413119"
+                   class="flex-1 min-w-0 border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
+            <button type="button" (click)="lookupByIsbn(isbn)" [disabled]="!isValidIsbn || scanLoading"
+                    class="shrink-0 px-4 rounded-2xl text-sm font-bold text-white bg-primary hover:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              Rechercher
+            </button>
+          </div>
+          <p *ngIf="isbnError" class="text-xs text-orange-600 mb-5">{{ isbnError }}</p>
+          <p *ngIf="!isbnError" class="text-xs text-gray-400 mb-5">
+            Les 13 chiffres au dos du livre, sous le code-barres. Facultatif, mais ça remplit le titre et la couverture automatiquement.
+          </p>
+
           <label class="block text-sm font-bold text-gray-900 mb-2">Titre du livre <span class="text-primary">*</span></label>
           <div class="relative mb-5">
             <input type="text" [(ngModel)]="title" name="title" placeholder="Ex : Une si longue lettre"

@@ -33,6 +33,14 @@ export class PublishComponent implements OnInit, OnDestroy {
   isPack = false;
   title = '';
   author = '';
+  /**
+   * ISBN de l'exemplaire, scanné ou saisi à la main.
+   *
+   * C'est la seule clé fiable pour rattacher une annonce à une couverture de
+   * référence : un ISBN identifie une édition et un format précis, là où
+   * « titre + auteur » confond les cinq éditions d'un même manuel.
+   */
+  isbn = '';
   categoryId: number | null = null;
   bookType = 'textbook';
   condition = '';
@@ -103,6 +111,49 @@ export class PublishComponent implements OnInit, OnDestroy {
 
   get currentStep() {
     return this.steps[this.step - 1];
+  }
+
+  /**
+   * ISBN ramené à sa forme ISBN-13 sans séparateur, ou '' s'il est invalide.
+   *
+   * Même règle que le serveur (`app/core/isbn.py`) : on vérifie la clé de
+   * contrôle plutôt que la seule longueur. Un ISBN mal saisi pointerait vers
+   * un autre livre, et le catalogue afficherait une couverture sans rapport
+   * avec l'exemplaire mis en vente.
+   */
+  get normalizedIsbn(): string {
+    const code = this.isbn.replace(/[\s\-–—]/g, '').toUpperCase();
+
+    if (/^\d{9}[\dX]$/.test(code)) {
+      const sum = [...code.slice(0, 9)].reduce((t, d, i) => t + (10 - i) * +d, 0);
+      const rest = (11 - (sum % 11)) % 11;
+      if (code[9] !== (rest === 10 ? 'X' : String(rest))) return '';
+      const base = '978' + code.slice(0, 9);
+      return base + PublishComponent.ean13CheckDigit(base);
+    }
+
+    if (/^\d{13}$/.test(code)) {
+      if (!code.startsWith('978') && !code.startsWith('979')) return '';
+      if (code[12] !== PublishComponent.ean13CheckDigit(code.slice(0, 12))) return '';
+      return code;
+    }
+
+    return '';
+  }
+
+  private static ean13CheckDigit(firstTwelve: string): string {
+    const sum = [...firstTwelve].reduce((t, d, i) => t + (i % 2 === 0 ? 1 : 3) * +d, 0);
+    return String((10 - (sum % 10)) % 10);
+  }
+
+  get isValidIsbn(): boolean {
+    return this.normalizedIsbn !== '';
+  }
+
+  /** Signale une saisie qui ressemble à un ISBN sans en être un. */
+  get isbnError(): string {
+    if (!this.isbn.trim() || this.isValidIsbn) return '';
+    return "Ce code ne correspond pas à un ISBN valide, vérifie les chiffres.";
   }
 
   /** Champs marqués d'un astérisque dans la maquette, étape par étape. */
@@ -466,6 +517,11 @@ export class PublishComponent implements OnInit, OnDestroy {
   }
 
   async lookupByIsbn(isbn: string) {
+    // On retient l'ISBN avant même d'interroger Google Books : qu'il y ait une
+    // fiche ou non, c'est lui qui permettra plus tard de rattacher l'annonce à
+    // une couverture de référence. Auparavant il était simplement perdu.
+    this.isbn = isbn;
+
     this.scanLoading = 'barcode';
     this.scanError = '';
     try {
@@ -771,6 +827,7 @@ export class PublishComponent implements OnInit, OnDestroy {
         accepts_whatsapp_contact: !!this.acceptsWhatsappContact,
         is_pack: this.isPack,
       };
+      if (this.isValidIsbn) payload.isbn = this.normalizedIsbn;
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
       if (this.selectedCover) payload.cover_url = this.selectedCover;
