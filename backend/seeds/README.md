@@ -88,3 +88,26 @@ exemplaire, ou attendre qu'un vendeur en publie un.
 Chaque ligne conserve sa `source`. Le jour où un éditeur demande le retrait de
 ses visuels, c'est une suppression ciblée sur cette colonne, et non une reprise
 de toute la base.
+
+## Relever le catalogue d'un éditeur
+
+`scrape_catalog.py` produit un CSV au format ci-dessus à partir du site d'un
+éditeur. Il ne touche jamais la base : on relit le fichier, puis on l'importe.
+
+```bash
+cd backend
+python scrape_catalog.py https://editionsdidactikos.sn --limit 5   # essai
+python scrape_catalog.py https://editionsdidactikos.sn \
+    --out seeds/didactikos.csv --publisher "Éditions Didactikos"
+python import_covers.py seeds/didactikos.csv --dry-run
+```
+
+Il essaie d'abord l'API JSON de WooCommerce, qui donne des données structurées
+et résiste aux changements de présentation. Il ne lit le HTML qu'à défaut.
+
+Il consulte `robots.txt` et s'arrête si la relève y est interdite. Il attend
+deux secondes entre deux requêtes : un éditeur local n'a pas l'infrastructure
+d'un grand site marchand, et une relève doit rester invisible.
+
+**Niveau et matière sont déduits du titre.** C'est une supposition : relisez le
+fichier avant de l'importer. Une case vide vaut mieux qu'une déduction fausse.
