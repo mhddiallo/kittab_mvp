@@ -36,8 +36,12 @@ Le script est rejouable : l'unicité porte sur `(source, source_ref)`, donc une
 relance après incident met à jour au lieu de dupliquer. Il ne touche jamais une
 couverture déjà validée par des vendeurs.
 
-Comptez environ trois secondes par ligne — c'est volontaire, pour rester en
-deçà des limites d'Open Library. Cinquante lignes prennent trois minutes.
+Le rythme s'adapte à ce qui est sollicité. Quand la couverture doit être
+cherchée chez Google ou Open Library, comptez trois secondes par ligne — c'est
+volontaire, pour rester en deçà des limites d'Open Library. Quand le CSV fournit
+déjà l'adresse de l'image, cas d'un catalogue d'éditeur relevé au préalable,
+aucune API plafonnée n'est sollicitée et l'import va environ sept fois plus
+vite.
 
 ## Colonnes
 

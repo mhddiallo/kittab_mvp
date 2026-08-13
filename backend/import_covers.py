@@ -53,7 +53,13 @@ from app.services.cover_service import (        # noqa: E402
 # Open Library plafonne les requêtes vers son service de couvertures. On reste
 # volontairement en deçà : un import qui se fait bannir à mi-parcours coûte
 # plus cher que quelques minutes d'attente.
-DELAY_BETWEEN_ROWS_S = 3.0
+DELAY_LOOKUP_S = 3.0
+
+# Quand le CSV fournit déjà l'adresse de l'image — cas d'un catalogue d'éditeur
+# relevé au préalable — aucune API plafonnée n'est sollicitée : attendre trois
+# secondes par ligne ferait durer un import de trois cents manuels un quart
+# d'heure pour rien.
+DELAY_DIRECT_S = 0.4
 
 
 @dataclass
@@ -123,7 +129,10 @@ async def resolve_row(client: httpx.AsyncClient, row: dict) -> tuple[str | None,
 
     forced = (row.get("image_url") or "").strip()
     if forced:
-        return forced, {"isbn13": isbn, "source": CoverSource.PUBLISHER, "source_ref": forced}
+        return forced, {
+            "isbn13": isbn, "source": CoverSource.PUBLISHER,
+            "source_ref": forced, "direct": True,
+        }
 
     volume_info, _volume_id, _failed = await fetch_google_volume(
         client, api_key=settings.GOOGLE_BOOKS_API_KEY,
@@ -183,10 +192,12 @@ async def run(csv_path: Path, dry_run: bool, only_missing: bool) -> Report:
                     report.errors.append(f"{label} : {type(exc).__name__} {exc}")
                     continue
 
+                delay = DELAY_DIRECT_S if meta.get("direct") else DELAY_LOOKUP_S
+
                 if not url:
                     print("    aucune couverture trouvée")
                     report.no_cover.append(label)
-                    await asyncio.sleep(DELAY_BETWEEN_ROWS_S)
+                    await asyncio.sleep(DELAY_LOOKUP_S)
                     continue
 
                 existing = (
@@ -200,7 +211,7 @@ async def run(csv_path: Path, dry_run: bool, only_missing: bool) -> Report:
                     print(f"    {verb} — {url[:90]}")
                     report.updated += 1 if existing else 0
                     report.imported += 0 if existing else 1
-                    await asyncio.sleep(DELAY_BETWEEN_ROWS_S)
+                    await asyncio.sleep(delay)
                     continue
 
                 hosted = upload_to_cloudinary(url, f"{work_key[:80]}-{index}") or url
@@ -236,7 +247,7 @@ async def run(csv_path: Path, dry_run: bool, only_missing: bool) -> Report:
                     report.imported += 1
 
                 db.commit()
-                await asyncio.sleep(DELAY_BETWEEN_ROWS_S)
+                await asyncio.sleep(delay)
     finally:
         db.close()
 
