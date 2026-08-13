@@ -1,9 +1,13 @@
-<a [routerLink]="['/books', book.id, slugify(book.title)]" class="card block overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
+<!-- flex + h-full : les cartes d'une même rangée s'étirent à la même hauteur,
+     et le bloc prix reste collé en bas quelle que soit la longueur du titre
+     ou du nom d'auteur. Un auteur sur deux lignes décalait toute la carte. -->
+<a [routerLink]="['/books', book.id, slugify(book.title)]"
+   class="card flex flex-col h-full overflow-hidden hover:shadow-md transition-shadow group cursor-pointer">
   <!-- Cadre au format d'un livre, identique pour toutes les cartes. Les
        couvertures d'éditeur sont en 2:3, les photos des vendeurs souvent en
        paysage : plutôt que de rogner (le titre y passait), on montre l'image
        entière sur un fond tiré d'elle-même. La grille reste régulière. -->
-  <div class="relative aspect-[3/4] bg-gray-50 overflow-hidden">
+  <div class="relative shrink-0 aspect-[3/4] bg-gray-50 overflow-hidden">
     <img [src]="primaryImage" alt="" aria-hidden="true"
          class="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-40" />
     <img [src]="primaryImage" [alt]="book.title"
@@ -13,15 +17,17 @@
     <span *ngIf="!book.is_pack" class="absolute top-2 left-2 badge" [ngClass]="conditionClass">{{ conditionLabel }}</span>
     <span class="absolute top-2 right-2 bg-white/90 text-gray-800 text-xs font-bold px-2 py-1 rounded-lg">{{ book.price | number }} FCFA</span>
   </div>
-  <div class="p-3">
-    <h3 class="font-semibold text-sm text-gray-900 truncate">{{ book.title }}</h3>
-    <p *ngIf="!book.is_pack" class="text-xs text-gray-500 mb-2">par {{ book.author }}</p>
-    <p *ngIf="book.is_pack" class="text-xs text-gray-500 mb-2">{{ book.pack_items?.length || 0 }} livres inclus</p>
-    <p class="text-xs text-gray-400 flex items-center gap-1">
-      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-      {{ locationText }}
+  <div class="p-3 flex flex-col flex-1">
+    <!-- title : le nom complet reste lisible au survol, et la fiche de
+         l'annonce l'affiche en entier. -->
+    <h3 class="font-semibold text-sm text-gray-900 truncate" [title]="book.title">{{ book.title }}</h3>
+    <p *ngIf="!book.is_pack" class="text-xs text-gray-500 mb-2 truncate" [title]="book.author">par {{ book.author }}</p>
+    <p *ngIf="book.is_pack" class="text-xs text-gray-500 mb-2 truncate">{{ book.pack_items?.length || 0 }} livres inclus</p>
+    <p class="text-xs text-gray-400 flex items-center gap-1 min-w-0" [title]="locationText">
+      <svg class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+      <span class="truncate">{{ locationText }}</span>
     </p>
-    <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+    <div class="mt-auto pt-3 border-t border-gray-50 flex items-center justify-between">
       <span class="text-primary font-bold text-sm">{{ book.price | number }} FCFA</span>
       <span class="flex items-center gap-1 text-xs text-gray-400">
         <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
