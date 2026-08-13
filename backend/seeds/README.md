@@ -20,10 +20,17 @@ cette base.
 
 ```bash
 cd backend
-python import_covers.py seeds/covers_seed.csv --dry-run   # voir sans écrire
-python import_covers.py seeds/covers_seed.csv             # écrire
-python import_covers.py seeds/covers_seed.csv --only-missing
+python import_covers.py seeds/covers_seed_manuels.csv --dry-run   # voir sans écrire
+python import_covers.py seeds/covers_seed_manuels.csv             # écrire
+python import_covers.py seeds/covers_seed_litterature.csv
 ```
+
+Deux fichiers, deux niveaux de confiance :
+
+- `covers_seed_manuels.csv` — recopié du programme officiel sénégalais. Les
+  ISBN qui s'y trouvent ont tous passé la clé de contrôle.
+- `covers_seed_litterature.csv` — classiques africains, titres et auteurs
+  saisis de mémoire. À vérifier après import.
 
 Le script est rejouable : l'unicité porte sur `(source, source_ref)`, donc une
 relance après incident met à jour au lieu de dupliquer. Il ne touche jamais une
@@ -48,18 +55,25 @@ deçà des limites d'Open Library. Cinquante lignes prennent trois minutes.
 
 ## État de la liste fournie
 
-**La colonne `isbn` est volontairement vide partout.** Un ISBN inventé pointe
-vers un autre livre et ferait afficher une couverture sans rapport — mieux vaut
-laisser le script chercher par titre et auteur, et vérifier le résultat.
+**La colonne `isbn` n'est remplie que là où le code provient d'un document.**
+Un ISBN inventé pointe vers un autre livre et ferait afficher une couverture
+sans rapport : ailleurs, on laisse le script chercher par titre et auteur, puis
+on vérifie le résultat.
 
 **Les titres de littérature africaine** sont un point de départ raisonnable,
 mais ils restent à vérifier. Contrôlez le résultat de l'import avant de vous
 en servir.
 
-**Les lignes de manuels scolaires sont des exemples de format**, pas une liste
-de référence. La vraie liste est celle du programme officiel publié par le
-Ministère de l'Éducation nationale — c'est elle qu'il faut recopier ici. Le
-travail de curation est la partie qui a de la valeur, et c'est celle que le
+**Les manuels** proviennent du programme officiel sénégalais. Seule la classe
+de Seconde (séries L et S) est couverte pour l'instant : les autres niveaux
+restent à recopier depuis les documents du Ministère, du CI à la Terminale.
+
+Trois lignes n'ont pas d'ISBN dans le document d'origine — le manuel de
+physique-chimie Kandia, celui de SVT Didactikos et le fascicule d'arabe. Le
+script tentera de les retrouver par titre et éditeur ; à défaut, il faudra
+photographier un exemplaire ou demander le visuel à l'éditeur.
+
+Le travail de curation est la partie qui a de la valeur, et c'est celle que le
 script ne peut pas faire à votre place.
 
 ## Ce qu'il faut regarder après un import
