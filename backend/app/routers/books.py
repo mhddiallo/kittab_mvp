@@ -276,6 +276,7 @@ def list_books(
     min_price: Optional[float] = Query(None),
     max_price: Optional[float] = Query(None),
     education_level: Optional[str] = Query(None),
+    subject: Optional[str] = Query(None),
     boosted: Optional[bool] = Query(None),
     accepts_exchange: Optional[bool] = Query(None),
     pack_only: Optional[bool] = Query(None),
@@ -316,8 +317,12 @@ def list_books(
         query = query.filter(Book.price >= min_price)
     if max_price is not None:
         query = query.filter(Book.price <= max_price)
+    # Niveau et matière sont désormais choisis dans une liste fermée : une
+    # égalité exacte suffit et évite les rapprochements hasardeux d'un LIKE.
     if education_level:
-        query = query.filter(Book.education_level.ilike(f"%{education_level}%"))
+        query = query.filter(Book.education_level == education_level)
+    if subject:
+        query = query.filter(Book.subject == subject)
     if city_id is not None:
         # Filtre exact, celui du nouveau sélecteur de ville.
         query = query.filter(Book.city_id == city_id)

@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 
 import { environment } from '../../../environments/environment';
+import { EDUCATION_CYCLES, SUBJECTS, SCHOOL_CATEGORY_NAME } from '../../core/education';
 
 interface AutocompleteResult {
   title: string;
@@ -65,28 +66,9 @@ export class PublishComponent implements OnInit, OnDestroy {
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
   languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
-  /**
-   * Niveaux scolaires, groupés par cycle.
-   *
-   * L'élémentaire manquait alors qu'il porte l'essentiel du volume de manuels
-   * au Sénégal. Le supérieur reste volontairement indifférencié : on n'y
-   * cherche pas un manuel de niveau mais un ouvrage de filière, ce qui appelle
-   * un tout autre découpage — à traiter à part le jour venu.
-   */
-  readonly educationCycles = [
-    { label: 'Élémentaire', levels: ['CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2'] },
-    { label: 'Collège', levels: ['6ème', '5ème', '4ème', '3ème'] },
-    { label: 'Lycée', levels: ['Seconde', 'Première', 'Terminale'] },
-    { label: 'Supérieur', levels: ['Supérieur'] },
-  ];
-
-  /** Matières : liste fermée, sinon « maths », « Maths » et « mathématiques »
-   *  cohabiteront et le filtre du catalogue sera inexploitable. */
-  readonly subjects = [
-    'Mathématiques', 'Français', 'Anglais', 'Physique-Chimie', 'SVT',
-    'Histoire-Géographie', 'Philosophie', 'Arabe', 'Espagnol', 'Allemand',
-    'Économie', 'Informatique', 'Éducation religieuse', 'Autre',
-  ];
+  /** Référentiel scolaire partagé avec le catalogue (voir core/education.ts). */
+  readonly educationCycles = EDUCATION_CYCLES;
+  readonly subjects = SUBJECTS;
 
   subject = '';
 
@@ -198,7 +180,7 @@ export class PublishComponent implements OnInit, OnDestroy {
    * formulaire de tout le monde.
    */
   get isSchoolBook(): boolean {
-    return this.categories.find(c => c.id === this.categoryId)?.name === 'Manuels scolaires';
+    return this.categories.find(c => c.id === this.categoryId)?.name === SCHOOL_CATEGORY_NAME;
   }
 
   get canContinue(): boolean {

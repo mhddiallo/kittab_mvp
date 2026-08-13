@@ -7,6 +7,7 @@ import { FooterComponent } from '../../components/footer/footer.component';
 import { BookCardComponent, BookCard } from '../../components/book-card/book-card.component';
 import { AuthService } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
+import { EDUCATION_CYCLES, SUBJECTS, SCHOOL_CATEGORY_NAME } from '../../core/education';
 
 interface Category { id: number; name: string; }
 
@@ -37,6 +38,13 @@ export class CatalogueComponent implements OnInit {
   selectedCondition = '';
   onlyExchange = false;
   onlyPack = false;
+  /** Filtres propres au scolaire, voir isSchoolCategory. */
+  selectedLevel = '';
+  selectedSubject = '';
+  readonly educationCycles = EDUCATION_CYCLES;
+  readonly subjects = SUBJECTS;
+  showLevelDropdown = false;
+  showSubjectDropdown = false;
   cityFilter = '';
   /** Ville choisie dans le référentiel. cityFilter reste pour la géolocalisation. */
   cityId: number | null = null;
@@ -126,8 +134,28 @@ export class CatalogueComponent implements OnInit {
     return this.conditions.find(c => c.value === this.selectedCondition)?.label ?? 'État';
   }
 
+  /**
+   * Niveau et matière ne concernent que les manuels : les afficher en
+   * permanence encombrerait la barre pour tous les autres acheteurs. Ils
+   * apparaissent donc quand la catégorie « Manuels scolaires » est choisie,
+   * comme les facettes d'une catégorie sur les places de marché classiques.
+   */
+  get isSchoolCategory(): boolean {
+    return this.categories.find((c: any) => c.id === this.selectedCategoryId)?.name === SCHOOL_CATEGORY_NAME;
+  }
+
+  get selectedLevelLabel(): string {
+    return this.selectedLevel || 'Niveau';
+  }
+
+  get selectedSubjectLabel(): string {
+    return this.selectedSubject || 'Matière';
+  }
+
   get activeFilterCount(): number {
     let count = 0;
+    if (this.selectedLevel) count++;
+    if (this.selectedSubject) count++;
     if (this.selectedCondition) count++;
     if (this.selectedPriceRange > 0) count++;
     if (this.onlyExchange) count++;
@@ -200,6 +228,8 @@ export class CatalogueComponent implements OnInit {
       if (range.max !== null) url += `&max_price=${range.max}`;
       if (this.onlyExchange) url += `&accepts_exchange=true`;
       if (this.onlyPack) url += `&pack_only=true`;
+      if (this.selectedLevel) url += `&education_level=${encodeURIComponent(this.selectedLevel)}`;
+      if (this.selectedSubject) url += `&subject=${encodeURIComponent(this.selectedSubject)}`;
       if (this.cityId !== null) url += `&city_id=${this.cityId}`;
       else if (this.cityFilter.trim()) url += `&city=${encodeURIComponent(this.cityFilter.trim())}`;
       const res = await fetch(url);
@@ -272,6 +302,12 @@ export class CatalogueComponent implements OnInit {
 
   selectCategory(id: number | null) {
     this.selectedCategoryId = id;
+    // Quitter le scolaire masque niveau et matière : les laisser actifs
+    // filtrerait les résultats sans que rien ne l'indique à l'écran.
+    if (!this.isSchoolCategory) {
+      this.selectedLevel = '';
+      this.selectedSubject = '';
+    }
     this.loadBooks(1);
     this.loadWantedBooks();
   }
@@ -286,8 +322,13 @@ export class CatalogueComponent implements OnInit {
     this.onlyExchange = false;
     this.onlyPack = false;
     this.cityFilter = '';
+    // cityId n'était pas remis à zéro : la ville restait appliquée alors que
+    // le compteur de filtres retombait à zéro.
+    this.cityId = null;
     this.cityError = '';
     this.selectedCategoryId = null;
+    this.selectedLevel = '';
+    this.selectedSubject = '';
     this.loadBooks(1);
   }
 
