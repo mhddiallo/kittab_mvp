@@ -265,6 +265,34 @@
               </select>
             </div>
           </div>
+
+          <!-- Champs propres au scolaire. Un parent ne cherche pas un titre,
+               il cherche « ce qu'il faut pour la 4ème » : sans niveau ni
+               matière, son annonce est introuvable. Ils n'apparaissent que
+               pour cette catégorie, pour ne pas alourdir le reste. -->
+          <div *ngIf="isSchoolBook" class="mt-5 rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+            <p class="text-xs font-bold text-amber-800 mb-3">📚 Précisions pour un manuel scolaire</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Niveau <span class="text-primary">*</span></label>
+                <select [(ngModel)]="educationLevel" name="educationLevel"
+                        class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+                  <option value="">— Choisir —</option>
+                  <optgroup *ngFor="let cycle of educationCycles" [label]="cycle.label">
+                    <option *ngFor="let l of cycle.levels" [value]="l">{{ l }}</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-900 mb-2">Matière <span class="text-primary">*</span></label>
+                <select [(ngModel)]="subject" name="subject"
+                        class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+                  <option value="">— Choisir —</option>
+                  <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ÉTAPE 2 — État -->

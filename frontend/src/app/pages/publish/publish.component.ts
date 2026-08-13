@@ -65,7 +65,30 @@ export class PublishComponent implements OnInit, OnDestroy {
   packItems: { value: string }[] = [{ value: '' }, { value: '' }];
 
   languages = ['Français', 'Anglais', 'Arabe', 'Portugais', 'Wolof', 'Peul', 'Autre'];
-  educationLevels = ['6ème','5ème','4ème','3ème','Seconde','Première','Terminale','Licence 1','Licence 2','Licence 3','Master 1','Master 2'];
+  /**
+   * Niveaux scolaires, groupés par cycle.
+   *
+   * L'élémentaire manquait alors qu'il porte l'essentiel du volume de manuels
+   * au Sénégal. Le supérieur reste volontairement indifférencié : on n'y
+   * cherche pas un manuel de niveau mais un ouvrage de filière, ce qui appelle
+   * un tout autre découpage — à traiter à part le jour venu.
+   */
+  readonly educationCycles = [
+    { label: 'Élémentaire', levels: ['CI', 'CP', 'CE1', 'CE2', 'CM1', 'CM2'] },
+    { label: 'Collège', levels: ['6ème', '5ème', '4ème', '3ème'] },
+    { label: 'Lycée', levels: ['Seconde', 'Première', 'Terminale'] },
+    { label: 'Supérieur', levels: ['Supérieur'] },
+  ];
+
+  /** Matières : liste fermée, sinon « maths », « Maths » et « mathématiques »
+   *  cohabiteront et le filtre du catalogue sera inexploitable. */
+  readonly subjects = [
+    'Mathématiques', 'Français', 'Anglais', 'Physique-Chimie', 'SVT',
+    'Histoire-Géographie', 'Philosophie', 'Arabe', 'Espagnol', 'Allemand',
+    'Économie', 'Informatique', 'Éducation religieuse', 'Autre',
+  ];
+
+  subject = '';
 
   // ── Assistant en 4 étapes ──────────────────────────────
   step = 1;
@@ -159,12 +182,23 @@ export class PublishComponent implements OnInit, OnDestroy {
   /** Champs marqués d'un astérisque dans la maquette, étape par étape. */
   stepValid(step: number): boolean {
     switch (step) {
-      case 1: return this.title.trim().length > 0 && this.author.trim().length > 0;
+      case 1: return this.title.trim().length > 0 && this.author.trim().length > 0
+                     && (!this.isSchoolBook || (!!this.educationLevel && !!this.subject));
       case 2: return !!this.condition && this.cityId !== null;
       case 3: return !!this.price && this.price > 0;
       case 4: return this.images.length > 0;
       default: return false;
     }
+  }
+
+  /**
+   * Une annonce scolaire appelle des champs que les autres n'ont pas : un
+   * parent ne cherche pas un titre, il cherche « ce qu'il faut pour la 4ème ».
+   * Ces champs n'apparaissent donc que dans ce cas, pour ne pas réalourdir le
+   * formulaire de tout le monde.
+   */
+  get isSchoolBook(): boolean {
+    return this.categories.find(c => c.id === this.categoryId)?.name === 'Manuels scolaires';
   }
 
   get canContinue(): boolean {
@@ -516,6 +550,30 @@ export class PublishComponent implements OnInit, OnDestroy {
     await this.onScanImage({ target: input } as any, 'cover');
   }
 
+  /**
+   * Ce que la recherche a rempli, et ce qu'il reste à faire à la main.
+   *
+   * Les éditions françaises et africaines sont souvent référencées sans image
+   * ni rubrique chez Google Books. Le formulaire se contentait alors de ne
+   * rien remplir, sans rien dire : impossible de savoir si la recherche avait
+   * échoué ou si le livre était incomplet.
+   */
+  private describeLookup(data: any): string {
+    if (data.lookup_failed) {
+      return 'La recherche automatique est momentanément indisponible. Remplis les champs à la main, ton ISBN est conservé.';
+    }
+    if (!data.title) {
+      return "Ce livre n'est pas référencé. Remplis les champs à la main, ton ISBN est conservé.";
+    }
+
+    const missing: string[] = [];
+    if (!this.selectedCover) missing.push('la couverture');
+    if (!this.categoryId) missing.push('la catégorie');
+    if (!missing.length) return '';
+
+    return `Fiche trouvée, mais ${missing.join(' et ')} ${missing.length > 1 ? 'manquent' : 'manque'} : à compléter ci-dessous.`;
+  }
+
   async lookupByIsbn(isbn: string) {
     // On retient l'ISBN avant même d'interroger Google Books : qu'il y ait une
     // fiche ou non, c'est lui qui permettra plus tard de rattacher l'annonce à
@@ -532,14 +590,15 @@ export class PublishComponent implements OnInit, OnDestroy {
         if (data.author && !this.author) this.author = data.author;
         if (data.cover_url) this.selectedCover = data.cover_url;
         if (data.page_count) this.pageCount = data.page_count;
+        if (data.google_id) this.googleBooksId = data.google_id;
         if (data.kittab_category) {
           const match = this.categories.find(c => c.name === data.kittab_category);
           if (match) this.categoryId = match.id;
         }
         if (data.language && this.languages.includes(data.language)) this.language = data.language;
-        this.scanError = '';
+        this.scanError = this.describeLookup(data);
       } else {
-        this.scanError = 'ISBN non trouvé dans Google Books, remplis manuellement.';
+        this.scanError = 'La recherche automatique a échoué. Remplis les champs à la main, ton ISBN est conservé.';
       }
     } catch {
       this.scanError = 'Erreur lors de la recherche par ISBN.';
@@ -828,6 +887,8 @@ export class PublishComponent implements OnInit, OnDestroy {
         is_pack: this.isPack,
       };
       if (this.isValidIsbn) payload.isbn = this.normalizedIsbn;
+      if (this.educationLevel) payload.education_level = this.educationLevel;
+      if (this.subject) payload.subject = this.subject;
       if (this.categoryId) payload.category_id = this.categoryId;
       if (this.description) payload.description = this.description;
       if (this.selectedCover) payload.cover_url = this.selectedCover;
@@ -841,7 +902,6 @@ export class PublishComponent implements OnInit, OnDestroy {
       if (this.pageCount) payload.page_count = this.pageCount;
       if (this.isPack) {
         payload.pack_items = this.validPackItems;
-        if (this.educationLevel) payload.education_level = this.educationLevel;
       }
 
       const res = await fetch(`${environment.apiUrl}/api/books`, {

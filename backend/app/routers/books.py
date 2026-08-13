@@ -108,6 +108,53 @@ async def book_autocomplete(q: str = Query(..., min_length=2), db: Session = Dep
     return await autocomplete(db, q)
 
 
+def _google_image_link(volume_info: dict) -> Optional[str]:
+    """
+    Meilleure couverture déclarée par Google Books, du plus grand format au plus petit.
+
+    Seul `thumbnail` était lu : les volumes qui n'exposent que `smallThumbnail`
+    revenaient donc sans image, alors qu'ils en avaient une.
+    """
+    links = volume_info.get("imageLinks") or {}
+    for key in ("extraLarge", "large", "medium", "small", "thumbnail", "smallThumbnail"):
+        url = links.get(key)
+        if url:
+            return url.replace("http://", "https://").replace("&zoom=1", "&zoom=3")
+    return None
+
+
+async def _resolve_cover(client, volume_info: dict, volume_id: Optional[str], isbn: Optional[str]) -> Optional[str]:
+    """
+    Couverture d'un livre, en descendant les sources jusqu'à en trouver une valide.
+
+    `imageLinks` est souvent absent des éditions françaises et africaines : la
+    recherche par ISBN renvoyait alors une fiche sans image et le formulaire
+    restait silencieusement vide. On se rabat donc sur le point d'accès
+    « content » de Google, qui sert une couverture à partir du seul
+    identifiant de volume, puis sur Open Library, qui indexe par ISBN sans clé
+    ni quota.
+
+    Chaque candidate est vérifiée avant d'être renvoyée : Open Library répond
+    par une image vide plutôt que par une erreur quand elle ne connaît pas le
+    livre, et une vignette cassée dans le formulaire est pire que pas d'image.
+    """
+    from app.services.catalog_service import is_valid_cover
+
+    candidates = [_google_image_link(volume_info)]
+    if volume_id:
+        candidates.append(
+            f"https://books.google.com/books/content?id={volume_id}&printsec=frontcover&img=1&zoom=3"
+        )
+    if isbn:
+        # default=false : renvoie 404 au lieu d'un GIF d'un pixel.
+        candidates.append(f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg?default=false")
+
+    for url in candidates:
+        if url and await is_valid_cover(client, url):
+            return url
+    return None
+
+
 @router.get("/info")
 async def book_info(
     google_id: Optional[str] = Query(None),
@@ -115,11 +162,21 @@ async def book_info(
     author: Optional[str] = Query(None),
     isbn: Optional[str] = Query(None),
 ):
-    from app.services.catalog_service import search_google_books
     import httpx
 
     api_key = settings.GOOGLE_BOOKS_API_KEY
     volume_info = None
+    volume_id = google_id
+    # Distingue « Google n'a pas répondu » de « Google ne connaît pas ce livre » :
+    # le formulaire ne peut pas expliquer un échec qu'on ne lui rapporte pas.
+    lookup_failed = False
+
+    empty = {
+        "title": None, "author": None, "language": None, "summary": None,
+        "subjects": [], "published_year": None, "cover_url": None,
+        "page_count": None, "publisher": None, "google_books_link": None,
+        "kittab_category": None, "google_id": None, "lookup_failed": False,
+    }
 
     try:
         async with httpx.AsyncClient(timeout=5.0, verify=False) as client:
@@ -132,6 +189,10 @@ async def book_info(
                     items = r.json().get("items", [])
                     if items:
                         volume_info = items[0].get("volumeInfo")
+                        volume_id = items[0].get("id") or volume_id
+                else:
+                    # 429 en tête : le quota Google Books est vite atteint sans clé.
+                    lookup_failed = True
 
             if not volume_info and google_id:
                 params = {}
@@ -140,6 +201,8 @@ async def book_info(
                 r = await client.get(f"https://www.googleapis.com/books/v1/volumes/{google_id}", params=params)
                 if r.status_code == 200:
                     volume_info = r.json().get("volumeInfo")
+                else:
+                    lookup_failed = True
 
             if not volume_info and title:
                 q = f"intitle:{title}"
@@ -153,11 +216,18 @@ async def book_info(
                     items = r.json().get("items", [])
                     if items:
                         volume_info = items[0].get("volumeInfo")
+                        volume_id = items[0].get("id") or volume_id
+                else:
+                    lookup_failed = True
+
+            # Google peut ne rien connaître du livre et Open Library avoir sa
+            # couverture : on tente quand même la résolution par ISBN.
+            cover_url = await _resolve_cover(client, volume_info or {}, volume_id, isbn)
     except Exception:
-        pass
+        return {**empty, "lookup_failed": True}
 
     if not volume_info:
-        return {"summary": None, "subjects": [], "published_year": None, "cover_url": None, "page_count": None, "publisher": None, "google_books_link": None, "kittab_category": None}
+        return {**empty, "cover_url": cover_url, "lookup_failed": lookup_failed}
 
     gb_categories = volume_info.get("categories") or []
     authors = volume_info.get("authors") or []
@@ -171,11 +241,13 @@ async def book_info(
         "summary": volume_info.get("description"),
         "subjects": gb_categories[:6],
         "published_year": (volume_info.get("publishedDate") or "")[:4] or None,
-        "cover_url": (volume_info.get("imageLinks") or {}).get("thumbnail", "").replace("http://", "https://").replace("&zoom=1", "&zoom=3") or None,
+        "cover_url": cover_url,
         "page_count": volume_info.get("pageCount"),
         "publisher": volume_info.get("publisher"),
         "google_books_link": volume_info.get("infoLink"),
         "kittab_category": map_to_kittab_category(gb_categories),
+        "google_id": volume_id,
+        "lookup_failed": False,
     }
 
 
