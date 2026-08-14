@@ -42,7 +42,7 @@ if settings.CLOUDINARY_CLOUD_NAME:
         secure=True,
     )
 
-MAX_IMAGES = 4
+MAX_IMAGES = 3
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 # Repli quand le nom de fichier envoyé par le navigateur n'a pas d'extension

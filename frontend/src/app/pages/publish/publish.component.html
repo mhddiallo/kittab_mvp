@@ -460,45 +460,96 @@
           <div class="bg-amber-100/70 rounded-2xl p-4 flex items-start gap-2.5 mb-5">
             <span class="shrink-0">📷</span>
             <p class="text-sm text-gray-700 leading-relaxed">
-              Ajoute des photos claires<span class="hidden lg:inline"> (couverture, dos, pages intérieures)</span> — au moins une, jusqu'à quatre.
+              Trois photos suffisent : la couverture, le dos, et un défaut si besoin.
             </p>
           </div>
 
           <!--
+            Trois créneaux nommés plutôt qu'une galerie libre : le vendeur sait
+            exactement quoi montrer, et le catalogue reçoit des photos
+            comparables d'une annonce à l'autre.
+
             Déclencheurs en <label for>, jamais input.click() : Safari iOS
             bloque le clic programmatique sur un input non rendu, et le
             sélecteur de fichiers ne s'ouvrait pas sur iPhone.
           -->
-          <input id="publish-photos" type="file" accept="image/*" multiple class="sr-only"
-                 (change)="onImageChange($event)" />
+          <div class="space-y-3 mb-5">
 
-          <!-- La prise de vue guidée passe en premier : c'est elle qui produit
-               une couverture exploitable, et donc réutilisable par les
-               prochains vendeurs du même livre. -->
-          <button type="button" (click)="startCoverCamera()" [disabled]="images.length >= 4"
-                  class="w-full border-2 border-primary/30 bg-red-50/50 rounded-2xl py-5 flex flex-col items-center gap-1 hover:bg-red-50 transition-colors mb-3 disabled:opacity-50">
-            <span class="text-2xl">🖼️</span>
-            <span class="font-bold text-primary text-sm">Photographier la couverture</span>
-            <span class="text-xs text-gray-500">Cadrage guidé — recommandé</span>
-          </button>
+            <!-- 1. Couverture — cadrage guidé, obligatoire -->
+            <input id="publish-cover-fallback" type="file" accept="image/*" class="sr-only"
+                   (change)="onCoverPhotoChange($event)" />
+            <ng-container *ngIf="!coverPhotoPreview; else coverFilled">
+              <button type="button" (click)="startCoverCamera()"
+                      class="w-full border-2 border-primary/30 bg-red-50/50 rounded-2xl py-5 flex flex-col items-center gap-1 hover:bg-red-50 transition-colors">
+                <span class="text-2xl">🖼️</span>
+                <span class="font-bold text-primary text-sm">1. Couverture <span class="text-primary">*</span></span>
+                <span class="text-xs text-gray-500">Cadrage guidé</span>
+              </button>
+              <label for="publish-cover-fallback"
+                     class="block text-center text-xs font-semibold text-gray-400 hover:text-primary mt-1.5 cursor-pointer">
+                Ou choisir une photo existante
+              </label>
+            </ng-container>
+            <ng-template #coverFilled>
+              <div class="flex items-center gap-3 border border-gray-100 rounded-2xl p-3">
+                <img [src]="coverPhotoPreview" alt="" class="w-14 h-14 object-cover rounded-xl border border-gray-100 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-gray-900">1. Couverture</p>
+                  <p class="text-xs text-gray-400">Photo prête</p>
+                </div>
+                <button type="button" (click)="startCoverCamera()"
+                        class="text-xs font-bold text-primary hover:underline shrink-0">Reprendre</button>
+              </div>
+            </ng-template>
 
-          <label for="publish-photos"
-                 class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-6 flex flex-col items-center gap-1.5 hover:border-primary transition-colors mb-4 cursor-pointer"
-                 [class.pointer-events-none]="images.length >= 4"
-                 [class.opacity-50]="images.length >= 4">
-            <span class="text-2xl">📷</span>
-            <span class="font-bold text-gray-900 text-sm">Ajouter d'autres photos</span>
-            <span class="text-xs text-gray-400">JPG, PNG ou WEBP</span>
-          </label>
+            <!-- 2. Dos du livre — obligatoire, montre l'état général -->
+            <input id="publish-back-photo" type="file" accept="image/*" capture="environment" class="sr-only"
+                   (change)="onBackPhotoChange($event)" />
+            <ng-container *ngIf="!backPhotoPreview; else backFilled">
+              <label for="publish-back-photo"
+                     class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-5 flex flex-col items-center gap-1 hover:border-primary transition-colors cursor-pointer">
+                <span class="text-2xl">📷</span>
+                <span class="font-bold text-gray-900 text-sm">2. Dos du livre <span class="text-primary">*</span></span>
+                <span class="text-xs text-gray-400">Montre l'état général</span>
+              </label>
+            </ng-container>
+            <ng-template #backFilled>
+              <div class="flex items-center gap-3 border border-gray-100 rounded-2xl p-3">
+                <img [src]="backPhotoPreview" alt="" class="w-14 h-14 object-cover rounded-xl border border-gray-100 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-gray-900">2. Dos du livre</p>
+                  <p class="text-xs text-gray-400">Photo prête</p>
+                </div>
+                <label for="publish-back-photo"
+                       class="text-xs font-bold text-primary hover:underline cursor-pointer shrink-0">Reprendre</label>
+              </div>
+            </ng-template>
 
-          <div class="grid grid-cols-4 gap-3 mb-5">
-            <div *ngFor="let src of imagePreviews; let i = index" class="relative aspect-square">
-              <img [src]="src" alt="" class="w-full h-full object-cover rounded-2xl border border-gray-100" />
-              <button type="button" (click)="removeImage(i)"
-                      class="absolute -top-1.5 -right-1.5 w-6 h-6 bg-white border border-gray-200 rounded-full text-gray-500 text-sm leading-none shadow-sm hover:text-primary">&times;</button>
-            </div>
-            <label *ngFor="let slot of emptySlots" for="publish-photos"
-                   class="aspect-square border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors cursor-pointer">+</label>
+            <!-- 3. Un défaut à montrer — facultatif -->
+            <input id="publish-extra-photo" type="file" accept="image/*" capture="environment" class="sr-only"
+                   (change)="onExtraPhotoChange($event)" />
+            <ng-container *ngIf="!extraPhotoPreview; else extraFilled">
+              <label for="publish-extra-photo"
+                     class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-5 flex flex-col items-center gap-1 hover:border-primary transition-colors cursor-pointer">
+                <span class="text-2xl">➕</span>
+                <span class="font-bold text-gray-900 text-sm">3. Une tache, une page abîmée ? <span class="font-medium text-gray-400">(optionnel)</span></span>
+                <span class="text-xs text-gray-400">Un détail qui compte pour l'acheteur</span>
+              </label>
+            </ng-container>
+            <ng-template #extraFilled>
+              <div class="flex items-center gap-3 border border-gray-100 rounded-2xl p-3">
+                <img [src]="extraPhotoPreview" alt="" class="w-14 h-14 object-cover rounded-xl border border-gray-100 shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-bold text-gray-900">3. Photo supplémentaire</p>
+                  <p class="text-xs text-gray-400">Photo prête</p>
+                </div>
+                <div class="flex items-center gap-3 shrink-0">
+                  <label for="publish-extra-photo" class="text-xs font-bold text-primary hover:underline cursor-pointer">Reprendre</label>
+                  <button type="button" (click)="removeExtraPhoto()" class="text-xs font-bold text-gray-400 hover:text-primary">Retirer</button>
+                </div>
+              </div>
+            </ng-template>
+
           </div>
 
           <div class="bg-[#F6EEE2] rounded-2xl p-4">

@@ -102,7 +102,7 @@ export class PublishComponent implements OnInit, OnDestroy {
     },
     {
       n: 4, label: 'Photos', heading: 'Dernière étape', emoji: '📸',
-      text: 'Ajoute de vraies photos de ton exemplaire : couverture, dos, pages intérieures.',
+      text: 'Ajoute de vraies photos de ton exemplaire : couverture, dos, et un défaut si besoin.',
       tip: 'Les annonces avec photos se vendent 3x plus vite.',
       gradient: 'from-[#E8A317] to-[#CE8A00]',
     },
@@ -174,7 +174,7 @@ export class PublishComponent implements OnInit, OnDestroy {
                      && (!this.isSchoolBook || (!!this.educationLevel && !!this.subject));
       case 2: return !!this.condition && this.cityId !== null;
       case 3: return !!this.price && this.price > 0;
-      case 4: return this.images.length > 0;
+      case 4: return !!this.coverPhoto && !!this.backPhoto;
       default: return false;
     }
   }
@@ -215,8 +215,26 @@ export class PublishComponent implements OnInit, OnDestroy {
   suggestions: AutocompleteResult[] = [];
   showSuggestions = false;
   autocompleteLoading = false;
-  images: File[] = [];
-  imagePreviews: string[] = [];
+  /**
+   * Trois clichés guidés plutôt qu'une galerie libre à quatre emplacements.
+   *
+   * Sur un marché de livres d'occasion, ce qui rassure un acheteur c'est de
+   * voir la couverture (identification) et le dos (état général) ; un défaut
+   * précis reste au choix du vendeur, imposer "n'importe quelle page" n'aide
+   * personne.
+   */
+  coverPhoto: File | null = null;
+  coverPhotoPreview = '';
+  backPhoto: File | null = null;
+  backPhotoPreview = '';
+  extraPhoto: File | null = null;
+  extraPhotoPreview = '';
+
+  /** Ordre d'envoi : le serveur marque comme couverture la première image reçue. */
+  get images(): File[] {
+    return [this.coverPhoto, this.backPhoto, this.extraPhoto].filter((f): f is File => !!f);
+  }
+
   submitting = false;
   error = '';
   /** Renseigné quand l'annonce est créée mais que des photos ont échoué. */
@@ -334,9 +352,8 @@ export class PublishComponent implements OnInit, OnDestroy {
     return this.acceptsWhatsappContact ? 'Oui' : 'Non';
   }
   autocompleteTimeout: any;
-  scanLoading: false | 'cover' | 'back' | 'barcode' = false;
+  scanLoading: false | 'barcode' = false;
   scanError = '';
-  showScanMenu = false;
   showBarcodeCamera = false;
   private barcodeReader: BrowserMultiFormatReader | null = null;
   private barcodeStream: MediaStream | null = null;
@@ -480,7 +497,6 @@ export class PublishComponent implements OnInit, OnDestroy {
   ngOnDestroy() { this.stopBarcodeCamera(); this.stopCoverCamera(); }
 
   async startBarcodeCamera() {
-    this.showScanMenu = false;
     this.showBarcodeCamera = true;
     this.barcodeDetected = false;
     this.scanError = '';
@@ -510,32 +526,6 @@ export class PublishComponent implements OnInit, OnDestroy {
     this.barcodeReader = null;
     this.barcodeStream = null;
     this.showBarcodeCamera = false;
-  }
-
-  async onScanUpload(event: Event) {
-    this.showScanMenu = false;
-    const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    this.scanError = '';
-
-    // Essayer d'abord le code-barres
-    try {
-      const reader = new BrowserMultiFormatReader();
-      const img = await createImageBitmap(file);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width; canvas.height = img.height;
-      canvas.getContext('2d')!.drawImage(img, 0, 0);
-      const result = await reader.decodeFromCanvas(canvas);
-      if (result) {
-        await this.lookupByIsbn(result.getText());
-        input.value = '';
-        return;
-      }
-    } catch {}
-
-    // Sinon scan couverture avec Claude
-    await this.onScanImage({ target: input } as any, 'cover');
   }
 
   /**
@@ -693,7 +683,6 @@ export class PublishComponent implements OnInit, OnDestroy {
   }
 
   async startCoverCamera() {
-    if (this.images.length >= 4) return;
     this.showCoverCamera = true;
     this.coverCameraError = '';
     setTimeout(async () => {
@@ -710,7 +699,7 @@ export class PublishComponent implements OnInit, OnDestroy {
           });
         };
       } catch {
-        this.coverCameraError = "Impossible d'accéder à la caméra. Utilise « Ajouter des photos ».";
+        this.coverCameraError = "Impossible d'accéder à la caméra. Choisis une photo existante ci-dessous.";
       }
       this.cdr.detectChanges();
     }, 200);
@@ -752,14 +741,8 @@ export class PublishComponent implements OnInit, OnDestroy {
 
     const file = new File([blob], `couverture-${Date.now()}.jpg`, { type: 'image/jpeg' });
 
-    // En première position : le serveur marque comme couverture la première
-    // image reçue, et c'est bien celle-ci.
-    this.images.unshift(file);
-    this.imagePreviews.unshift(canvas.toDataURL('image/jpeg', 0.7));
-    if (this.images.length > 4) {
-      this.images.pop();
-      this.imagePreviews.pop();
-    }
+    this.coverPhoto = file;
+    this.coverPhotoPreview = canvas.toDataURL('image/jpeg', 0.7);
 
     this.stopCoverCamera();
     this.cdr.detectChanges();
@@ -803,70 +786,44 @@ export class PublishComponent implements OnInit, OnDestroy {
     }
   }
 
-  async onScanImage(event: Event, mode: 'cover' | 'back' = 'cover') {
+  /** Lit un fichier choisi pour un créneau et prépare son aperçu. */
+  private readSlotFile(file: File, apply: (preview: string) => void) {
+    const reader = new FileReader();
+    reader.onload = e => { apply(e.target?.result as string); this.cdr.detectChanges(); };
+    reader.readAsDataURL(file);
+  }
+
+  /** Repli quand la caméra guidée est indisponible : la couverture vient alors d'une photo existante. */
+  onCoverPhotoChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (!input.files?.length) return;
-    const file = input.files[0];
-    this.scanLoading = mode;
-    this.scanError = '';
-    try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch(`${environment.apiUrl}/api/books/scan-cover`, {
-        method: 'POST',
-        body: form,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        // Ne pas écraser ce qui est déjà rempli
-        if (data.title && !this.title) this.title = data.title;
-        if (data.author && !this.author) this.author = data.author;
-        if (data.category && !this.categoryId) {
-          const match = this.categories.find(c => c.name === data.category);
-          if (match) this.categoryId = match.id;
-        }
-        if (data.language && !this.language && this.languages.includes(data.language)) {
-          this.language = data.language;
-        }
-        // Ajouter la photo scannée comme image de l'annonce
-        if (this.images.length < 4) {
-          this.images.push(file);
-          const reader = new FileReader();
-          reader.onload = e => this.imagePreviews.push(e.target?.result as string);
-          reader.readAsDataURL(file);
-        }
-      } else {
-        this.scanError = 'Impossible d\'analyser l\'image, remplis manuellement.';
-      }
-    } catch {
-      this.scanError = 'Erreur lors de l\'analyse, remplis manuellement.';
-    }
-    this.scanLoading = false;
-    this.cdr.detectChanges();
+    const file = input.files?.[0];
+    if (!file) return;
+    this.coverPhoto = file;
+    this.readSlotFile(file, preview => this.coverPhotoPreview = preview);
     input.value = '';
   }
 
-  onImageChange(event: Event) {
+  onBackPhotoChange(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (!input.files) return;
-    const files = Array.from(input.files);
-    const remaining = 4 - this.images.length;
-    const toAdd = files.slice(0, remaining);
-    this.images.push(...toAdd);
-    toAdd.forEach(f => {
-      const reader = new FileReader();
-      reader.onload = e => this.imagePreviews.push(e.target?.result as string);
-      reader.readAsDataURL(f);
-    });
+    const file = input.files?.[0];
+    if (!file) return;
+    this.backPhoto = file;
+    this.readSlotFile(file, preview => this.backPhotoPreview = preview);
+    input.value = '';
   }
 
-  removeImage(i: number) {
-    this.images.splice(i, 1);
-    this.imagePreviews.splice(i, 1);
+  onExtraPhotoChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.extraPhoto = file;
+    this.readSlotFile(file, preview => this.extraPhotoPreview = preview);
+    input.value = '';
   }
 
-  get emptySlots(): null[] {
-    return Array(4 - this.imagePreviews.length).fill(null);
+  removeExtraPhoto() {
+    this.extraPhoto = null;
+    this.extraPhotoPreview = '';
   }
 
   get conditionLabel(): string {
