@@ -12,6 +12,8 @@ export const routes: Routes = [
   // Page "Comment ça marche" désactivée pour le MVP — la section équivalente sur l'accueil suffit pour l'instant.
   // { path: 'how-it-works', loadComponent: () => import('./pages/how-it-works/how-it-works.component').then(m => m.HowItWorksComponent) },
   { path: 'contact', loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent) },
+  { path: 'confidentialite', loadComponent: () => import('./pages/legal/legal.component').then(m => m.LegalComponent), data: { section: 'confidentialite' } },
+  { path: 'conditions', loadComponent: () => import('./pages/legal/legal.component').then(m => m.LegalComponent), data: { section: 'conditions' } },
   { path: 'community', loadComponent: () => import('./pages/community/community.component').then(m => m.CommunityComponent) },
   { path: 'publish', loadComponent: () => import('./pages/publish/publish.component').then(m => m.PublishComponent), canActivate: [profileGuard] },
   { path: 'publish/edit/:id', loadComponent: () => import('./pages/publish/edit/edit-book.component').then(m => m.EditBookComponent), canActivate: [profileGuard] },

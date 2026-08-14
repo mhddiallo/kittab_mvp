@@ -299,13 +299,10 @@
               <option value="">Langue *</option>
               <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
             </select>
-            <input [(ngModel)]="pageCount" name="pageCountMobile" type="number" min="1" inputmode="numeric"
-                   placeholder="Nombre de pages"
-                   class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
           </div>
 
           <!-- Desktop : libellés au-dessus -->
-          <div class="hidden lg:grid grid-cols-3 gap-4">
+          <div class="hidden lg:grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-bold text-gray-900 mb-2">Catégorie</label>
               <select [(ngModel)]="categoryId" name="categoryId"
@@ -322,12 +319,6 @@
                 <option value="">— Choisir —</option>
                 <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
               </select>
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Nombre de pages</label>
-              <input [(ngModel)]="pageCount" name="pageCount" type="number" min="1" inputmode="numeric"
-                     placeholder="Ex : 320"
-                     class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
             </div>
           </div>
 
