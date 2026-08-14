@@ -1,0 +1,185 @@
+<app-navbar />
+
+<div class="bg-[#FBF5EC] min-h-screen">
+  <div class="max-w-3xl mx-auto px-5 md:px-8 py-9 md:py-16">
+
+    <!-- En-tête -->
+    <div class="text-center mb-6 md:mb-10">
+      <p class="text-amber-600 text-xs md:text-[13px] font-bold uppercase tracking-[0.16em] mb-2.5 md:mb-3">Informations légales</p>
+      <h1 class="font-black text-gray-900 text-[28px] md:text-[44px] leading-tight tracking-tight">Politique de confidentialité &amp; Conditions d'utilisation</h1>
+    </div>
+
+    <!-- Texte provisoire : à retirer dès que le texte officiel est en place. -->
+    <div class="bg-amber-100/70 border border-amber-200 rounded-2xl px-4 py-3.5 flex items-start gap-2.5 mb-6 md:mb-8">
+      <span class="shrink-0">⚠️</span>
+      <p class="text-sm text-amber-800 leading-relaxed">
+        Texte provisoire, à titre d'exemple. La version officielle sera mise en ligne prochainement.
+      </p>
+    </div>
+
+    <!-- Bascule entre les deux textes -->
+    <div class="flex gap-2 bg-white rounded-2xl p-1.5 shadow-[0_2px_14px_rgba(0,0,0,0.05)] mb-6 md:mb-10">
+      <button type="button" (click)="show('confidentialite')"
+              class="flex-1 text-sm font-bold py-2.5 rounded-xl transition-colors"
+              [ngClass]="active === 'confidentialite' ? 'bg-primary text-white' : 'text-gray-500 hover:text-gray-800'">
+        Confidentialité
+      </button>
+      <button type="button" (click)="show('conditions')"
+              class="flex-1 text-sm font-bold py-2.5 rounded-xl transition-colors"
+              [ngClass]="active === 'conditions' ? 'bg-primary text-white' : 'text-gray-500 hover:text-gray-800'">
+        Conditions d'utilisation
+      </button>
+    </div>
+
+    <div class="bg-white rounded-[24px] p-6 md:p-10 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
+
+      <!-- ── Politique de confidentialité ─────────────────── -->
+      <ng-container *ngIf="active === 'confidentialite'">
+        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : à définir</p>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">1. Les données que nous collectons</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorsque tu crées un compte sur Kittab, nous
+            collectons ton numéro de téléphone, ton prénom, ton nom et ta ville. Lorsque tu publies une annonce,
+            nous conservons également les photos que tu ajoutes et les informations du livre concerné.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">2. Pourquoi nous les collectons</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Ut enim ad minim veniam, quis nostrud exercitation. Ces informations nous permettent de faire
+            fonctionner la messagerie entre acheteurs et vendeurs, de sécuriser ton compte, et d'améliorer
+            progressivement le service.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">3. Avec qui nous les partageons</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore. Certaines informations de
+            ton annonce (titre, prix, ville, photos) sont visibles publiquement sur le catalogue. Ton numéro de
+            téléphone n'est communiqué qu'aux personnes avec qui tu échanges directement.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">4. Combien de temps nous les conservons</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
+            laborum. Tes données sont conservées tant que ton compte est actif, et supprimées dans un délai
+            raisonnable après sa suppression.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">5. Cookies</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Kittab utilise uniquement les cookies
+            nécessaires au bon fonctionnement du site (connexion, préférences d'affichage).
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">6. Tes droits</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit. Tu peux à tout moment
+            demander l'accès, la correction ou la suppression de tes données personnelles.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">7. Nous contacter</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Pour toute question sur cette politique, écris-nous depuis la page
+            <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
+          </p>
+        </section>
+      </ng-container>
+
+      <!-- ── Conditions d'utilisation ──────────────────────── -->
+      <ng-container *ngIf="active === 'conditions'">
+        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : à définir</p>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">1. Objet</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Les présentes conditions régissent
+            l'utilisation de Kittab, une plateforme mettant en relation des particuliers pour l'achat, la vente et
+            l'échange de livres d'occasion.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">2. Acceptation</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. En créant un compte, tu acceptes
+            sans réserve les présentes conditions ainsi que notre politique de confidentialité.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">3. Ton compte</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            Tu es responsable des informations fournies lors de la création de ton compte et de la confidentialité
+            de tes accès.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">4. Règles de publication</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Excepteur sint occaecat cupidatat non proident. Les annonces doivent décrire fidèlement le livre
+            proposé (titre, état, photos). Kittab se réserve le droit de retirer toute annonce non conforme.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">5. Transactions entre utilisateurs</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium. Kittab met en relation les
+            utilisateurs mais n'est pas partie à la transaction : le paiement et la remise du livre se négocient
+            directement entre acheteur et vendeur.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">6. Responsabilité de Kittab</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit. Kittab ne garantit pas
+            l'exactitude des annonces publiées par les utilisateurs ni la bonne exécution des transactions.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">7. Suspension et résiliation</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis. Kittab peut suspendre ou
+            supprimer un compte en cas de non-respect des présentes conditions.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">8. Droit applicable</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Et harum quidem rerum facilis est et expedita distinctio. Les présentes conditions sont soumises au
+            droit sénégalais.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">9. Nous contacter</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Pour toute question sur ces conditions, écris-nous depuis la page
+            <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
+          </p>
+        </section>
+      </ng-container>
+
+    </div>
+  </div>
+</div>
+
+<app-footer />
