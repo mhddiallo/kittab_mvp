@@ -8,6 +8,35 @@
           class="mt-5 bg-white text-gray-900 font-bold px-7 py-3 rounded-full text-sm">Annuler</button>
 </div>
 
+<!-- ── Prise de vue guidée de la couverture ───────────────
+     Le cadre a exactement les proportions de la zone découpée : le vendeur
+     obtient ce qu'il a visé. Guider à la prise de vue vaut mieux que corriger
+     après coup — aucun traitement ne rattrape un livre pris de biais. -->
+<div *ngIf="showCoverCamera" class="fixed inset-0 z-[80] bg-black flex flex-col items-center justify-center p-4">
+  <div class="relative w-full max-w-md" [style.aspect-ratio]="videoAspect">
+    <video #coverVideo autoplay playsinline muted
+           class="absolute inset-0 w-full h-full object-contain rounded-[18px] bg-black"></video>
+
+    <!-- 78 % de la largeur, format 3/4 : mêmes valeurs que le découpage. -->
+    <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <div class="border-2 border-white/90 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
+           [style.width]="frameWidthCss" [style.height]="frameHeightCss"></div>
+    </div>
+  </div>
+
+  <p class="text-white/85 text-sm mt-5 text-center max-w-xs leading-relaxed">
+    Pose le livre à plat et aligne sa couverture sur le cadre. Évite les reflets.
+  </p>
+  <p *ngIf="coverCameraError" class="text-orange-300 text-sm mt-2 text-center">{{ coverCameraError }}</p>
+
+  <div class="flex items-center gap-4 mt-6">
+    <button type="button" (click)="stopCoverCamera()"
+            class="px-6 py-3 rounded-full text-sm font-bold text-white/80 border border-white/30">Annuler</button>
+    <button type="button" (click)="captureCover()"
+            class="px-8 py-3 rounded-full text-sm font-extrabold bg-white text-gray-900">Prendre la photo</button>
+  </div>
+</div>
+
 <!-- ── Confirmation puis progression de la publication ───── -->
 <div *ngIf="showConfirm" class="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-5">
   <div class="bg-white rounded-[24px] w-full max-w-sm p-6 max-h-[88vh] overflow-y-auto">
@@ -230,11 +259,28 @@
           <!-- (error) : dernier filet. Si malgré les vérifications du serveur
                l'image ne charge pas, on la retire plutôt que d'annoncer une
                couverture trouvée sous un cadre vide. -->
-          <div *ngIf="selectedCover" class="flex items-center gap-3 mb-5">
+          <div *ngIf="selectedCover" class="flex items-center gap-3 mb-3">
             <img [src]="selectedCover" alt="" (error)="onCoverError()"
                  class="w-12 h-16 object-cover rounded-lg border border-gray-100" />
-            <p class="text-xs text-gray-500">Couverture trouvée automatiquement</p>
+            <div>
+              <p class="text-xs text-gray-500">Couverture trouvée automatiquement</p>
+              <!-- Toujours accessible, même quand l'ISBN a donné une image :
+                   il désigne parfois un autre tirage que l'exemplaire réel. -->
+              <button type="button" (click)="rejectCover()"
+                      class="text-xs font-semibold text-primary hover:underline mt-0.5">
+                Ce n'est pas la bonne couverture
+              </button>
+            </div>
           </div>
+
+          <!-- Aucune couverture : le sélecteur devient la proposition principale. -->
+          <!-- Sans couverture, le catalogue compose une vignette à partir du
+               titre et de l'auteur : la grille reste homogène sans rien exiger
+               du vendeur. -->
+          <p *ngIf="!selectedCover && title.trim()" class="text-xs text-gray-500 mb-5">
+            Pas de couverture connue pour ce livre : le catalogue affichera son titre et son auteur.
+            Tes photos resteront visibles sur la fiche de l'annonce.
+          </p>
 
           <!-- Mobile : pas de libellé, l'intitulé sert de valeur par défaut -->
           <div class="grid grid-cols-2 gap-3 lg:hidden">
@@ -411,12 +457,22 @@
           <input id="publish-photos" type="file" accept="image/*" multiple class="sr-only"
                  (change)="onImageChange($event)" />
 
+          <!-- La prise de vue guidée passe en premier : c'est elle qui produit
+               une couverture exploitable, et donc réutilisable par les
+               prochains vendeurs du même livre. -->
+          <button type="button" (click)="startCoverCamera()" [disabled]="images.length >= 4"
+                  class="w-full border-2 border-primary/30 bg-red-50/50 rounded-2xl py-5 flex flex-col items-center gap-1 hover:bg-red-50 transition-colors mb-3 disabled:opacity-50">
+            <span class="text-2xl">🖼️</span>
+            <span class="font-bold text-primary text-sm">Photographier la couverture</span>
+            <span class="text-xs text-gray-500">Cadrage guidé — recommandé</span>
+          </button>
+
           <label for="publish-photos"
-                 class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-9 flex flex-col items-center gap-1.5 hover:border-primary transition-colors mb-4 cursor-pointer"
+                 class="w-full border-2 border-dashed border-gray-200 rounded-2xl py-6 flex flex-col items-center gap-1.5 hover:border-primary transition-colors mb-4 cursor-pointer"
                  [class.pointer-events-none]="images.length >= 4"
                  [class.opacity-50]="images.length >= 4">
             <span class="text-2xl">📷</span>
-            <span class="font-bold text-gray-900 text-sm">Ajouter des photos</span>
+            <span class="font-bold text-gray-900 text-sm">Ajouter d'autres photos</span>
             <span class="text-xs text-gray-400">JPG, PNG ou WEBP</span>
           </label>
 

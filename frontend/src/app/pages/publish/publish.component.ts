@@ -22,6 +22,7 @@ interface Category {
   name: string;
 }
 
+
 @Component({
   selector: 'app-publish',
   standalone: true,
@@ -30,6 +31,7 @@ interface Category {
 })
 export class PublishComponent implements OnInit, OnDestroy {
   @ViewChild('barcodeVideo') barcodeVideo!: ElementRef<HTMLVideoElement>;
+  @ViewChild('coverVideo') coverVideo!: ElementRef<HTMLVideoElement>;
   // Form fields
   isPack = false;
   title = '';
@@ -471,7 +473,7 @@ export class PublishComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, public auth: AuthService, private ngZone: NgZone, private cdr: ChangeDetectorRef) {}
 
-  ngOnDestroy() { this.stopBarcodeCamera(); }
+  ngOnDestroy() { this.stopBarcodeCamera(); this.stopCoverCamera(); }
 
   async startBarcodeCamera() {
     this.showScanMenu = false;
@@ -629,6 +631,134 @@ export class PublishComponent implements OnInit, OnDestroy {
       const res = await fetch(`${environment.apiUrl}/api/categories`);
       if (res.ok) this.categories = await res.json();
     } catch {}
+  }
+
+  /**
+   * Le vendeur signale que la couverture trouvée n'est pas la sienne.
+   *
+   * On l'écarte sans rien exiger de plus : le catalogue composera alors une
+   * vignette à partir du titre et de l'auteur, et la grille restera homogène.
+   * Ses propres photos restent visibles sur la fiche de l'annonce.
+   */
+  rejectCover() {
+    this.selectedCover = '';
+    this.scanError = "Couverture écartée. Le catalogue affichera le titre et l'auteur ; tes photos resteront visibles sur la fiche de l'annonce.";
+  }
+
+  // ── Prise de vue guidée de la couverture ──────────────────────────
+  //
+  // Guider le cadrage à la prise de vue vaut mieux que corriger après coup :
+  // aucun traitement ne rattrape un livre pris de biais dans la pénombre, et
+  // un cadre à l'écran ne coûte ni calcul ni latence sur les téléphones
+  // modestes.
+  showCoverCamera = false;
+  coverCameraError = '';
+  private coverStream: MediaStream | null = null;
+  /** Proportions réelles du flux, pour que le cadre affiché corresponde
+   *  exactement à la zone découpée. */
+  videoAspect = 3 / 4;
+
+  static readonly FRAME_WIDTH_RATIO = 0.78;
+  static readonly FRAME_ASPECT = 3 / 4;
+  /** Le cadre ne dépasse jamais cette part de la hauteur de l'image. */
+  static readonly FRAME_MAX_HEIGHT_RATIO = 0.92;
+
+  /**
+   * Dimensions du cadre affiché, en pourcentage de l'image.
+   *
+   * Calculées ici et non en CSS, pour qu'elles proviennent des mêmes valeurs
+   * que le découpage : sur un flux en paysage, un cadre 3/4 à 78 % de largeur
+   * dépasse en hauteur, et le vendeur voyait un cadre qui ne correspondait
+   * pas à la zone réellement conservée.
+   */
+  private get frameFractions(): { w: number; h: number } {
+    const w = PublishComponent.FRAME_WIDTH_RATIO;
+    const h = (w / PublishComponent.FRAME_ASPECT) * this.videoAspect;
+    if (h <= PublishComponent.FRAME_MAX_HEIGHT_RATIO) return { w, h };
+
+    const clamped = PublishComponent.FRAME_MAX_HEIGHT_RATIO;
+    return { w: (clamped / this.videoAspect) * PublishComponent.FRAME_ASPECT, h: clamped };
+  }
+
+  get frameWidthCss(): string {
+    return `${(this.frameFractions.w * 100).toFixed(2)}%`;
+  }
+
+  get frameHeightCss(): string {
+    return `${(this.frameFractions.h * 100).toFixed(2)}%`;
+  }
+
+  async startCoverCamera() {
+    if (this.images.length >= 4) return;
+    this.showCoverCamera = true;
+    this.coverCameraError = '';
+    setTimeout(async () => {
+      try {
+        this.coverStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment', width: { ideal: 1920 } },
+        });
+        const video = this.coverVideo.nativeElement;
+        video.srcObject = this.coverStream;
+        video.onloadedmetadata = () => {
+          this.ngZone.run(() => {
+            this.videoAspect = video.videoWidth / video.videoHeight;
+            this.cdr.detectChanges();
+          });
+        };
+      } catch {
+        this.coverCameraError = "Impossible d'accéder à la caméra. Utilise « Ajouter des photos ».";
+      }
+      this.cdr.detectChanges();
+    }, 200);
+  }
+
+  stopCoverCamera() {
+    this.coverStream?.getTracks().forEach(t => t.stop());
+    this.coverStream = null;
+    this.showCoverCamera = false;
+  }
+
+  /**
+   * Découpe la zone visée et l'ajoute en première photo.
+   *
+   * Le découpage reprend exactement les proportions du cadre affiché : le
+   * vendeur obtient ce qu'il a vu, sans surprise.
+   */
+  async captureCover() {
+    const video = this.coverVideo?.nativeElement;
+    if (!video || !video.videoWidth) return;
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+    const { w, h } = this.frameFractions;
+    const frameW = vw * w;
+    const frameH = vh * h;
+
+    const sx = (vw - frameW) / 2;
+    const sy = (vh - frameH) / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(frameW);
+    canvas.height = Math.round(frameH);
+    canvas.getContext('2d')!.drawImage(video, sx, sy, frameW, frameH, 0, 0, canvas.width, canvas.height);
+
+    const blob: Blob | null = await new Promise(resolve =>
+      canvas.toBlob(b => resolve(b), 'image/jpeg', 0.9));
+    if (!blob) return;
+
+    const file = new File([blob], `couverture-${Date.now()}.jpg`, { type: 'image/jpeg' });
+
+    // En première position : le serveur marque comme couverture la première
+    // image reçue, et c'est bien celle-ci.
+    this.images.unshift(file);
+    this.imagePreviews.unshift(canvas.toDataURL('image/jpeg', 0.7));
+    if (this.images.length > 4) {
+      this.images.pop();
+      this.imagePreviews.pop();
+    }
+
+    this.stopCoverCamera();
+    this.cdr.detectChanges();
   }
 
   hideSuggestionsDelayed() {
