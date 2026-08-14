@@ -450,6 +450,19 @@ async def upload_image(
     image = BookImage(book_id=book_id, url=image_url, is_primary=is_primary)
     db.add(image)
     db.commit()
+
+    # La première photo est la couverture de l'exemplaire : elle rejoint le
+    # référentiel, où le sélecteur la proposera aux prochains vendeurs du même
+    # livre. C'est ce versement qui évite quarante images différentes pour un
+    # même manuel. Un échec ici ne doit pas faire perdre la photo au vendeur.
+    if is_primary:
+        try:
+            from app.services.cover_service import promote_seller_cover
+            promote_seller_cover(db, book, image_url)
+        except Exception as exc:
+            print(f"[COVERS] promotion impossible pour le livre {book_id} : {exc}")
+            db.rollback()
+
     db.refresh(book)
     return book
 

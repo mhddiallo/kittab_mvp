@@ -147,3 +147,65 @@ async def fetch_google_volume(
             return items[0].get("volumeInfo"), items[0].get("id"), False
 
     return None, None, failed
+
+
+# Au-delà de ce nombre de couvertures pour une même œuvre, on cesse d'en
+# ajouter automatiquement. Sans ce plafond, quarante vendeurs du même manuel
+# créeraient quarante entrées : on aurait simplement déplacé le désordre des
+# annonces vers le référentiel, sans rien résoudre.
+MAX_AUTO_COVERS_PER_WORK = 3
+
+
+def promote_seller_cover(db, book, image_url: str) -> bool:
+    """
+    Fait entrer la photo d'un vendeur dans le référentiel des couvertures.
+
+    C'est ce qui ferme la boucle : la première personne à publier un manuel
+    inconnu fournit la couverture que le sélecteur proposera à toutes les
+    suivantes. Sans ce versement, le référentiel ne se remplirait que par
+    imports manuels, et le catalogue garderait autant d'images différentes que
+    de vendeurs pour un même livre.
+
+    On n'ajoute rien si l'œuvre est déjà pourvue : au-delà de trois vignettes,
+    le choix n'aide plus le vendeur, il l'encombre.
+
+    Renvoie True si une entrée a été créée.
+    """
+    from app.models.book import BookCover, CoverSource
+
+    if not image_url or not (book.title or "").strip():
+        return False
+
+    key = normalize_work_key(book.title, book.author)
+
+    existing = db.query(BookCover).filter(BookCover.work_key == key).count()
+    if existing >= MAX_AUTO_COVERS_PER_WORK:
+        return False
+
+    # L'unicité porte sur (source, source_ref) : une même image ne peut pas
+    # entrer deux fois, même si l'envoi est rejoué.
+    already = (
+        db.query(BookCover)
+        .filter(BookCover.source == CoverSource.SELLER,
+                BookCover.source_ref == image_url)
+        .first()
+    )
+    if already:
+        return False
+
+    db.add(BookCover(
+        isbn13=book.isbn or None,
+        work_key=key,
+        title=book.title,
+        author=book.author,
+        image_url=image_url,
+        source=CoverSource.SELLER,
+        source_ref=image_url,
+        education_level=book.education_level,
+        subject=book.subject,
+        country_code=book.country_code,
+        picks_count=0,
+        is_verified=False,
+    ))
+    db.commit()
+    return True
