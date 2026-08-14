@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { environment } from '../../../environments/environment';
+import { BookCoverComponent } from '../book-cover/book-cover.component';
 
 export interface BookCard {
   id: number; title: string; author: string; price: number;
@@ -21,7 +21,7 @@ export interface BookCard {
 @Component({
   selector: 'app-book-card',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, BookCoverComponent],
   templateUrl: './book-card.component.html',
 })
 export class BookCardComponent {
@@ -46,40 +46,6 @@ export class BookCardComponent {
   get conditionClass(): string {
     return ({ new: 'bg-green-100 text-green-700', like_new: 'bg-blue-100 text-blue-700', good: 'bg-amber-100 text-amber-700', fair: 'bg-gray-100 text-gray-600' } as any)[this.book.condition] || 'bg-gray-100 text-gray-600';
   }
-  private readonly API = environment.apiUrl;
-
-  private isValidCover(url: string): boolean {
-    return !url.toLowerCase().includes('unavailable') && !url.toLowerCase().includes('nocover');
-  }
-
-  /**
-   * Vignette du catalogue : la couverture officielle passe avant les photos
-   * du vendeur.
-   *
-   * La grille mélangeait des couvertures d'éditeur et des clichés pris sur un
-   * coin de table, avec des cadrages et des lumières très inégaux. Quand
-   * l'ISBN a été scanné, on dispose de la couverture de l'éditeur : on
-   * l'affiche ici pour que le catalogue reste lisible d'un seul coup d'œil.
-   *
-   * Les vraies photos de l'exemplaire ne disparaissent pas pour autant : la
-   * fiche de l'annonce les montre en premier, et c'est là que l'acheteur
-   * juge l'état réel. Un pack n'a pas de couverture d'éditeur, il garde donc
-   * les photos du vendeur.
-   */
-  get primaryImage(): string {
-    if (!this.book.is_pack && this.book.cover_url && this.isValidCover(this.book.cover_url)) {
-      return this.book.cover_url;
-    }
-    const url = this.book.images?.find(i => i.is_primary)?.url || this.book.images?.[0]?.url;
-    if (url) return url.startsWith('http') ? url : `${this.API}${url}`;
-    if (this.book.cover_url && this.isValidCover(this.book.cover_url)) return this.book.cover_url;
-    return 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
-  }
-
-  onImageError(event: Event) {
-    (event.target as HTMLImageElement).src = 'https://placehold.co/300x400/f3f4f6/9ca3af?text=Livre';
-  }
-
   slugify(text: string): string {
     return text.toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '')

@@ -8,6 +8,7 @@ import { BookCardComponent, BookCard } from '../../components/book-card/book-car
 import { AuthService } from '../../core/auth.service';
 import { environment } from '../../../environments/environment';
 import { EDUCATION_CYCLES, SUBJECTS, SCHOOL_CATEGORY_NAME } from '../../core/education';
+import { BookCoverComponent } from '../../components/book-cover/book-cover.component';
 
 interface Category { id: number; name: string; }
 
@@ -25,7 +26,7 @@ interface WantedBook {
 @Component({
   selector: 'app-catalogue',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule, NavbarComponent, FooterComponent, BookCardComponent],
+  imports: [RouterLink, CommonModule, FormsModule, NavbarComponent, FooterComponent, BookCardComponent, BookCoverComponent],
   templateUrl: './catalogue.component.html',
 })
 export class CatalogueComponent implements OnInit {
@@ -362,17 +363,6 @@ export class CatalogueComponent implements OnInit {
   getImageUrl(url: string | undefined): string {
     if (!url) return 'https://placehold.co/176x128/f3f4f6/9ca3af?text=Livre';
     return url.startsWith('http') ? url : `${environment.apiUrl}${url}`;
-  }
-
-  /**
-   * Même règle que les cartes du catalogue : la couverture de l'éditeur passe
-   * avant la photo du vendeur, pour que le bandeau reste homogène.
-   */
-  featuredImage(book: any): string {
-    const cover = book?.cover_url;
-    const usable = cover && !/unavailable|nocover/i.test(cover);
-    if (!book?.is_pack && usable) return cover;
-    return this.getImageUrl(book?.images?.[0]?.url);
   }
 
   async sendAlert() {
