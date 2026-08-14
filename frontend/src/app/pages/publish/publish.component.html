@@ -46,9 +46,13 @@
       <h2 class="font-black text-gray-900 text-xl text-center mb-1">On récapitule</h2>
       <p class="text-sm text-gray-500 text-center mb-5">Vérifie que tout est bon avant de publier.</p>
 
+      <!-- Ce que le catalogue affichera vraiment : la couverture trouvée, ou
+           la vignette composée. Le récapitulatif montrait la photo du vendeur,
+           qui n'apparaît nulle part dans la grille. -->
       <div class="flex items-center gap-3 mb-4">
-        <img *ngIf="imagePreviews.length" [src]="imagePreviews[0]" alt=""
-             class="w-14 h-16 object-cover rounded-xl border border-gray-100 shrink-0" />
+        <div class="w-14 h-[4.5rem] rounded-xl border border-gray-100 overflow-hidden shrink-0 bg-gray-50">
+          <app-book-cover [title]="title" [author]="author" [coverUrl]="selectedCover" [compact]="true" />
+        </div>
         <div class="min-w-0">
           <p class="font-bold text-gray-900 truncate">{{ title }}</p>
           <p class="text-sm text-gray-500 truncate">{{ author }}</p>
@@ -290,14 +294,18 @@
               <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
             </select>
             <select [(ngModel)]="language" name="languageMobile"
-                    class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
-              <option value="">Langue</option>
+                    class="w-full border rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors"
+                    [ngClass]="language ? 'border-gray-200' : 'border-primary/40'">
+              <option value="">Langue *</option>
               <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
             </select>
+            <input [(ngModel)]="pageCount" name="pageCountMobile" type="number" min="1" inputmode="numeric"
+                   placeholder="Nombre de pages"
+                   class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
           </div>
 
           <!-- Desktop : libellés au-dessus -->
-          <div class="hidden lg:grid grid-cols-2 gap-4">
+          <div class="hidden lg:grid grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-bold text-gray-900 mb-2">Catégorie</label>
               <select [(ngModel)]="categoryId" name="categoryId"
@@ -307,12 +315,19 @@
               </select>
             </div>
             <div>
-              <label class="block text-sm font-bold text-gray-900 mb-2">Langue</label>
+              <label class="block text-sm font-bold text-gray-900 mb-2">Langue <span class="text-primary">*</span></label>
               <select [(ngModel)]="language" name="language"
-                      class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+                      class="w-full border rounded-2xl px-4 py-3.5 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors"
+                      [ngClass]="language ? 'border-gray-200' : 'border-primary/40'">
                 <option value="">— Choisir —</option>
                 <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
               </select>
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-gray-900 mb-2">Nombre de pages</label>
+              <input [(ngModel)]="pageCount" name="pageCount" type="number" min="1" inputmode="numeric"
+                     placeholder="Ex : 320"
+                     class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
             </div>
           </div>
 

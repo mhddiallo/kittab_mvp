@@ -5,6 +5,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { BookCoverComponent } from '../../components/book-cover/book-cover.component';
 
 import { environment } from '../../../environments/environment';
 import { EDUCATION_CYCLES, SUBJECTS, SCHOOL_CATEGORY_NAME } from '../../core/education';
@@ -26,7 +27,7 @@ interface Category {
 @Component({
   selector: 'app-publish',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent],
+  imports: [CommonModule, FormsModule, RouterLink, NavbarComponent, BookCoverComponent],
   templateUrl: './publish.component.html',
 })
 export class PublishComponent implements OnInit, OnDestroy {
@@ -166,7 +167,10 @@ export class PublishComponent implements OnInit, OnDestroy {
   /** Champs marqués d'un astérisque dans la maquette, étape par étape. */
   stepValid(step: number): boolean {
     switch (step) {
+      // La langue conditionne la recherche d'un acheteur : un manuel en arabe
+      // et son équivalent en français ne s'adressent pas au même public.
       case 1: return this.title.trim().length > 0 && this.author.trim().length > 0
+                     && !!this.language
                      && (!this.isSchoolBook || (!!this.educationLevel && !!this.subject));
       case 2: return !!this.condition && this.cityId !== null;
       case 3: return !!this.price && this.price > 0;
