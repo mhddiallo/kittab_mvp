@@ -67,12 +67,67 @@ def google_image_link(volume_info: dict) -> Optional[str]:
     return None
 
 
-async def is_valid_cover(client: httpx.AsyncClient, url: str) -> bool:
+# Une image plus petite que ça n'est pas une couverture : c'est un pixel
+# transparent ou une icône de substitution.
+MIN_COVER_BYTES = 900
+
+
+def _looks_like_image(response) -> bool:
+    """
+    Vrai si la réponse est bien une image d'une taille plausible.
+
+    Le verdict repose d'abord sur le type de contenu, et seulement ensuite sur
+    la taille. L'ancien test exigeait un `content-length` : Open Library
+    redirige vers un stockage qui ne renvoie pas cet en-tête sur une requête
+    HEAD, l'absence valait zéro, et toutes ses couvertures étaient écartées
+    alors qu'elles existaient.
+    """
+    if response.status_code >= 400:
+        return False
+    if not response.headers.get("content-type", "").lower().startswith("image/"):
+        return False
+
+    size = response.headers.get("content-length")
+    if size is None:
+        # Taille inconnue : le type de contenu suffit à trancher.
+        return True
     try:
-        r = await client.head(url, follow_redirects=True, timeout=4.0)
+        return int(size) > MIN_COVER_BYTES
+    except ValueError:
+        return True
+
+
+async def is_valid_cover(client: httpx.AsyncClient, url: str) -> bool:
+    """
+    Vérifie qu'une adresse sert vraiment une couverture.
+
+    On interroge d'abord par HEAD, plus léger. Certains hébergeurs le refusent
+    ou répondent sans en-têtes exploitables : on retombe alors sur un GET
+    limité aux premiers octets, assez pour connaître le type et la taille sans
+    télécharger l'image entière.
+    """
+    try:
+        head = await client.head(url, follow_redirects=True, timeout=8.0)
+        if _looks_like_image(head):
+            return True
+        # 405 : méthode refusée. 200 sans type exploitable : réponse muette.
+        if head.status_code >= 400 and head.status_code != 405:
+            return False
+    except Exception:
+        pass
+
+    try:
+        r = await client.get(
+            url, follow_redirects=True, timeout=8.0,
+            headers={"Range": "bytes=0-2047"},
+        )
         if r.status_code >= 400:
             return False
-        return int(r.headers.get("content-length", 0)) > 500
+        if not r.headers.get("content-type", "").lower().startswith("image/"):
+            return False
+        # Une réponse partielle ne dit pas la taille totale : le contenu reçu
+        # suffit à écarter un pixel de substitution.
+        return len(r.content) > 100 or r.status_code == 206
     except Exception:
         return False
 
