@@ -34,6 +34,7 @@ Le résultat s'importe ensuite comme n'importe quelle amorce :
 
 import argparse
 import csv
+import html
 import re
 import sys
 import time
@@ -97,14 +98,31 @@ ISBN_IN_TEXT = re.compile(r'97[89][\d\-\s]{10,17}')
 
 
 def strip_accents(text: str) -> str:
+    """
+    Ramène le texte à sa forme la plus simple pour la comparaison.
+
+    NFKD et non NFD : les catalogues écrivent « Tlᵉ » et « 1ʳᵉ » avec de vraies
+    lettres en exposant, que NFD laisse intactes. Le niveau n'était alors pas
+    reconnu. NFKD les ramène à « Tle » et « 1re ».
+    """
     return "".join(
-        c for c in unicodedata.normalize("NFD", text)
+        c for c in unicodedata.normalize("NFKD", text)
         if unicodedata.category(c) != "Mn"
     )
 
 
+def flatten(text: str) -> str:
+    """
+    Texte prêt pour la reconnaissance de niveau.
+
+    Les points des abréviations sont retirés : « C.E.2 » et « CE2 » désignent
+    la même classe, mais seule la seconde forme était reconnue.
+    """
+    return strip_accents(text).lower().replace(".", "")
+
+
 def guess_level(*texts: str) -> str:
-    haystack = strip_accents(" ".join(t or "" for t in texts).lower())
+    haystack = flatten(" ".join(t or "" for t in texts))
     for pattern, level in LEVEL_PATTERNS:
         if re.search(pattern, haystack):
             return level
@@ -112,9 +130,9 @@ def guess_level(*texts: str) -> str:
 
 
 def guess_subject(*texts: str) -> str:
-    haystack = strip_accents(" ".join(t or "" for t in texts).lower())
+    haystack = flatten(" ".join(t or "" for t in texts))
     for subject in SUBJECTS:
-        if strip_accents(subject.lower()) in haystack:
+        if flatten(subject) in haystack:
             return subject
     for alias, subject in SUBJECT_ALIASES.items():
         if alias in haystack:
@@ -200,6 +218,8 @@ def row_from_json(product: dict) -> dict:
     name = product.get("name") or ""
     if isinstance(name, dict):          # wp/v2 renvoie {"rendered": "..."}
         name = name.get("rendered", "")
+    # WooCommerce renvoie les intitulés encodés : « Cahier d&rsquo;activités ».
+    name = html.unescape(str(name))
 
     images = product.get("images") or []
     image_url = ""
@@ -214,7 +234,7 @@ def row_from_json(product: dict) -> dict:
     description = product.get("short_description") or product.get("description") or ""
     if isinstance(description, dict):
         description = description.get("rendered", "")
-    description = re.sub(r"<[^>]+>", " ", str(description))
+    description = html.unescape(re.sub(r"<[^>]+>", " ", str(description)))
 
     sku = str(product.get("sku") or "")
 
