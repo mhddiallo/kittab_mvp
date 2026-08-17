@@ -1,0 +1,292 @@
+<app-navbar />
+
+<!-- ── Caméra code-barres ISBN (facultative) ──────────────
+     Ne sert qu'à pré-remplir l'ISBN saisi à la main juste en-dessous. -->
+<div *ngIf="showBarcodeCamera" class="fixed inset-0 z-[60] bg-black/90 flex flex-col items-center justify-center p-5">
+  <video #barcodeVideo autoplay playsinline class="w-full max-w-md rounded-[20px]"></video>
+  <p class="text-white/80 text-sm mt-4">Vise le code-barres au dos du livre</p>
+  <button type="button" (click)="stopBarcodeCamera()"
+          class="mt-5 bg-white text-gray-900 font-bold px-7 py-3 rounded-full text-sm">Annuler</button>
+</div>
+
+<!-- ── Prise de vue guidée de la couverture ───────────────
+     Reprise à l'identique du formulaire classique : même cadre, même
+     proportion, pour garantir des couvertures homogènes dans le catalogue
+     quel que soit le chemin de publication emprunté. -->
+<div *ngIf="showCoverCamera" class="fixed inset-0 z-[80] bg-black flex flex-col items-center justify-center p-4">
+  <div class="relative w-full max-w-md" [style.aspect-ratio]="videoAspect">
+    <video #coverVideo autoplay playsinline muted
+           class="absolute inset-0 w-full h-full object-contain rounded-[18px] bg-black"></video>
+
+    <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <div class="border-2 border-white/90 rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
+           [style.width]="frameWidthCss" [style.height]="frameHeightCss"></div>
+    </div>
+  </div>
+
+  <p class="text-white/85 text-sm mt-5 text-center max-w-xs leading-relaxed">
+    Pose le livre à plat et aligne sa couverture sur le cadre. Évite les reflets.
+  </p>
+  <p *ngIf="coverCameraError" class="text-orange-300 text-sm mt-2 text-center">{{ coverCameraError }}</p>
+
+  <div class="flex items-center gap-4 mt-6">
+    <button type="button" (click)="stopCoverCamera()"
+            class="px-6 py-3 rounded-full text-sm font-bold text-white/80 border border-white/30">Annuler</button>
+    <button type="button" (click)="captureCover()"
+            class="px-8 py-3 rounded-full text-sm font-extrabold bg-white text-gray-900">Prendre la photo</button>
+  </div>
+</div>
+
+<div class="bg-[#FBF5EC] min-h-screen">
+  <div class="max-w-2xl mx-auto px-5 md:px-8 pt-8 lg:pt-14 pb-16">
+
+    <!-- ═══ ÉCRAN 1 : le message ═══════════════════════════ -->
+    <div *ngIf="screen === 'message'">
+      <div class="text-center mb-8">
+        <a routerLink="/publish" class="inline-block text-xs font-bold text-gray-400 hover:text-primary mb-3">&#8592; Choisir un autre mode</a>
+        <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] mb-2.5">Nouvelle annonce</p>
+        <h1 class="font-black text-gray-900 text-[26px] md:text-3xl leading-tight tracking-tight">Décris ton livre en un message</h1>
+        <p class="text-gray-500 text-sm mt-2">Titre, état, prix, ville — écris comme tu le ferais sur WhatsApp.</p>
+      </div>
+
+      <div class="bg-white rounded-[24px] p-5 md:p-7 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
+        <textarea [(ngModel)]="text" name="text" rows="6"
+                  placeholder="Ex : Je vends Une si longue lettre de Mariama Bâ, bon état, 2000 FCFA, à récupérer à Dakar Médina"
+                  class="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors mb-5"></textarea>
+
+        <label class="block text-sm font-bold text-gray-900 mb-2">Code ISBN <span class="font-medium text-gray-400">(optionnel)</span></label>
+        <div class="flex gap-2 mb-1.5">
+          <input type="text" [(ngModel)]="isbn" name="isbn" inputmode="numeric" placeholder="Ex : 9782070413119"
+                 class="flex-1 min-w-0 border border-gray-200 rounded-2xl px-4 py-3.5 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
+          <button type="button" (click)="startBarcodeCamera()"
+                  class="shrink-0 w-12 h-12 flex items-center justify-center rounded-2xl border border-gray-200 text-lg hover:border-primary transition-colors"
+                  aria-label="Scanner le code-barres">📷</button>
+        </div>
+        <p *ngIf="barcodeError" class="text-xs text-orange-600 mb-3">{{ barcodeError }}</p>
+        <p class="text-xs text-gray-400 mb-6">
+          Sert juste à vérifier titre, auteur et surtout la couverture — jamais obligatoire.
+        </p>
+
+        <p *ngIf="messageError" class="text-sm text-red-600 bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mb-4">{{ messageError }}</p>
+
+        <button type="button" (click)="analyze()" [disabled]="!canAnalyze"
+                class="w-full font-bold text-sm py-3.5 rounded-full transition-colors"
+                [ngClass]="canAnalyze ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+          Analyser mon message &#8594;
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ ÉCRAN 2 : traitement ═══════════════════════════ -->
+    <div *ngIf="screen === 'processing'" class="text-center py-24" role="status" aria-live="polite">
+      <div class="w-12 h-12 mx-auto mb-5 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="font-black text-gray-900 text-lg mb-2">On lit ton message...</p>
+      <p class="text-sm text-gray-500">Titre, état, prix, ville — quelques secondes.</p>
+    </div>
+
+    <!-- ═══ ÉCRAN 3 : vérifie et corrige ═══════════════════ -->
+    <div *ngIf="screen === 'review'">
+      <div class="text-center mb-6">
+        <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] mb-2.5">Nouvelle annonce</p>
+        <h1 class="font-black text-gray-900 text-[26px] md:text-3xl leading-tight tracking-tight">Vérifie et corrige</h1>
+        <p class="text-gray-500 text-sm mt-2">Touche un champ pour le modifier.</p>
+      </div>
+
+      <p *ngIf="parseFailed" class="text-sm text-orange-700 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-5">
+        Je n'ai pas réussi à lire ton message. Remplis les champs ci-dessous à la main.
+      </p>
+
+      <div class="bg-white rounded-[24px] p-5 md:p-7 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
+
+        <!-- Titre -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Titre</p>
+            <ng-container *ngIf="!editingTitle; else titleEdit">
+              <p class="font-bold text-gray-900 truncate">{{ title || '—' }}</p>
+            </ng-container>
+            <ng-template #titleEdit>
+              <input type="text" [(ngModel)]="title" name="title" (blur)="editingTitle = false" (keyup.enter)="editingTitle = false"
+                     class="w-full border border-primary/40 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:outline-none focus:border-primary" />
+            </ng-template>
+          </div>
+          <button type="button" (click)="editingTitle = !editingTitle" class="shrink-0 text-gray-400 hover:text-primary p-1.5" aria-label="Modifier le titre">✏️</button>
+        </div>
+
+        <!-- Auteur -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Auteur</p>
+            <ng-container *ngIf="!editingAuthor; else authorEdit">
+              <p class="font-bold text-gray-900 truncate">{{ author || '—' }}</p>
+            </ng-container>
+            <ng-template #authorEdit>
+              <input type="text" [(ngModel)]="author" name="author" (blur)="editingAuthor = false" (keyup.enter)="editingAuthor = false"
+                     class="w-full border border-primary/40 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:outline-none focus:border-primary" />
+            </ng-template>
+          </div>
+          <button type="button" (click)="editingAuthor = !editingAuthor" class="shrink-0 text-gray-400 hover:text-primary p-1.5" aria-label="Modifier l'auteur">✏️</button>
+        </div>
+
+        <!-- Prix -->
+        <div class="flex items-center gap-2 mb-5">
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Prix</p>
+            <ng-container *ngIf="!editingPrice; else priceEdit">
+              <p class="font-black text-primary">{{ price ? (price | number:'1.0-0') + ' FCFA' : '—' }}</p>
+            </ng-container>
+            <ng-template #priceEdit>
+              <div class="relative">
+                <input type="number" [(ngModel)]="price" name="price" min="0" (blur)="editingPrice = false" (keyup.enter)="editingPrice = false"
+                       class="w-full border border-primary/40 rounded-xl px-3 py-2 text-sm font-bold text-gray-900 focus:outline-none focus:border-primary" />
+                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 pointer-events-none">FCFA</span>
+              </div>
+            </ng-template>
+          </div>
+          <button type="button" (click)="editingPrice = !editingPrice" class="shrink-0 text-gray-400 hover:text-primary p-1.5" aria-label="Modifier le prix">✏️</button>
+        </div>
+
+        <!-- État -->
+        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">État</label>
+        <div class="grid grid-cols-4 gap-2 mb-5">
+          <button *ngFor="let c of conditionChoices" type="button" (click)="condition = c.value"
+                  class="rounded-xl border px-2 py-2.5 text-xs font-bold transition-colors"
+                  [ngClass]="condition === c.value ? 'border-primary bg-red-50 text-primary' : 'border-gray-200 text-gray-800 hover:border-gray-300'">
+            {{ c.label }}
+          </button>
+        </div>
+
+        <!-- Ville / quartier -->
+        <div class="grid grid-cols-2 gap-3 mb-5">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Ville</label>
+            <select [(ngModel)]="cityId" name="cityId"
+                    class="w-full border border-gray-200 rounded-2xl px-3.5 py-3 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+              <option [ngValue]="null">Choisir...</option>
+              <option *ngFor="let c of cities" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Quartier</label>
+            <input type="text" [(ngModel)]="locationLabel" name="locationLabel" placeholder="Ex : Médina"
+                   class="w-full border border-gray-200 rounded-2xl px-3.5 py-3 text-sm placeholder-gray-400 focus:outline-none focus:border-primary transition-colors" />
+          </div>
+        </div>
+
+        <!-- Catégorie / langue -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Catégorie</label>
+            <select [(ngModel)]="categoryId" name="categoryId"
+                    class="w-full border border-gray-200 rounded-2xl px-3.5 py-3 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors">
+              <option [ngValue]="null">Choisir...</option>
+              <option *ngFor="let c of categories" [ngValue]="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Langue</label>
+            <select [(ngModel)]="language" name="language"
+                    class="w-full border rounded-2xl px-3.5 py-3 text-sm bg-white text-gray-700 focus:outline-none focus:border-primary transition-colors"
+                    [ngClass]="language ? 'border-gray-200' : 'border-primary/40'">
+              <option value="">Choisir...</option>
+              <option *ngFor="let l of languages" [value]="l">{{ l }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Couverture : officielle (ISBN) si trouvée, sinon photo obligatoire —
+             même principe que le formulaire classique, pour garder le catalogue
+             homogène quel que soit le chemin de publication. -->
+        <div class="border-t border-gray-100 pt-5 mb-5">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Couverture</p>
+
+          <div *ngIf="selectedCover && !coverPhotoPreview" class="flex items-center gap-3 mb-3">
+            <img [src]="selectedCover" alt="" class="w-12 h-16 object-cover rounded-lg border border-gray-100" />
+            <div>
+              <p class="text-xs text-gray-500">Couverture officielle trouvée</p>
+              <button type="button" (click)="selectedCover = ''" class="text-xs font-semibold text-primary hover:underline mt-0.5">
+                Ce n'est pas la bonne couverture
+              </button>
+            </div>
+          </div>
+
+          <input id="publish-ai-cover-fallback" type="file" accept="image/*" class="sr-only" (change)="onCoverPhotoChange($event)" />
+          <ng-container *ngIf="!coverPhotoPreview; else coverFilled">
+            <button type="button" (click)="startCoverCamera()"
+                    class="w-full border-2 border-primary/30 bg-red-50/50 rounded-2xl py-5 flex flex-col items-center gap-1 hover:bg-red-50 transition-colors">
+              <span class="text-2xl">🖼️</span>
+              <span class="font-bold text-primary text-sm">Photo de la couverture <span class="text-primary">*</span></span>
+              <span class="text-xs text-gray-500">Cadrage guidé</span>
+            </button>
+            <label for="publish-ai-cover-fallback"
+                   class="block text-center text-xs font-semibold text-gray-400 hover:text-primary mt-1.5 cursor-pointer">
+              Ou choisir une photo existante
+            </label>
+          </ng-container>
+          <ng-template #coverFilled>
+            <div class="flex items-center gap-3 border border-gray-100 rounded-2xl p-3">
+              <img [src]="coverPhotoPreview" alt="" class="w-14 h-14 object-cover rounded-xl border border-gray-100 shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-gray-900">Couverture</p>
+                <p class="text-xs text-gray-400">Photo prête</p>
+              </div>
+              <button type="button" (click)="startCoverCamera()" class="text-xs font-bold text-primary hover:underline shrink-0">Reprendre</button>
+            </div>
+          </ng-template>
+        </div>
+
+        <!-- Photos supplémentaires : facultatives -->
+        <div class="mb-6">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
+            Photos supplémentaires <span class="font-medium normal-case text-gray-400">(optionnel)</span>
+          </p>
+          <div class="grid grid-cols-3 gap-2.5">
+            <div *ngFor="let p of extraPhotoPreviews; let i = index" class="relative aspect-[3/4] rounded-xl overflow-hidden border border-gray-100">
+              <img [src]="p" alt="" class="w-full h-full object-cover" />
+              <button type="button" (click)="removeExtraPhoto(i)"
+                      class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 text-white text-xs flex items-center justify-center">&times;</button>
+            </div>
+            <label *ngIf="canAddExtraPhoto" for="publish-ai-extra-photo"
+                   class="aspect-[3/4] border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-2xl text-gray-300 hover:border-primary hover:text-primary transition-colors cursor-pointer">
+              +
+            </label>
+          </div>
+          <input id="publish-ai-extra-photo" type="file" accept="image/*" capture="environment" class="sr-only" (change)="onExtraPhotoChange($event)" />
+        </div>
+
+        <div *ngIf="error" class="bg-red-50 border border-red-100 rounded-2xl px-4 py-3 mb-4">
+          <p class="text-sm text-red-600">{{ error }}</p>
+          <a *ngIf="createdBookId" [routerLink]="['/books', createdBookId]" class="inline-block mt-2 text-sm font-bold text-primary hover:underline">Voir mon annonce &#8594;</a>
+        </div>
+
+        <button type="button" (click)="publish()" [disabled]="!canPublish"
+                class="w-full font-bold text-sm py-3.5 rounded-full transition-colors"
+                [ngClass]="canPublish ? 'bg-primary text-white hover:bg-red-800' : 'bg-[#EFE3D5] text-gray-400 cursor-not-allowed'">
+          {{ submitting ? 'Publication...' : 'Publier' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ ÉCRAN 4 : c'est en ligne ═══════════════════════ -->
+    <div *ngIf="screen === 'result'" class="text-center py-10">
+      <div class="text-5xl mb-4">🎉</div>
+      <h1 class="font-black text-2xl text-gray-900 mb-2">Ton annonce est en ligne</h1>
+      <p class="text-gray-500 mb-8">Elle est déjà visible dans le catalogue.</p>
+
+      <div class="w-32 h-40 mx-auto mb-8 rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50">
+        <app-book-cover [title]="createdBookTitle" [author]="createdBookAuthor" [coverUrl]="selectedCover" />
+      </div>
+
+      <div class="flex flex-col gap-3 max-w-xs mx-auto">
+        <a [routerLink]="['/books', createdBookId]"
+           class="w-full bg-primary text-white font-bold py-3.5 rounded-full text-sm hover:bg-red-800 transition-colors">
+          Voir l'annonce publiée
+        </a>
+        <button type="button" (click)="addAnother()" class="w-full text-sm font-bold text-gray-500 py-2 hover:text-primary transition-colors">
+          Publier un autre livre
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

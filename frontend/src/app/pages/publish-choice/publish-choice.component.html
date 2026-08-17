@@ -1,0 +1,41 @@
+<app-navbar />
+
+<div class="bg-[#FBF5EC] min-h-screen">
+  <div class="max-w-4xl mx-auto px-5 md:px-8 pt-10 lg:pt-16 pb-16">
+
+    <div class="text-center mb-8 lg:mb-12">
+      <p class="text-amber-700 text-xs font-bold uppercase tracking-[0.16em] mb-2.5">Nouvelle annonce</p>
+      <h1 class="font-black text-gray-900 text-[28px] md:text-[40px] leading-tight tracking-tight">Comment veux-tu publier ton livre ?</h1>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <a routerLink="/publish/ia"
+         class="relative overflow-hidden rounded-[24px] p-7 text-white bg-gradient-to-br from-[#C0452F] to-[#A63A28] flex flex-col min-h-[220px] hover:brightness-105 transition-[filter]">
+        <span class="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10"></span>
+        <span class="absolute top-5 right-5 bg-white text-[#A63A28] text-[10px] font-black tracking-wide px-2.5 py-1 rounded-full">NOUVEAU</span>
+        <span class="relative text-3xl mb-4">💬</span>
+        <h2 class="relative font-black text-xl mb-2">Décrire en un message</h2>
+        <p class="relative text-white/90 text-sm leading-relaxed mb-5">
+          Écris comme sur WhatsApp — titre, état, prix. On s'occupe du reste.
+        </p>
+        <span class="relative mt-auto inline-flex items-center gap-2 bg-white/15 rounded-xl px-4 py-2.5 text-sm font-bold w-fit">
+          ⚡ Publié en une phrase
+        </span>
+      </a>
+
+      <a routerLink="/publish/formulaire"
+         class="rounded-[24px] p-7 bg-white border border-gray-100 shadow-[0_2px_20px_rgba(0,0,0,0.05)] flex flex-col min-h-[220px] hover:border-gray-200 transition-colors">
+        <span class="text-3xl mb-4">📖</span>
+        <h2 class="font-black text-gray-900 text-xl mb-2">Remplir le formulaire</h2>
+        <p class="text-gray-500 text-sm leading-relaxed mb-5">
+          Titre, état, prix, photos — étape par étape, comme aujourd'hui.
+        </p>
+        <span class="mt-auto inline-flex items-center gap-2 bg-[#F6EEE2] text-gray-700 rounded-xl px-4 py-2.5 text-sm font-bold w-fit">
+          🕐 2 minutes
+        </span>
+      </a>
+
+    </div>
+  </div>
+</div>
