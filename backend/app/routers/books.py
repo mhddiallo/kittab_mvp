@@ -178,6 +178,177 @@ async def book_info(
     }
 
 
+class ParseListingInput(BaseModel):
+    text: str
+    isbn: str | None = None
+
+
+def _parse_price(price_text: Optional[str]) -> Optional[int]:
+    """
+    Isole les chiffres d'un prix écrit en texte libre ("2000 FCFA", "2 000F",
+    "environ 2000") en un entier. Renvoie None plutôt que de deviner un
+    montant : c'est le seul champ que l'IA ne doit jamais inventer, une
+    absence explicite vaut mieux qu'un chiffre halluciné.
+    """
+    import re
+
+    if not price_text:
+        return None
+    digits = re.sub(r"[^\d]", "", price_text)
+    if not digits:
+        return None
+    try:
+        value = int(digits)
+    except ValueError:
+        return None
+    return value if value > 0 else None
+
+
+async def _extract_listing_with_ai(
+    text: str,
+    category_names: list[str],
+    city_names: list[str],
+    languages: list[str],
+    condition_values: list[str],
+) -> dict:
+    """
+    Demande à Claude de lire l'annonce en texte libre et d'en extraire les
+    champs du formulaire, contraints à nos listes fermées.
+
+    La sortie structurée (`output_config.format`) est ce qui nous permet de
+    ne jamais laisser l'IA inventer une ville ou une catégorie hors de nos
+    référentiels : le schéma JSON liste les valeurs possibles en `enum`,
+    Claude ne peut littéralement pas répondre autre chose.
+    """
+    import anthropic
+
+    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    schema = {
+        "type": "object",
+        "properties": {
+            "title": {"type": "string"},
+            "author": {"type": "string"},
+            "condition": {"type": "string", "enum": [*condition_values, ""]},
+            "price_text": {"type": "string", "description": "Le prix tel qu'écrit dans le texte, chiffres uniquement importants. Vide si absent."},
+            "city": {"type": "string", "enum": [*city_names, ""]},
+            "location_label": {"type": "string", "description": "Quartier ou zone mentionné, si présent."},
+            "category": {"type": "string", "enum": [*category_names, ""]},
+            "language": {"type": "string", "enum": [*languages, ""]},
+        },
+        "required": ["title", "author", "condition", "price_text", "city", "location_label", "category", "language"],
+        "additionalProperties": False,
+    }
+
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=512,
+        messages=[{
+            "role": "user",
+            "content": (
+                "Voici une annonce de vente d'un livre d'occasion, écrite librement par un "
+                "particulier en français. Extrais-en les informations demandées. Ne réponds "
+                "qu'à partir de ce texte, sans inventer : laisse une chaîne vide si "
+                "l'information n'y figure pas. Pour l'état, choisis la catégorie la plus "
+                "proche de ce que le texte décrit (état neuf/parfait, bon état, correct, "
+                "dégradé/abîmé) ; laisse vide si rien ne l'indique.\n\n"
+                f"Texte du vendeur :\n{text}"
+            ),
+        }],
+        output_config={"format": {"type": "json_schema", "schema": schema}},
+    )
+
+    if message.stop_reason == "refusal":
+        raise ValueError("refusal")
+
+    raw = next((b.text for b in message.content if b.type == "text"), "")
+    return json.loads(raw)
+
+
+@router.post("/parse-listing")
+async def parse_listing(
+    payload: ParseListingInput,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Publication par message : transforme un texte libre en champs de
+    formulaire pré-remplis.
+
+    Rien de ce qui revient ici n'est appliqué tel quel côté client sans
+    passer par l'écran de relecture — voir le principe déjà en place pour
+    l'ISBN : l'IA propose, le serveur vérifie ce qui doit rester dans une
+    liste fermée, le vendeur confirme.
+    """
+    from app.core.countries import DEFAULT_COUNTRY
+    from app.core.isbn import normalize_isbn
+    from app.models.book import Category
+
+    text = payload.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Décris le livre avant de continuer.")
+    if not settings.ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail="La publication par message est momentanément indisponible.")
+
+    country = (current_user.country_code or DEFAULT_COUNTRY).upper()
+    categories = db.query(Category).order_by(Category.name).all()
+    cities = db.query(City).filter(City.country_code == country).order_by(City.name).all()
+    languages = ["Français", "Anglais", "Arabe", "Portugais", "Wolof", "Peul", "Autre"]
+    condition_labels = {"new": "Parfait", "like_new": "Très bon", "good": "Correct", "fair": "Dégradé"}
+
+    try:
+        extracted = await _extract_listing_with_ai(
+            text,
+            [c.name for c in categories],
+            [c.name for c in cities],
+            languages,
+            list(condition_labels.keys()),
+        )
+        parse_failed = False
+    except Exception as exc:
+        print(f"[PARSE-LISTING] échec de l'extraction : {exc}")
+        extracted = {}
+        parse_failed = True
+
+    city = next((c for c in cities if c.name == extracted.get("city")), None)
+    category = next((c for c in categories if c.name == extracted.get("category")), None)
+
+    cover_url = None
+    page_count = None
+    normalized_isbn = normalize_isbn(payload.isbn) if payload.isbn else None
+    if normalized_isbn:
+        import httpx
+        from app.services.cover_service import fetch_google_volume, resolve_cover
+
+        try:
+            async with httpx.AsyncClient(timeout=8.0) as client:
+                volume_info, _, _ = await fetch_google_volume(
+                    client, api_key=settings.GOOGLE_BOOKS_API_KEY, isbn=normalized_isbn,
+                )
+                cover_url = await resolve_cover(client, volume_info or {}, normalized_isbn)
+                if volume_info:
+                    page_count = volume_info.get("pageCount")
+        except Exception:
+            pass
+
+    return {
+        "title": extracted.get("title") or "",
+        "author": extracted.get("author") or "",
+        "condition": extracted.get("condition") or "",
+        "condition_label": condition_labels.get(extracted.get("condition"), ""),
+        "price": _parse_price(extracted.get("price_text")),
+        "city_id": city.id if city else None,
+        "city_name": city.name if city else None,
+        "location_label": extracted.get("location_label") or "",
+        "category_id": category.id if category else None,
+        "category_name": category.name if category else None,
+        "language": extracted.get("language") or "",
+        "cover_url": cover_url,
+        "isbn": normalized_isbn,
+        "page_count": page_count,
+        "parse_failed": parse_failed,
+    }
+
+
 class CatalogSavePayload(BaseModel):
     title: str
     author: str
