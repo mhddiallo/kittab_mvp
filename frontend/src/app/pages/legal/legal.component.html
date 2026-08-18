@@ -9,13 +9,9 @@
       <h1 class="font-black text-gray-900 text-[28px] md:text-[44px] leading-tight tracking-tight">Politique de confidentialité &amp; Conditions d'utilisation</h1>
     </div>
 
-    <!-- Texte provisoire : à retirer dès que le texte officiel est en place. -->
-    <div class="bg-amber-100/70 border border-amber-200 rounded-2xl px-4 py-3.5 flex items-start gap-2.5 mb-6 md:mb-8">
-      <span class="shrink-0">⚠️</span>
-      <p class="text-sm text-amber-800 leading-relaxed">
-        Texte provisoire, à titre d'exemple. La version officielle sera mise en ligne prochainement.
-      </p>
-    </div>
+    <!-- Certaines informations administratives (RCCM, NINEA, siège social...) restent
+         à compléter avant l'ouverture publique — signalé directement dans le texte
+         concerné plutôt que dans un bandeau générique. -->
 
     <!-- Bascule entre les deux textes -->
     <div class="flex gap-2 bg-white rounded-2xl p-1.5 shadow-[0_2px_14px_rgba(0,0,0,0.05)] mb-6 md:mb-10">
@@ -33,147 +29,399 @@
 
     <div class="bg-white rounded-[24px] p-6 md:p-10 shadow-[0_2px_20px_rgba(0,0,0,0.05)]">
 
-      <!-- ── Politique de confidentialité ─────────────────── -->
+      <!-- ── Politique de confidentialité (Tome 2) ─────────── -->
       <ng-container *ngIf="active === 'confidentialite'">
-        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : à définir</p>
+        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded align-middle">à compléter</span></p>
+
+        <p class="text-sm text-gray-600 leading-relaxed mb-7">
+          Kittab accorde une importance capitale à la protection de la vie privée et des données personnelles de ses
+          utilisateurs. Cette politique explique de manière claire et transparente comment vos données personnelles
+          sont collectées, utilisées, partagées et conservées lorsque vous utilisez la plateforme Kittab. En utilisant
+          la plateforme, vous consentez à la collecte et à l'utilisation de vos données personnelles conformément à
+          la présente politique.
+        </p>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">1. Les données que nous collectons</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">1. Responsable du traitement</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorsque tu crées un compte sur Kittab, nous
-            collectons ton numéro de téléphone, ton prénom, ton nom et ta ville. Lorsque tu publies une annonce,
-            nous conservons également les photos que tu ajoutes et les informations du livre concerné.
+            Le responsable du traitement des données personnelles est la société Kittab, SARL de droit sénégalais,
+            dont le siège social est situé à <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded align-middle">adresse du siège social à compléter</span>,
+            immatriculée au RCCM sous le numéro <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded align-middle">RCCM à compléter</span>. Pour toute question
+            relative à cette politique ou à l'exercice de vos droits, vous pouvez contacter notre équipe à l'adresse
+            <a href="mailto:contact@kittab.co" class="text-primary font-semibold hover:underline">contact&#64;kittab.co</a>
+            (à l'attention du DPO).
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">2. Pourquoi nous les collectons</h2>
-          <p class="text-sm text-gray-600 leading-relaxed">
-            Ut enim ad minim veniam, quis nostrud exercitation. Ces informations nous permettent de faire
-            fonctionner la messagerie entre acheteurs et vendeurs, de sécuriser ton compte, et d'améliorer
-            progressivement le service.
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">2. Quelles données collectons-nous ?</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Nous collectons différentes catégories de données personnelles vous concernant, selon votre utilisation
+            de la plateforme :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">Données d'identification</span> — nom, prénom, pseudo, adresse email, numéro de téléphone, photo de profil.</li>
+            <li><span class="font-semibold text-gray-800">Données de localisation</span> — ville, adresse approximative pour la remise du livre, données de géolocalisation précises si vous y consentez.</li>
+            <li><span class="font-semibold text-gray-800">Données de transaction</span> — historique des achats et des ventes, livres consultés, favoris, recherches.</li>
+            <li><span class="font-semibold text-gray-800">Données de communication</span> — contenu des messages échangés via la messagerie intégrée.</li>
+            <li><span class="font-semibold text-gray-800">Données techniques</span> — adresse IP, type d'appareil, système d'exploitation, données de navigation.</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">3. Pourquoi collectons-nous vos données ?</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">Nous utilisons vos données personnelles pour :</p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li>Créer et gérer votre compte, et vous permettre d'accéder à la plateforme.</li>
+            <li>Faciliter les transactions entre acheteurs et vendeurs.</li>
+            <li>Faire fonctionner la messagerie entre utilisateurs.</li>
+            <li>Personnaliser les recommandations de livres selon votre historique.</li>
+            <li>Vous montrer des livres disponibles à proximité, avec votre consentement.</li>
+            <li>Détecter, prévenir et enquêter sur les comportements frauduleux ou abusifs.</li>
+            <li>Améliorer le service et réaliser des statistiques anonymisées.</li>
+            <li>Répondre à vos demandes de support et traiter vos signalements.</li>
+            <li>Vous informer des mises à jour et des alertes de sécurité.</li>
+            <li>Respecter nos obligations légales et comptables.</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">4. Sur quelle base légale traitons-nous vos données ?</h2>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">L'exécution du contrat</span> — pour gérer votre compte, faciliter les transactions et assurer la messagerie.</li>
+            <li><span class="font-semibold text-gray-800">Votre consentement</span> — pour la géolocalisation précise et certains cookies.</li>
+            <li><span class="font-semibold text-gray-800">L'intérêt légitime</span> — pour personnaliser les recommandations, améliorer le service et assurer la sécurité de la plateforme.</li>
+            <li><span class="font-semibold text-gray-800">L'obligation légale</span> — pour la conservation de certaines données (comptables notamment).</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">5. Avec qui partageons-nous vos données ?</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Vos données ne sont partagées qu'avec les catégories de destinataires suivantes, dans la limite de leurs
+            besoins :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">Les autres utilisateurs</span> — les informations que vous publiez (pseudo, photo, localisation approximative, annonce) sont visibles par les autres utilisateurs ; vos messages sont visibles par votre correspondant.</li>
+            <li><span class="font-semibold text-gray-800">Nos prestataires techniques</span> — notre hébergeur, nos outils d'envoi de SMS/WhatsApp et, le cas échéant, nos outils de mesure d'audience.</li>
+            <li><span class="font-semibold text-gray-800">Les autorités légales</span> — si la loi nous y oblige.</li>
+          </ul>
+          <p class="text-sm text-gray-600 leading-relaxed mt-3">
+            Nous ne vendons pas, ne louons pas et ne commercialisons pas vos données personnelles.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">3. Avec qui nous les partageons</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">6. Transferts de données hors du Sénégal</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore. Certaines informations de
-            ton annonce (titre, prix, ville, photos) sont visibles publiquement sur le catalogue. Ton numéro de
-            téléphone n'est communiqué qu'aux personnes avec qui tu échanges directement.
+            Certains de nos prestataires (hébergeur, outils techniques) peuvent être situés hors du Sénégal. Dans ce
+            cas, nous nous assurons que ces transferts sont encadrés par des garanties appropriées, pour assurer un
+            niveau de protection adéquat de vos données.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">4. Combien de temps nous les conservons</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">7. Combien de temps conservons-nous vos données ?</h2>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">Données du compte</span> — pendant toute la durée de vie de votre compte ; supprimées dans un délai <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded align-middle">durée à compléter</span> après la fermeture du compte, sauf obligation légale de conservation.</li>
+            <li><span class="font-semibold text-gray-800">Données de transaction</span> — conservées pour les besoins comptables et fiscaux, pendant la durée légale applicable.</li>
+            <li><span class="font-semibold text-gray-800">Données de messagerie</span> — pendant la durée de la relation, puis supprimées sauf si nécessaire pour la résolution d'un litige.</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">8. Cookies et traceurs</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est
-            laborum. Tes données sont conservées tant que ton compte est actif, et supprimées dans un délai
-            raisonnable après sa suppression.
+            Kittab utilise des cookies strictement nécessaires au fonctionnement du site (maintien de la session de
+            connexion), qui ne requièrent pas votre consentement, ainsi que, le cas échéant, des cookies de mesure
+            d'audience pour comprendre l'utilisation de la plateforme. Vous pouvez gérer vos préférences via les
+            paramètres de votre navigateur.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">5. Cookies</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">9. Sécurité des données</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Kittab utilise uniquement les cookies
-            nécessaires au bon fonctionnement du site (connexion, préférences d'affichage).
+            Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles appropriées pour protéger
+            vos données personnelles contre tout accès non autorisé, toute perte, altération ou divulgation
+            (chiffrement des échanges, sécurisation des accès). Malgré ces précautions, aucun système n'est
+            infaillible ; nous vous recommandons de ne pas divulguer vos identifiants de connexion.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">6. Tes droits</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">10. Vos droits</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Conformément à la législation sénégalaise et aux principes du RGPD, vous disposez des droits suivants sur
+            vos données personnelles :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">Droit d'accès</span> — obtenir la confirmation que vos données sont traitées et y accéder.</li>
+            <li><span class="font-semibold text-gray-800">Droit de rectification</span> — demander la correction de données inexactes ou incomplètes.</li>
+            <li><span class="font-semibold text-gray-800">Droit à l'effacement</span> — demander la suppression de vos données, sous réserve de nos obligations légales.</li>
+            <li><span class="font-semibold text-gray-800">Droit à la limitation du traitement</span> — demander la suspension du traitement de vos données.</li>
+            <li><span class="font-semibold text-gray-800">Droit d'opposition</span> — vous opposer au traitement de vos données pour des motifs légitimes.</li>
+            <li><span class="font-semibold text-gray-800">Droit à la portabilité</span> — recevoir vos données dans un format structuré.</li>
+            <li><span class="font-semibold text-gray-800">Droit de retrait du consentement</span> — à tout moment, lorsque le traitement est basé sur celui-ci.</li>
+          </ul>
+          <p class="text-sm text-gray-600 leading-relaxed mt-3">
+            Vous avez également le droit d'introduire une plainte auprès de la Commission de Protection des Données
+            Personnelles (CDP) du Sénégal.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">11. Modification de cette politique</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit. Tu peux à tout moment
-            demander l'accès, la correction ou la suppression de tes données personnelles.
+            Kittab se réserve le droit de modifier la présente politique à tout moment pour refléter les évolutions
+            de la plateforme ou les changements légaux. Les modifications substantielles vous seront signalées par
+            email ou via une notification sur la plateforme.
           </p>
         </section>
 
         <section>
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">7. Nous contacter</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">12. Nous contacter</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Pour toute question sur cette politique, écris-nous depuis la page
-            <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
+            Pour exercer vos droits ou pour toute question sur cette politique, écris-nous à
+            <a href="mailto:contact@kittab.co" class="text-primary font-semibold hover:underline">contact&#64;kittab.co</a>
+            ou depuis la page <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
           </p>
         </section>
       </ng-container>
 
-      <!-- ── Conditions d'utilisation ──────────────────────── -->
+      <!-- ── Conditions générales d'utilisation (Tome 1) ───── -->
       <ng-container *ngIf="active === 'conditions'">
-        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : à définir</p>
+        <p class="text-xs text-gray-400 mb-6">Dernière mise à jour : <span class="inline-block bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded align-middle">à compléter</span></p>
+
+        <p class="text-sm text-gray-600 leading-relaxed mb-7">
+          Les présentes conditions générales d'utilisation (les « CGU ») régissent l'accès et l'utilisation de la
+          plateforme en ligne Kittab, disponible via le site kittab.co et ses applications mobiles. La plateforme est
+          éditée par la société Kittab, SARL de droit sénégalais. Kittab agit en tant qu'intermédiaire technique et
+          n'est pas partie aux transactions conclues entre les utilisateurs. L'utilisation de la plateforme implique
+          l'acceptation pleine et entière des présentes CGU ; si vous ne les acceptez pas, vous ne devez pas utiliser
+          la plateforme.
+        </p>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">1. Objet</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 1 — Définitions</h2>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li><span class="font-semibold text-gray-800">Annonce</span> — la publication mise en ligne par un vendeur pour proposer un livre à la vente, à l'échange ou au don.</li>
+            <li><span class="font-semibold text-gray-800">Compte</span> — l'espace personnel créé par un utilisateur, permettant l'accès au service.</li>
+            <li><span class="font-semibold text-gray-800">Contenu</span> — l'ensemble des informations, textes, photos et autres éléments publiés par les utilisateurs.</li>
+            <li><span class="font-semibold text-gray-800">Utilisateur</span> — toute personne utilisant la plateforme, qu'elle soit acheteur ou vendeur.</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 2 — Accès à la plateforme et création du compte</h2>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">2.1. Conditions d'éligibilité</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            L'utilisation de la plateforme est ouverte à toute personne âgée d'au moins 18 ans, ou disposant de
+            l'autorisation parentale si elle est âgée de moins de 18 ans. En créant un compte, vous certifiez remplir
+            cette condition.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">2.2. Création du compte</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            Pour utiliser pleinement le service, l'utilisateur doit créer un compte et fournir des informations
+            exactes, complètes et à jour (nom d'utilisateur, numéro de téléphone, etc.). Toute information fausse,
+            trompeuse ou incomplète pourra entraîner la suspension ou la suppression du compte par Kittab.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">2.3. Sécurité du compte</h3>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Les présentes conditions régissent
-            l'utilisation de Kittab, une plateforme mettant en relation des particuliers pour l'achat, la vente et
-            l'échange de livres d'occasion.
+            L'utilisateur est seul responsable de la confidentialité et de la sécurité de ses identifiants de
+            connexion. Toute action réalisée depuis son compte est réputée avoir été effectuée par l'utilisateur
+            lui-même. En cas de perte ou de divulgation de ses identifiants, l'utilisateur doit en informer
+            immédiatement Kittab à l'adresse contact&#64;kittab.co.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">2. Acceptation</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 3 — Fonctionnement de la plateforme</h2>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">3.1. Publication des annonces</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Tout utilisateur disposant d'un compte peut publier une annonce pour proposer un livre à la vente, à
+            l'échange ou au don. L'annonce doit contenir, sous la seule responsabilité du vendeur :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed mb-4">
+            <li>Le titre et l'auteur du livre.</li>
+            <li>La catégorie du livre.</li>
+            <li>Une description précise de l'état du livre, selon la classification définie à l'Article 4.</li>
+            <li>Le prix de vente, ou la mention « Échange » ou « Don ».</li>
+            <li>Une ou plusieurs photos représentant fidèlement l'état du livre.</li>
+            <li>La ville et le quartier où récupérer le livre.</li>
+          </ul>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            L'utilisateur est seul responsable du contenu de ses annonces. Kittab ne garantit pas l'exactitude, la
+            véracité ou la légalité des annonces publiées par les utilisateurs.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">3.2. Recherche et achat</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            Les acheteurs peuvent rechercher des livres via la barre de recherche et les filtres (catégorie, état,
+            ville, prix). L'acheteur peut contacter le vendeur via la messagerie intégrée pour poser des questions
+            sur le livre. Le prix affiché dans l'annonce est ferme et définitif ; aucune fonctionnalité de
+            négociation n'est proposée sur la plateforme.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">3.3. Échanges et dons</h3>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. En créant un compte, tu acceptes
-            sans réserve les présentes conditions ainsi que notre politique de confidentialité.
+            La plateforme permet également l'échange de livres entre utilisateurs (un livre contre un autre) ou le
+            don. Les conditions de l'échange ou du don sont définies librement entre les parties, en dehors de
+            l'intervention de Kittab. La plateforme ne fournit pas de service de paiement ou de livraison pour les
+            échanges et les dons.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">3. Ton compte</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 4 — Classification et état des livres</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Afin d'assurer une transparence maximale entre les utilisateurs, les livres proposés sur la plateforme
+            doivent être classés selon la classification suivante, que le vendeur s'engage à respecter
+            scrupuleusement :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed mb-4">
+            <li><span class="font-semibold text-gray-800">Parfait</span> — livre neuf ou comme neuf, sans aucune marque d'usure, ni déchirure, ni annotation.</li>
+            <li><span class="font-semibold text-gray-800">Très bon</span> — livre très peu utilisé, très légères marques d'usure possibles, aucune annotation ni page cornée.</li>
+            <li><span class="font-semibold text-gray-800">Correct</span> — signes d'usure normaux pour un livre d'occasion (pliures, pages jaunies, annotations mineures au crayon), l'ensemble reste parfaitement lisible.</li>
+            <li><span class="font-semibold text-gray-800">Dégradé</span> — dommages importants (pages déchirées ou manquantes, couverture abîmée, taches), à décrire clairement dans l'annonce et à refléter dans un prix très réduit.</li>
+          </ul>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-            Tu es responsable des informations fournies lors de la création de ton compte et de la confidentialité
-            de tes accès.
+            Le vendeur est seul responsable de l'exactitude de la classification de son livre. En cas de litige,
+            l'acheteur peut signaler l'annonce à Kittab, qui pourra, après examen, prendre des mesures à l'encontre
+            du vendeur.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">4. Règles de publication</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 5 — Fonctionnalités de la plateforme</h2>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">5.1. Aide à la publication par Intelligence Artificielle</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            Kittab propose des outils d'Intelligence Artificielle destinés à faciliter la publication d'une annonce
+            (par exemple, la reconnaissance d'un livre à partir d'une photo de couverture). Ces outils fournissent une
+            aide à titre indicatif et ne dispensent pas le vendeur de son obligation de décrire avec exactitude le
+            livre et son état réel. La responsabilité de Kittab ne saurait être engagée en raison d'une divergence
+            entre une suggestion de l'IA et l'état effectif du livre.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">5.2. Messagerie intégrée</h3>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Excepteur sint occaecat cupidatat non proident. Les annonces doivent décrire fidèlement le livre
-            proposé (titre, état, photos). Kittab se réserve le droit de retirer toute annonce non conforme.
+            La plateforme met à disposition des utilisateurs un système de messagerie pour faciliter la communication
+            entre acheteurs et vendeurs. Ce service est destiné exclusivement aux échanges relatifs aux transactions
+            en cours ; son utilisation à d'autres fins (prospection commerciale, harcèlement, spam) est strictement
+            interdite et pourra entraîner des sanctions.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">5. Transactions entre utilisateurs</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 6 — Obligations des utilisateurs</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            L'utilisateur s'engage à utiliser la plateforme conformément aux présentes CGU et à la législation en
+            vigueur. Il s'interdit notamment de :
+          </p>
+          <ul class="list-disc pl-5 space-y-1.5 text-sm text-gray-600 leading-relaxed">
+            <li>Publier, vendre, échanger ou donner des livres interdits par la loi (contrefaçons, livres piratés, contenus haineux, etc.).</li>
+            <li>Publier des annonces comportant des informations fausses, trompeuses ou inexactes, notamment sur l'état du livre.</li>
+            <li>Créer de faux comptes, usurper l'identité d'autrui, ou tenter de tromper un autre utilisateur ou Kittab.</li>
+            <li>Harceler ou nuire aux autres utilisateurs, notamment par des messages non sollicités via la messagerie.</li>
+            <li>Porter atteinte aux droits de propriété intellectuelle d'autrui.</li>
+            <li>Tenter de contourner les mesures de sécurité de la plateforme.</li>
+          </ul>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 7 — Propriété intellectuelle</h2>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">7.1. Contenu de la plateforme</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            La plateforme, son design, son code source, ses textes, logos et l'ensemble des éléments la composant
+            sont la propriété exclusive de Kittab ou de ses concédants. Toute reproduction ou utilisation non
+            autorisée est strictement interdite, sauf autorisation expresse préalable de Kittab.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">7.2. Contenu publié par les utilisateurs</h3>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium. Kittab met en relation les
-            utilisateurs mais n'est pas partie à la transaction : le paiement et la remise du livre se négocient
-            directement entre acheteur et vendeur.
+            L'utilisateur conserve la propriété pleine et entière des contenus (photos, descriptions) qu'il publie sur
+            la plateforme. En publiant un contenu, l'utilisateur accorde à Kittab une licence gratuite et non
+            exclusive pour l'héberger, le stocker et l'afficher dans le cadre du fonctionnement de la plateforme.
+            Cette licence prend fin automatiquement lors de la suppression du contenu ou de la fermeture du compte,
+            dans un délai raisonnable nécessaire à la purge des sauvegardes techniques.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">6. Responsabilité de Kittab</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 8 — Transactions, paiement et livraison</h2>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">8.1. Conclusion de la vente</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            La vente est directement conclue entre le vendeur et l'acheteur. Kittab n'est pas partie à la
+            transaction. Le vendeur et l'acheteur sont libres de convenir des modalités de paiement et de livraison.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">8.2. Paiement et commission</h3>
+          <p class="text-sm text-gray-600 leading-relaxed mb-4">
+            Pour la version actuelle du service, Kittab n'intervient pas dans le processus de paiement et ne perçoit
+            aucune commission sur les ventes réalisées via la plateforme. Les modalités de paiement (espèces, Mobile
+            Money, virement, etc.) sont convenues directement entre l'acheteur et le vendeur.
+          </p>
+          <h3 class="font-bold text-gray-800 text-sm mb-1.5">8.3. Livraison</h3>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit. Kittab ne garantit pas
-            l'exactitude des annonces publiées par les utilisateurs ni la bonne exécution des transactions.
+            Le vendeur et l'acheteur sont libres de choisir le mode de remise du livre (remise en main propre ou
+            livraison par transporteur). La responsabilité de Kittab ne saurait être engagée en cas de perte, de vol
+            ou de détérioration du livre lors de la remise.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">7. Suspension et résiliation</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 9 — Rôle de Kittab et limitation de responsabilité</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Kittab agit en tant qu'intermédiaire technique mettant en relation des acheteurs et des vendeurs. À ce
+            titre, Kittab n'est pas partie au contrat de vente, ne garantit ni la conformité ni l'état ni l'existence
+            des livres proposés, et n'est pas responsable de la solvabilité ou du comportement des utilisateurs. Tout
+            litige relatif à une transaction doit être réglé directement entre les parties.
+          </p>
           <p class="text-sm text-gray-600 leading-relaxed">
-            At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis. Kittab peut suspendre ou
-            supprimer un compte en cas de non-respect des présentes conditions.
+            Kittab s'efforce de maintenir la plateforme accessible et opérationnelle, mais ne peut garantir une
+            disponibilité totale et ininterrompue. Sauf faute lourde ou intentionnelle, la responsabilité de Kittab
+            envers l'utilisateur est limitée aux dommages directs et prévisibles résultant d'une violation avérée de
+            ses obligations.
           </p>
         </section>
 
         <section class="mb-7">
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">8. Droit applicable</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 10 — Sanctions et suppression de compte</h2>
+          <p class="text-sm text-gray-600 leading-relaxed mb-3">
+            Kittab se réserve le droit, à sa seule discrétion, de prendre des mesures à l'encontre de tout utilisateur
+            qui violerait les présentes CGU, sans préavis : avertissement, suppression ou modification d'une annonce,
+            suspension temporaire ou suppression définitive du compte. Ces sanctions peuvent notamment s'appliquer en
+            cas d'annonce frauduleuse ou trompeuse, de fausse déclaration sur l'état d'un livre, de harcèlement ou de
+            tentative de fraude.
+          </p>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Et harum quidem rerum facilis est et expedita distinctio. Les présentes conditions sont soumises au
-            droit sénégalais.
+            L'utilisateur dont le compte est supprimé conserve la possibilité de contester cette décision en
+            contactant Kittab à contact&#64;kittab.co, dans un délai de quinze (15) jours suivant la notification de la
+            sanction.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 11 — Modification des CGU</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Kittab se réserve le droit de modifier les présentes CGU à tout moment pour les adapter à l'évolution de
+            la plateforme ou à des changements légaux. Les utilisateurs seront informés des modifications majeures.
+            L'utilisation continue de la plateforme après la publication des CGU modifiées vaut acceptation de ces
+            modifications ; si vous n'acceptez pas les nouvelles CGU, vous devez cesser d'utiliser la plateforme.
+          </p>
+        </section>
+
+        <section class="mb-7">
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 12 — Droit applicable et juridiction</h2>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            Les présentes CGU sont régies par le droit sénégalais. En cas de litige relatif à l'interprétation, à
+            l'exécution ou à la validité des présentes CGU, les parties s'efforceront de trouver une solution
+            amiable. À défaut, le litige sera soumis aux tribunaux compétents de Dakar (Sénégal).
           </p>
         </section>
 
         <section>
-          <h2 class="font-black text-gray-900 text-lg mb-2.5">9. Nous contacter</h2>
+          <h2 class="font-black text-gray-900 text-lg mb-2.5">Article 13 — Nous contacter</h2>
           <p class="text-sm text-gray-600 leading-relaxed">
-            Pour toute question sur ces conditions, écris-nous depuis la page
-            <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
+            Pour toute question relative aux présentes CGU, ou pour signaler une annonce ou un compte qui les
+            violerait, écris-nous à
+            <a href="mailto:contact@kittab.co" class="text-primary font-semibold hover:underline">contact&#64;kittab.co</a>
+            ou depuis la page <a routerLink="/contact" class="text-primary font-semibold hover:underline">Contact</a>.
           </p>
         </section>
       </ng-container>
