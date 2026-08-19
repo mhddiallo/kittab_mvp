@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_WHATSAPP_FROM: str = "+14155238886"
+    # Numéro Twilio SMS classique, distinct du numéro WhatsApp ci-dessus.
+    # Non renseigné par défaut : sans lui, le repli SMS est simplement ignoré
+    # et l'échec WhatsApp remonte tel quel (voir send_otp dans otp_service.py).
+    TWILIO_SMS_FROM: str = ""
 
     class Config:
         env_file = ".env"
