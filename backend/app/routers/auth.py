@@ -18,7 +18,7 @@ from app.schemas.user import (
     UserUpdate,
     VerifyOTPInput,
 )
-from app.services.otp_service import create_otp, send_otp, verify_otp
+from app.services.otp_service import OTPRateLimited, check_otp_rate_limit, create_otp, send_otp, verify_otp
 from app.services.username_generator import generate_username
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -49,6 +49,15 @@ def request_otp(payload: RequestOTPInput, db: Session = Depends(get_db)):
     if not phone:
         raise HTTPException(status_code=400, detail="Numéro de téléphone invalide")
     _validate_phone(phone)
+
+    try:
+        check_otp_rate_limit(db, phone)
+    except OTPRateLimited as e:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Trop de demandes pour ce numéro. Réessaie dans {e.retry_after_seconds}s.",
+            headers={"Retry-After": str(e.retry_after_seconds)},
+        )
 
     code = create_otp(db, phone)
     result = send_otp(phone, code)
