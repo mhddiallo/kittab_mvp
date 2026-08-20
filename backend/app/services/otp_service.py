@@ -8,6 +8,49 @@ from app.models.user import OTPCode
 
 OTP_EXPIRY_MINUTES = 10
 
+# En dessous de ce délai entre deux demandes pour le même numéro, on refuse :
+# sans ça, n'importe qui peut redemander un code en boucle. Chaque envoi
+# coûte un message WhatsApp via Twilio, et surtout, rien n'empêche de
+# harceler un numéro qui n'est pas le sien de codes qu'il n'a pas demandés.
+OTP_COOLDOWN_SECONDS = 60
+# Plafond sur une journée glissante, pour la même raison à plus long terme :
+# le cooldown seul n'empêche pas un envoi toutes les 61 secondes pendant des
+# heures.
+OTP_MAX_PER_DAY = 8
+
+
+class OTPRateLimited(Exception):
+    """Levée quand un numéro redemande un code trop vite ou trop souvent."""
+
+    def __init__(self, retry_after_seconds: int):
+        self.retry_after_seconds = retry_after_seconds
+        super().__init__(f"Nouvelle demande possible dans {retry_after_seconds}s")
+
+
+def check_otp_rate_limit(db: Session, phone: str) -> None:
+    """Lève OTPRateLimited si ce numéro a demandé un code trop récemment ou trop souvent."""
+    now = datetime.utcnow()
+
+    last = (
+        db.query(OTPCode)
+        .filter(OTPCode.phone == phone)
+        .order_by(OTPCode.created_at.desc())
+        .first()
+    )
+    if last:
+        elapsed = (now - last.created_at).total_seconds()
+        if elapsed < OTP_COOLDOWN_SECONDS:
+            raise OTPRateLimited(retry_after_seconds=int(OTP_COOLDOWN_SECONDS - elapsed) + 1)
+
+    since = now - timedelta(hours=24)
+    sent_today = (
+        db.query(OTPCode)
+        .filter(OTPCode.phone == phone, OTPCode.created_at >= since)
+        .count()
+    )
+    if sent_today >= OTP_MAX_PER_DAY:
+        raise OTPRateLimited(retry_after_seconds=3600)
+
 
 def generate_otp() -> str:
     return "".join(random.choices(string.digits, k=6))
